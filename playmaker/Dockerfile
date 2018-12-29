@@ -21,6 +21,8 @@ ADD Pipfile Pipfile
 ADD Pipfile.lock Pipfile.lock
 
 RUN pip install pipenv
+RUN pipenv lock -v
+RUN pip3 freeze
 ONBUILD RUN set -ex && pipenv install --deploy --system
 
 # COPY startup script into known file location in container
