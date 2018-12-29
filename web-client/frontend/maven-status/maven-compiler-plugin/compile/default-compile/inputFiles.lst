@@ -1,0 +1,16 @@
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/event/LoginEventHandler.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/views/LoginView.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/ClientFactory.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/placesAndactivities/LoginActivity.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/ClientFactoryImpl.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/MyHistoryMapper.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/placesAndactivities/MainPagePlace.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/MVPexample.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/MyActivityMapper.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/event/LogoutEventHandler.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/views/MainPageView.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/event/LoginEvent.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/placesAndactivities/UserSelectPlace.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/event/LogoutEvent.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/placesAndactivities/LoginPlace.java
+/Users/jakepeacock/Projects/connection-project/src/main/java/com/gwidgets/client/placesAndactivities/MainPageActivity.java

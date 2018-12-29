@@ -1,0 +1,13 @@
+binding: user.agent=safari
+Compiling module com.gwidgets.MVPExample
+   Unification traversed 22215 fields and methods and 2121 types. 2085 are considered part of the current module and 2085 had all of their fields and methods traversed.
+   Compiling 1 permutation
+      Compiling permutation 0...
+      Linking per-type JS with 2065 new/changed types.
+      Source Maps Enabled
+   Compile of permutations succeeded
+   Compilation succeeded -- 7.047s
+Linking into /Users/jakepeacock/Projects/connection-project/target/gwt/devmode/work/com.gwidgets.MVPExample/compile-2/war/mvpexample; Writing extras to /Users/jakepeacock/Projects/connection-project/target/gwt/devmode/work/com.gwidgets.MVPExample/compile-2/extras/mvpexample
+   Link succeeded
+   Linking succeeded -- 0.371s
+7.509s total -- Compile completed

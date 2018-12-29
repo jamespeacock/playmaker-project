@@ -1,0 +1,8 @@
+version: '2'
+services:
+  interface:
+    build:
+      context: ./api
+    image: playmaker-interface
+    ports:
+     - "8080:8080"
