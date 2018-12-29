@@ -1,8 +1,8 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.views import status
-from .models import Songs
-from .serializers import SongsSerializer
+from .models import Song
+from .serializers import SongSerializer
 
 # tests for views
 
@@ -13,7 +13,7 @@ class BaseViewTest(APITestCase):
     @staticmethod
     def create_song(title="", artist=""):
         if title != "" and artist != "":
-            Songs.objects.create(title=title, artist=artist)
+            Song.objects.create(title=title, artist=artist)
 
     def setUp(self):
         # add test data
@@ -35,7 +35,7 @@ class GetAllSongsTest(BaseViewTest):
             reverse("songs-all", kwargs={"version": "v1"})
         )
         # fetch the data from db
-        expected = Songs.objects.all()
-        serialized = SongsSerializer(expected, many=True)
+        expected = Song.objects.all()
+        serialized = SongSerializer(expected, many=True)
         self.assertEqual(response.data, serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -5,4 +5,4 @@ services:
       context: ./playmaker
     image: playmaker-interface
     ports:
-     - "8080:8080"
+     - "8000:8000"

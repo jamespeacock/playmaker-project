@@ -15,21 +15,21 @@ RUN pip3 install pipenv
 
 RUN set -ex && mkdir /app
 
-WORKDIR /playmaker
+WORKDIR /app
 
 ADD Pipfile Pipfile
 ADD Pipfile.lock Pipfile.lock
 
 RUN pip install pipenv
-RUN pipenv lock -v
+RUN pipenv install --deploy --system --skip-lock
 RUN pip3 freeze
-ONBUILD RUN set -ex && pipenv install --deploy --system
-
 # COPY startup script into known file location in container
 ADD start.sh /start.sh
 
 # EXPOSE port 8000 to allow communication to/from server
 EXPOSE 8000
+
+COPY . /app
 
 # CMD specifcies the command to execute to start the server running.
 CMD ["/start.sh"]

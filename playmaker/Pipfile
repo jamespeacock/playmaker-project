@@ -9,14 +9,14 @@ verify_ssl = true
 spotipy = "*"
 requests = "*"
 django = "*"
-numpy = "*"
+#numpy = "*"
 djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
 django-tastypie = "*"
 pytest = "*"
 gunicorn = "*"
-sklearn = "*"
+#sklearn = "*"
 
 [requires]
 python_version = "3.6"

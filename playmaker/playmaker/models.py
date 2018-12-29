@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
-class Songs(models.Model):
+class Song(models.Model):
     # song title
     title = models.CharField(max_length=255, null=False)
     # name of artist or group/band
@@ -12,4 +12,4 @@ class Songs(models.Model):
         return "{} - {}".format(self.title, self.artist)
 
 class User(AbstractUser):
-    pass
+    token = models.CharField(max_length=255, null=True, blank=True)
