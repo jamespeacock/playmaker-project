@@ -8,7 +8,10 @@ import spotipy.util as util
 import spotipy.oauth2 as oauth2
 import logging
 import json
+import base64
 import requests
+import six
+import six.moves.urllib.parse as urllibparse
 
 # Create your views here.
 class SpotifyLoginView(LoginView):
@@ -18,28 +21,49 @@ class SpotifyLoginView(LoginView):
         username = request.GET.get('username')
         logging.log(logging.INFO, "In spotify login GET %s" % username)
 
-        # Create a Spotify client that can access my saved song information.
-        # token = util.prompt_for_user_token(username,
-        #                                            SPOTIFY_SCOPE,
-        #                                            client_id=SPOTIFY_CLIENT_ID,
-        #                                            client_secret=SPOTIFY_CLIENT_SECRET,
-        #                                            redirect_uri=SPOTIFY_REDIRECT_URI)
-        url = 'https://accounts.spotify.com/authorize?username=%s?scope=%s?client_id=%s?client_secret=%s?redirect_uri=%s' % (username, SPOTIFY_SCOPE, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI)
+        url = 'https://accounts.spotify.com/authorize?'
+        urlparams = urllibparse.urlencode({'username': username, 'scope': SPOTIFY_SCOPE, 'client_id': SPOTIFY_CLIENT_ID,
+                                           'client_secret': SPOTIFY_CLIENT_SECRET,'redirect_uri': SPOTIFY_REDIRECT_URI,
+                                           'response_type':'code'})
 
-        return redirect(url)
+        return redirect('%s:%s' % (url, urlparams))
 
-class SpotifyCallbackView():
+class SpotifyCallbackView(LoginView):
 
     def get(self, request, *args, **kwargs):
-        print(request.url)
-        auth_code = request.url.split("?code=")[1].split("&")[0]
-
-        sp_oauth = oauth2.SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, 'unused_redirect_url',
-                                       scope=SPOTIFY_SCOPE)
-
+        #debug this (it did work on notebook)
+        auth_code = request.GET.get('code')
+        sp_oauth = spotipy.oauth2.SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, 'http://localhost',
+                                                 scope=SPOTIFY_SCOPE)
         token_info = sp_oauth.get_access_token(auth_code)
+
+        # token_info = get_access_token(auth_code, SPOTIFY_REDIRECT_URI, SPOTIFY_CLIENT_SECRET, SPOTIFY_CLIENT_SECRET, scope=SPOTIFY_SCOPE)
 
         #Get user based on username, save token info to User object, return success.
         #Now backend has credentials for logged in user
 
-        return HttpResponse(status=200, data=token_info)
+        return HttpResponse(status=200)
+
+
+OAUTH_TOKEN_URL = 'https://accounts.spotify.com/api/token'
+
+def get_access_token(code, redirect_uri, client_id, client_secret, scope=None, state=None):
+    payload = {'redirect_uri': redirect_uri,
+               'code': code,
+               'grant_type': 'authorization_code'}
+    if scope:
+        payload['scope'] = scope
+    if state:
+        payload['state'] = state
+
+    auth_header = base64.b64encode(six.text_type(client_id + ':' + client_secret).encode('ascii'))
+    headers = {'Authorization': 'Basic %s' % auth_header.decode('ascii'), 'Content-Type': 'application/x-www-form-urlencoded'}
+
+    response = requests.post(OAUTH_TOKEN_URL, data=payload,
+                             headers=headers, verify=True)
+    if response.status_code != 200:
+        raise Exception(response.reason)
+    token_info = response.json()
+    # token_info = self._add_custom_values_to_token_info(token_info)
+    # self._save_token_info(token_info)
+    return token_info
