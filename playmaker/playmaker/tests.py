@@ -32,10 +32,11 @@ class GetAllSongsTest(BaseViewTest):
         """
         # hit the API endpoint
         response = self.client.get(
-            reverse("songs-all", kwargs={"version": "v1"})
+            reverse("songs-all")
         )
         # fetch the data from db
         expected = Song.objects.all()
         serialized = SongSerializer(expected, many=True)
         self.assertEqual(response.data, serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        print("TEST DONE")

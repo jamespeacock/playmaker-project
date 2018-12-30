@@ -9,3 +9,4 @@ class ListSongsView(generics.ListAPIView):
     """
     queryset = Song.objects.all()
     serializer_class = SongSerializer
+
