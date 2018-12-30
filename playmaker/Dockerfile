@@ -17,8 +17,8 @@ RUN set -ex && mkdir /app
 
 WORKDIR /app
 
-ADD Pipfile Pipfile
 ADD Pipfile.lock Pipfile.lock
+ADD Pipfile Pipfile
 
 RUN pip install pipenv
 RUN pipenv install --deploy --system --skip-lock
