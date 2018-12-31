@@ -11,5 +11,10 @@ class Song(models.Model):
     def __str__(self):
         return "{} - {}".format(self.title, self.artist)
 
+
 class User(AbstractUser):
-    token = models.CharField(max_length=255, null=True, blank=True)
+    username = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    #TODO figure out how to store this more securely
+    access_token = models.CharField(max_length=255, null=True, blank=True)
+    refresh_token = models.CharField(max_length=255, null=True, blank=True)
+    scope = models.CharField(max_length=255, null=True, blank=True)
