@@ -27,7 +27,7 @@ public class MVPexample implements EntryPoint {
         MyHistoryMapper historyMapper= GWT.create(MyHistoryMapper.class);
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
         historyHandler.register(controller, bus, welcomePlace);
-        
+
         RootPanel.get().add(appWidget);
         historyHandler.handleCurrentHistory();
 	}

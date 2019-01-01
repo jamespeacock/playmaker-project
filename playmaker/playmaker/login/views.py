@@ -1,6 +1,9 @@
+import json
+
 from django.shortcuts import render
 from django.contrib.auth.views import LoginView
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
 import spotipy
@@ -47,6 +50,11 @@ class SpotifyCallbackView(LoginView):
         user.scope = token_info['scope']
         user.save()
 
-        return HttpResponse(status=200, content="Created: %s" % str(created))
+        user_dict = {"access_token": user.access_token,
+                     "scope": user.scope,
+                     "id": user.id,
+                     "username": user.username}
+        
+        return JsonResponse(user_dict, safe=False)
 
 #TODO implement SpotifyRefreshTokenView

@@ -10,7 +10,6 @@ import com.gwidgets.client.views.MainPageView;
 public class ClientFactoryImpl implements ClientFactory {
 	LoginView login = new LoginView();
 	MainPageView mainPage = new MainPageView();
-	HandlerManager controllerBus = new HandlerManager(null);
 	EventBus eventBus = new SimpleEventBus();
 	PlaceController controller = new PlaceController(eventBus);
 

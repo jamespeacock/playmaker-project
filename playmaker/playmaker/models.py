@@ -13,8 +13,8 @@ class Song(models.Model):
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=255, null=True, blank=True, unique=True)
-    #TODO figure out how to store this more securely
+    username = models.CharField(max_length=255, null=True, blank=True)
+    #TODO figure out how to store this more secuely
     access_token = models.CharField(max_length=255, null=True, blank=True)
     refresh_token = models.CharField(max_length=255, null=True, blank=True)
     scope = models.CharField(max_length=255, null=True, blank=True)

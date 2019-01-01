@@ -2,35 +2,36 @@ package com.gwidgets.client.placesAndactivities;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.gwidgets.client.models.CurrentSession;
 
-public class MainPagePlace extends Place{
+public class MainPagePlace extends Place {
 
-     String name;
-	
-	public MainPagePlace(String placeName){
-		this.name = placeName;
+	private CurrentSession session;
+
+	public MainPagePlace(CurrentSession session) {
+		this.session = session;
 	}
-	
-	public String getPlaceName(){
-		return name;
-	}
-	
-public void setPlaceName(String name){
-		this.name = name;
-	}
-	
-	 public static class Tokenizer implements PlaceTokenizer<MainPagePlace> {
-	        @Override
-	        public String getToken(MainPagePlace place) {
-	            return place.getPlaceName();
-	        }
 
-	        @Override
-	        public MainPagePlace getPlace(String token) {
-	            return new MainPagePlace(token);
-	        }
-	    }
-	
-	
+	public String getPlaceName() {
+		return "main app page";
+	}
 
+	public CurrentSession getSession() { return session; }
+
+	public static class Tokenizer implements PlaceTokenizer<MainPagePlace> {
+		@Override
+		public String getToken(MainPagePlace place) {
+			return place.session.toTokenString();
+		}
+
+		@Override
+		public MainPagePlace getPlace(String token) {
+			return new MainPagePlace(createFromString(token));
+		}
+	}
+
+	public static CurrentSession createFromString(String token) {
+
+		return CurrentSession.fromTokenString(token);
+	}
 }

@@ -12,7 +12,7 @@ public class LoginPlace extends Place {
 		this.name = placeName;
 	}
 	
-	public String getPlaceName(){
+	public String getLoginName(){
 		
 		return name;
 	}
@@ -20,7 +20,7 @@ public class LoginPlace extends Place {
 	 public static class Tokenizer implements PlaceTokenizer<LoginPlace> {
 	        @Override
 	        public String getToken(LoginPlace place) {
-	            return place.getPlaceName();
+	            return place.getLoginName();
 	        }
 
 	        @Override

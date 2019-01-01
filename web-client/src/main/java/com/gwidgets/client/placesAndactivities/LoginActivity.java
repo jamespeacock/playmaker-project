@@ -17,7 +17,7 @@ public class LoginActivity extends AbstractActivity implements LoginView.Present
 	
 	public LoginActivity(LoginPlace loginPlace, ClientFactory clientFactory){
 		this.factory = clientFactory;
-		this.name = loginPlace.getPlaceName();
+		this.name = loginPlace.getLoginName();
 	}
 
 	@Override
@@ -26,25 +26,15 @@ public class LoginActivity extends AbstractActivity implements LoginView.Present
 		LoginView view = factory.getLoginView();
         view.setPresenter(this);
 		panel.setWidget(view.asWidget());
-		bindEvents();
 		
 	}
-	
-	public void bindEvents(){
-		loginButtonEvent();
-	}
-	
-	
 
+	/**
+	 * Ask user before stopping this activity
+	 */
 	@Override
-	public void loginButtonEvent() {
-		factory.getLoginView().getLoginButton().addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				goTo(new MainPagePlace("MainPage"));
-               
-			}
-		});
+	public String mayStop() {
+		return "You are being redirected to Spotify Login Page";
 	}
 	
 	@Override

@@ -9,7 +9,10 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.gwidgets.client.ClientFactory;
+import com.gwidgets.client.models.CurrentSession;
 import com.gwidgets.client.views.MainPageView;
+
+import javax.swing.plaf.ColorUIResource;
 
 public class MainPageActivity extends AbstractActivity implements MainPageView.Presenter {
 	
@@ -18,64 +21,28 @@ public class MainPageActivity extends AbstractActivity implements MainPageView.P
 	String name;
 	
 	MainPageView view;
+
+	CurrentSession session;
 	
 	public MainPageActivity(MainPagePlace mainPagePlace, ClientFactory clientFactory){
 		this.factory = clientFactory;
 		this.name = mainPagePlace.getPlaceName();
+		this.session = mainPagePlace.getSession();
 		view = clientFactory.getMainPageView();
 	}
 
 	@Override
 	public void start(AcceptsOneWidget panel, EventBus eventBus) {
 		MainPageView view = factory.getMainPageView();
+		view.setSession(session);
         view.setPresenter(this);
+        view.init();
 		panel.setWidget(view.asWidget());
-		bindEvents();
-	}
-	
-	public void bindEvents(){
-		LogoutButtonClick();
-		CellClickEvent();
 	}
 	
 	@Override
 	public void goTo(Place place) {
 		factory.getPlaceController().goTo(place);
-		
-	}
-
-	@Override
-	public void LogoutButtonClick() {
-		view.getLogoutButton().addClickHandler(new ClickHandler(){
-			@Override
-			public void onClick(ClickEvent event) {
-				goTo(new LoginPlace("login"));
-               
-			}
-		});
-	}
-
-	@Override
-	public void CellClickEvent() {
-
-		view.getCellTable().addCellPreviewHandler(new Handler<String>(){
-			@Override
-			public void onCellPreview(CellPreviewEvent<String> event) {
-				if("click".equals(event.getNativeEvent().getType())){
-					factory.getPlaceController().goTo(new MainPagePlace("user-select:" + event.getValue().split(" ")[0]));
-					
-					if(view.getRightPanel().getWidgetIndex(view.getFormPanel()) == -1){
-						view.getRightPanel().add(view.getFormPanel());
-					}
-					
-					String value= event.getValue();
-					view.getNameTextBox().setText(value.split(" ")[0]);
-					view.getTaskTextBox().setText(value.split(" ")[1]);
-					view.getProgressTextBox().setText(value.split(" ")[2]);
-				}
-			}
-			
-		});
 		
 	}
 
