@@ -1,6 +1,6 @@
 from rest_framework import generics
-from .models import Song
-from .serializers import SongSerializer
+from playmaker.songs.models import Song
+from playmaker.songs.serializers import SongSerializer
 
 
 class ListSongsView(generics.ListAPIView):
@@ -10,3 +10,8 @@ class ListSongsView(generics.ListAPIView):
     queryset = Song.objects.all()
     serializer_class = SongSerializer
 
+
+class SongDetailView(generics.RetrieveAPIView):
+
+    def get(self, request, *args, **kwargs):
+        pass

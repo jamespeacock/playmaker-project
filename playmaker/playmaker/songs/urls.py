@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ListSongsView
+from playmaker.songs.views import ListSongsView
 
 
 urlpatterns = [

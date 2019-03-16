@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Song
+from playmaker.songs.models import Song
 
 
 class SongSerializer(serializers.ModelSerializer):
