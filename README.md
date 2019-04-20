@@ -1,15 +1,14 @@
-## Dev Mode
+## Prereqs
 
-To run devmode: 
+##### pyenv and pipenv
 
-`mvn clean package war:war`
-</br>
-`mvn gwt:devmode`
-
-
-
-
-
+`brew install pyenv` https://github.com/pyenv/pyenv/blob/master/README.md
+```
+pyenv install 3.6.6
+pyenv local 3.6.6
+python -V
+pip install pipenv
+```
 
 
 

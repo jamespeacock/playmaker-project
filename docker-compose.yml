@@ -4,5 +4,7 @@ services:
     build:
       context: ./playmaker
     image: playmaker-interface
+    volumes:
+      - .:/app:ro
     ports:
      - "8000:8000"
