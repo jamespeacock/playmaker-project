@@ -19,6 +19,7 @@ numpy = "*"
 prompt-toolkit="==1.0.15"
 jupyter = "*"
 matplotlib = "*"
+seaborn = "*"
 
 [requires]
 python_version = "2.7"

@@ -8,7 +8,7 @@ import logging
 import six.moves.urllib.parse as urllibparse
 
 # Create your views here.
-from playmaker.songs.models import User
+from api.models import User
 
 
 class SpotifyLoginView(LoginView):

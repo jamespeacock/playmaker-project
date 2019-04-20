@@ -5,4 +5,3 @@ from playmaker.songs.models import Song
 class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
-        fields = ("title", "artist")
