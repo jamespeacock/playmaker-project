@@ -29,7 +29,7 @@ ADD start.sh /start.sh
 # EXPOSE port 8000 to allow communication to/from server
 EXPOSE 8000
 
-COPY . /app
+#COPY . /app
 
 # CMD specifcies the command to execute to start the server running.
 CMD ["/start.sh"]

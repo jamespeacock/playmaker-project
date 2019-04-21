@@ -19,5 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('', include('frontend.urls')),
     path('admin/', admin.site.urls),
-    path('login/', include('playmaker.login.urls.py'))
+    path('login/', include('playmaker.login.urls'))
 ]

@@ -5,6 +5,6 @@ services:
       context: ./playmaker
     image: playmaker-interface
     volumes:
-      - .:/app:ro
+      - ./playmaker:/app:rw
     ports:
      - "8000:8000"
