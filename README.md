@@ -1,3 +1,15 @@
+# Getting Started
+
+## Clone repo
+
+git clone https://github.com/jamespeacock/playmaker.git
+
+```
+cd ..
+mv playmaker playmaker-project
+cd playmaker-project
+```
+
 ## Prereqs
 
 ##### pyenv and pipenv
