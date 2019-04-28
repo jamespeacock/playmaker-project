@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from rest_framework import generics, serializers
@@ -17,15 +18,12 @@ from playmaker.models import User, Listener, Controller
 LISTENER = "listener"
 SONGS = "song_uris"
 
+
 class SecureAPIView(generics.GenericAPIView):
     pass
     # grab Auth token from request header or auth user in request
 
 
-# TODO figure out a shared method that executes an action for a bunch of users. ex: all users need a song queued
-
-class StringListField(ListField):
-    child = CharField()
 # Play song for current listeners
 
 class PlaySongView(SecureAPIView):
@@ -37,24 +35,14 @@ class PlaySongView(SecureAPIView):
 
         sp = spotipy.client.Spotify(auth=u.token)
 
-        #TODO extract device fetch process to be reused
-        devices = []
-        for d in sp._get('me/player/devices')['devices']:
-            d['sp_id'] = d.pop('id')
-            dev = Device(**d)
-            dev.save()
-            devices.append(dev)
-
-        listener.devices.set(devices)
         active_device_id = listener.devices.filter(is_active=True).first().sp_id
 
-        # VERIFY ACTION PERMISSION object
 
-        r = sp._put('me/player/play?device_id='+active_device_id, payload={'uris': request.GET.getlist(SONGS)})
 
-        check = sp._get('me/player')
+        sp.start_playback(active_device_id, uris=request.GET.getlist(SONGS))
+        check = sp.current_playback()
 
-        return r
+        return check
 
 class PlaySongForAllListenersView(PlaySongView):
 

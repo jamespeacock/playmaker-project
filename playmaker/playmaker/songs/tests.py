@@ -39,4 +39,5 @@ class GetAllSongsTest(BaseViewTest):
         serialized = SongSerializer(expected, many=True)
         self.assertEqual(response.data, serialized.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        expected.delete()
         print("TEST DONE")

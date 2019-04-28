@@ -4,9 +4,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+django-pytest = "*"
 
 [packages]
-spotipy = "*"
+spotipy = {git = "https://github.com/plamere/spotipy.git", ref = "master"}
 requests = "*"
 django = "*"
 djangorestframework = "*"

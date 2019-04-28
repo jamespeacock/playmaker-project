@@ -43,6 +43,12 @@ Download & install docker for mac: https://docs.docker.com/v17.12/docker-for-mac
 
 Troubleshooting this command...
 
+#### Running Tests
+
+```
+cd playmaker
+pytest
+```
 
 
 
@@ -51,3 +57,9 @@ Troubleshooting this command...
 Spin up intially: `docker-compose up -d`
 
 After making changes: `./refresh.sh && docker-compose logs -f interface`
+
+
+##### API
+
+# Play a song for a listener
+`http://localhost:8000/controller/playsong?listener=1&song_uris=spotify:track:5ewqsgAusPBCyYn2zmMt7k`
