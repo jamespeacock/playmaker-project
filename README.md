@@ -31,3 +31,11 @@ Download & install docker for mac: https://docs.docker.com/v17.12/docker-for-mac
 
 Troubleshooting this command...
 
+
+
+
+## Running & Editing
+
+Spin up intially: `docker-compose up -d`
+
+After making changes: `./refresh.sh && docker-compose logs -f interface`

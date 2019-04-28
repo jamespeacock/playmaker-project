@@ -1,20 +1,12 @@
 from django.db import models
 
-from django.contrib.auth.models import AbstractUser
-
-class User(AbstractUser):
-    username = models.CharField(max_length=255, null=True, blank=True)
-    #TODO figure out how to store this more secuely - encryptedField
-    access_token = models.CharField(max_length=255, null=True, blank=True)
-    refresh_token = models.CharField(max_length=255, null=True, blank=True)
-    scope = models.CharField(max_length=255, null=True, blank=True)
-
 
 class Song(models.Model):
     # song title
     title = models.CharField(max_length=255, null=False)
     # name of artist or group/band
     artist = models.CharField(max_length=255, null=False)
+    uri = models.CharField(max_length=255, null=False)
 
     # Audio Features
     key = models.FloatField(null=False)
@@ -38,18 +30,11 @@ class Song(models.Model):
 class Genre(models.Model):
     name = models.CharField(max_length=255, null=False)
 
-
-class Playlist(models.Model):
-    # name
-    name = models.CharField(max_length=255, null=False)
-
-    tracks = models.ManyToManyField(Song,related_name="playlists")
+    # TODO how to make a genre node network oooohh
 
 
 class Artist(models.Model):
     # name
     name = models.CharField(max_length=255, null=False)
-
-    tracks = models.ManyToManyField(Song, related_name="artists")
 
     genres = models.ManyToManyField(Genre, related_name="artists")
