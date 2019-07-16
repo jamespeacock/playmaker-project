@@ -1,6 +1,7 @@
 import spotipy
 from django.db.models import DateTimeField
 from django.http import JsonResponse
+from spotipy import SpotifyOAuth
 
 from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
 from django.utils import timezone as tz
@@ -9,9 +10,13 @@ from django.utils import timesince
 from django.contrib.auth import models as auth_models
 from django.db import models
 
-from playmaker.controller.models import Device
+from controller.models import Controller, Listener
+
+# TODO FIx these models up, comment out some shit. The migrations are fucked.!
 
 ### Users and Groups
+from playmaker.songs import utils
+
 
 class User(auth_models.AbstractUser):
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
@@ -30,7 +35,7 @@ class User(auth_models.AbstractUser):
 
     @property
     def token(self):
-        if timesince.timesince(tz.now(), self.token_expires) == '0 minutes': # > self.token_expires:
+        if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
             self.do_refresh_token()
         return self.access_token
 
@@ -49,7 +54,7 @@ class User(auth_models.AbstractUser):
         return JsonResponse(user_dict, safe=False)
 
     def do_refresh_token(self):
-        sp_oauth = spotipy.oauth2.SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET,
+        sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET,
                                                SPOTIFY_REDIRECT_URI, scope=SPOTIFY_SCOPE,
                                                state='username-' + self.username)
 
@@ -57,60 +62,30 @@ class User(auth_models.AbstractUser):
 
         self.save_token(token_info)
 
-    def top_artists(self):
-        return self.sp.current_user_top_artists()
+    @property
+    def info(self):
+        return self.sp.me()
 
+    @property
+    def top_artists(self):
+        return utils.from_response(self.sp.current_user_top_artists(), utils.ARTIST_LIST)
+
+    @property
     def top_tracks(self):
-        return self.sp.current_user_top_tracks()
-
-
-class Controller(models.Model):
-    me = models.OneToOneField(User, related_name='as_controller', on_delete=models.DO_NOTHING)
+        return utils.from_response(self.sp.current_user_top_tracks(), utils.SONG_LIST)
 
     @property
-    def listeners(self):
-        return self.group.listeners
-
-
-class Listener(models.Model):
-    me = models.OneToOneField(User, related_name='as_listener', on_delete=models.DO_NOTHING)
-    devices = models.ManyToManyField(Device, related_name='devices', blank=True)
+    def recently_played(self):
+        return utils.from_response(self.sp.current_user_recently_played(), utils.SONG_LIST)
 
     @property
-    def token(self):
-        return self.me.access_token
-
-    def get_devices(self):
-        if self.devices.blank is True or self.devices.filter(is_active=True).first() is not None:
-            devices = []
-            sp = spotipy.Spotify(self.token)
-            for d in sp.devices()['devices']:
-                d['sp_id'] = d.pop('id')
-                dev = Device(**d)
-                dev.save()
-                devices.append(dev)
-
-            self.devices.set(devices)
-
-    def top_artists(self):
-        return self.me.top_artists()
-
-    def recent_artists(self):
-        return self.me.recent_artists()
-
-    def refresh_user(self):
-        return self.me.refresh_user()
-
-
-class Group(models.Model):
-    controller = models.OneToOneField(User, related_name='group', on_delete=models.DO_NOTHING)
-
-    listeners = models.ForeignKey(Listener, on_delete=models.CASCADE)
+    def saved_tracks(self, limit=20, offset=0):
+        return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), utils.SONG_LIST)
 
 
 ### Permissions
 
-class Permission(auth_models.Permission):
+class Permission(models.Model): # inherit auth_models.Permission if need be
     actor = models.OneToOneField(Controller, on_delete=models.DO_NOTHING)
     listener = models.OneToOneField(Listener, on_delete=models.DO_NOTHING)
     scope = models.CharField(max_length=256)

@@ -15,7 +15,6 @@ class Migration(migrations.Migration):
             name='Device',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sp_id', models.CharField(max_length=64)),
                 ('is_active', models.BooleanField()),
                 ('is_private_session', models.BooleanField()),
                 ('is_restricted', models.BooleanField()),

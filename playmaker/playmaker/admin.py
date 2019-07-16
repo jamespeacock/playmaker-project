@@ -4,7 +4,7 @@ from playmaker.models import User
 
 
 # Register your models here.
-from playmaker.models import Controller, Listener
+from controller.models import Controller, Listener
 
 
 class ControllerAdmin(admin.ModelAdmin):

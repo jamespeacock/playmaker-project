@@ -1,11 +1,39 @@
 from django.db import models
 
+from playmaker.shared.models import SPModel
 
-class Song(models.Model):
+
+class Image(models.Model):
+    height = models.IntegerField()
+    width = models.IntegerField()
+    url = models.CharField(max_length=255)
+
+
+class Genre(models.Model):
+    name = models.CharField(max_length=255, null=False)
+
+    # TODO how to make a genre node network oooohh
+
+
+class Artist(SPModel):
+    # name
+    name = models.CharField(max_length=255, null=False)
+    popularity = models.IntegerField(null=True)
+    uri = models.CharField(max_length=255, null=True)
+    genres = models.ManyToManyField(Genre, related_name="artists")
+    num_followers = models.IntegerField(null=True)
+    images = models.ManyToManyField(Image, related_name="artist_images")
+
+
+class Album(SPModel):
+    artists = models.ManyToManyField(Artist)
+
+
+class Song(SPModel):
     # song title
     title = models.CharField(max_length=255, null=False)
     # name of artist or group/band
-    artist = models.CharField(max_length=255, null=False)
+    artist = models.ManyToManyField(Artist)
     uri = models.CharField(max_length=255, null=False)
 
     # Audio Features
@@ -27,14 +55,7 @@ class Song(models.Model):
         return "{} - {}".format(self.title, self.artist)
 
 
-class Genre(models.Model):
-    name = models.CharField(max_length=255, null=False)
-
-    # TODO how to make a genre node network oooohh
 
 
-class Artist(models.Model):
-    # name
-    name = models.CharField(max_length=255, null=False)
 
-    genres = models.ManyToManyField(Genre, related_name="artists")
+

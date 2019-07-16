@@ -39,3 +39,15 @@ def perform_action(controller, listeners, action, *args, **kwargs):
     return results
 
 
+# Queue Song, Play Song @ timestamp?
+
+# Fetch Playlists
+
+# Fetch Recommendations
+#  - filter recs
+
+# Add Song to Playlist
+
+# Save Song
+
+# HOW TO Crossfade into other songs?

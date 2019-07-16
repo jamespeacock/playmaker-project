@@ -1,8 +1,9 @@
 from django.db import models
 
+from playmaker.shared.models import SPModel
 
-class Device(models.Model):
-    sp_id = models.CharField(max_length=64, null=False)
+
+class Device(SPModel):
     is_active = models.BooleanField()
     is_private_session = models.BooleanField()
     is_restricted = models.BooleanField()

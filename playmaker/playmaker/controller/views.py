@@ -12,8 +12,8 @@ from playmaker.controller import utils
 from playmaker.controller.models import Device
 from playmaker.controller.utils import START_PLAYBACK
 
-from playmaker.models import User, Listener, Controller
-
+from playmaker.models import User
+from controller.models import Controller, Listener
 
 LISTENER = "listener"
 SONGS = "song_uris"
