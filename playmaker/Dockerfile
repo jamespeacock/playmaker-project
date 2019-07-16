@@ -20,6 +20,7 @@ WORKDIR /app
 ADD Pipfile.lock Pipfile.lock
 ADD Pipfile Pipfile
 
+RUN pip install --upgrade pip
 RUN pip install pipenv
 RUN pipenv install --deploy --system --skip-lock
 RUN pip3 freeze

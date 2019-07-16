@@ -35,6 +35,20 @@ pipenv install --dev
 Install node (downloads mac installer .pkg) : https://nodejs.org/dist/v10.15.3/node-v10.15.3.pkg
 
 
+##### pyenv, pipenv, python
+```
+brew install pyenv
+pyenv install 3.6.7
+cd /path/to/here
+pyenv local 3.6.7
+mkvirtualenv -a . playmaker
+add2virtualenv /path/to/first/playmaker
+workon playmaker
+pip install --upgrade pip
+pip install pipenv
+pipenv install
+```
+
 ##### Docker
 
 Download & install docker for mac: https://docs.docker.com/v17.12/docker-for-mac/install/
@@ -68,3 +82,10 @@ After making changes: `./refresh.sh && docker-compose logs -f interface`
 #### Play a song for a listener
 `http://localhost:8000/controller/playsong?listener=1&song_uris=spotify:track:5ewqsgAusPBCyYn2zmMt7k`
 
+## Troubleshooting
+
+#### If no staticfiles/css
+`python3.6 manage.py collectstatic`
+
+#### When needing to create an initial user
+`python3.6 manage.py createsuperuser`
