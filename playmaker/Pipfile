@@ -5,9 +5,10 @@ verify_ssl = true
 
 [dev-packages]
 pytest-django = "==3.4.8"
+pytest-html = "==1.20.0"
 
 [packages]
-spotipy = {git = "https://github.com/plamere/spotipy.git", ref = "master"}
+spotipy = {git = "https://github.com/jamespeacock/spotipy.git", ref = "master"}
 requests = "*"
 django = "*"
 djangorestframework = "*"

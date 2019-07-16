@@ -10,8 +10,6 @@ from django.utils import timesince
 from django.contrib.auth import models as auth_models
 from django.db import models
 
-from controller.models import Controller, Listener
-
 # TODO FIx these models up, comment out some shit. The migrations are fucked.!
 
 ### Users and Groups
@@ -81,12 +79,3 @@ class User(auth_models.AbstractUser):
     @property
     def saved_tracks(self, limit=20, offset=0):
         return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), utils.SONG_LIST)
-
-
-### Permissions
-
-class Permission(models.Model): # inherit auth_models.Permission if need be
-    actor = models.OneToOneField(Controller, on_delete=models.DO_NOTHING)
-    listener = models.OneToOneField(Listener, on_delete=models.DO_NOTHING)
-    scope = models.CharField(max_length=256)
-

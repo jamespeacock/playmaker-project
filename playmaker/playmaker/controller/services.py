@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from playmaker.models import Permission
+from playmaker.controllers.models import Permission
 
 TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []

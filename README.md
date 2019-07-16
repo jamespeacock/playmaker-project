@@ -27,7 +27,7 @@ pyenv local 3.6.6
 mkirtualenv -a . playmaker
 workon playmaker
 
-pipenv install --skip-lock 
+pipenv install --dev
 ```
 
 ##### Node.js, React
@@ -47,8 +47,12 @@ Troubleshooting this command...
 
 ```
 cd playmaker
-pytest
+pytest --html=report.html
 ```
+
+Create new RunConfiguration in PyCharm
+Python Test --> pytest 
+Additional arguments: `-c playmaker/pytest.ini --html=report.html`
 
 
 
@@ -59,7 +63,8 @@ Spin up intially: `docker-compose up -d`
 After making changes: `./refresh.sh && docker-compose logs -f interface`
 
 
-##### API
+## API Usage
 
-# Play a song for a listener
+#### Play a song for a listener
 `http://localhost:8000/controller/playsong?listener=1&song_uris=spotify:track:5ewqsgAusPBCyYn2zmMt7k`
+

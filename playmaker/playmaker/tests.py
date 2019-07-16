@@ -3,7 +3,8 @@ from rest_framework.test import APITestCase, APIClient
 
 from playmaker.controller import services
 from playmaker.controller.services import TOP_ARTISTS, ACTIONS
-from playmaker.models import User, Permission
+from playmaker.models import User
+from playmaker.controllers.models import Permission
 from controller.models import Controller, Listener
 
 
