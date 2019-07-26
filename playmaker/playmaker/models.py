@@ -1,40 +1,38 @@
 import spotipy
+import uuid as uuid
 from django.db.models import DateTimeField
 from django.http import JsonResponse
-from spotipy import SpotifyOAuth
-
-from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
 from django.utils import timezone as tz
 from django.utils import timesince
 
 from django.contrib.auth import models as auth_models
 from django.db import models
 
-# TODO FIx these models up, comment out some shit. The migrations are fucked.!
-
-### Users and Groups
 from playmaker.songs import utils
+from playmaker.login import services as logins
 
 
 class User(auth_models.AbstractUser):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
-    #TODO figure out how to store this more secuely - encryptedField
+    # TODO spotify_username
+    # TODO figure out how to store this more secuely - encryptedField
     access_token = models.CharField(max_length=255, null=True, blank=True)
     refresh_token = models.CharField(max_length=255, null=True, blank=True)
     token_expires = DateTimeField(null=True)
     scope = models.CharField(max_length=255, null=True, blank=True)
-    sp_cached = None
+    _sp_cached = None
 
     @property
     def sp(self):
-        if self.sp_cached is None:
-            self.sp_cached = spotipy.Spotify(self.token)
-        return self.sp_cached
+        if self._sp_cached is None:
+            self._sp_cached = spotipy.Spotify(self.token)
+        return self._sp_cached
 
     @property
     def token(self):
         if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
-            self.do_refresh_token()
+            return logins.do_refresh_token(self)
         return self.access_token
 
     def save_token(self, token_info):
@@ -50,15 +48,6 @@ class User(auth_models.AbstractUser):
                      "username": self.username}
 
         return JsonResponse(user_dict, safe=False)
-
-    def do_refresh_token(self):
-        sp_oauth = SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET,
-                                               SPOTIFY_REDIRECT_URI, scope=SPOTIFY_SCOPE,
-                                               state='username-' + self.username)
-
-        token_info = sp_oauth.refresh_access_token(self.refresh_token)
-
-        self.save_token(token_info)
 
     @property
     def info(self):

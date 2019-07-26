@@ -1,6 +1,9 @@
 from rest_framework import serializers
+from playmaker.shared.serializers import ParamSerializer
 
 
-class QueueActionSerializer(serializers.ModelSerializer):
-    action = serializers.CharField()
-    song_uri = serializers.CharField(allow_null=True, allow_blank=True)
+class ActionSerializer(ParamSerializer):
+    uris = serializers.CharField(allow_null=True, allow_blank=True)
+    controller = serializers.CharField()
+    listeners = serializers.ListField(serializers.CharField())
+

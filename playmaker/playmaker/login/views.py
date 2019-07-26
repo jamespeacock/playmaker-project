@@ -1,15 +1,12 @@
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect
-from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
-import spotipy
-import spotipy.oauth2
+from django.http import JsonResponse
+from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
 import logging
 import six.moves.urllib.parse as urllibparse
 
-# Create your views here.
 from playmaker.login import services
 from playmaker.models import User
-
 
 
 class SpotifyLoginView(LoginView):
@@ -27,10 +24,14 @@ class SpotifyLoginView(LoginView):
         return redirect('%s?%s' % (url, urlparams))
 
 
+# This endpoint/url is called after a user follows redirect to login into spotify.
 class SpotifyCallbackView(LoginView):
 
     def get(self, request, *args, **kwargs):
         auth_code = request.GET.get('code')
         username = request.GET.get('state').split('username-')[1]
 
-        return services.authenticate(username, auth_code)
+        user, created = User.objects.get_or_create(username=username)
+        status = "Success." if services.authenticate(user, auth_code) else "Failed."
+
+        return JsonResponse({"status": status})

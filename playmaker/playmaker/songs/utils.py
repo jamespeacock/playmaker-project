@@ -19,7 +19,7 @@ def get_cls(_t):
     return cls, LIST in _t
 
 
-#this should be a visitor (self method) on each obj. First section is artists, second is songs
+# TODO this should be a visitor (self method) on each obj. First section is artists, second is songs
 def to_obj(cls, **_kwargs):
     kwargs = _kwargs.copy()
     if cls == Artist:

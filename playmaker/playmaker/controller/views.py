@@ -1,81 +1,51 @@
-import asyncio
-import logging
-
-from rest_framework import generics, serializers
-import spotipy
-
+from django.http import JsonResponse
+from rest_framework import generics
 
 # TODO implement internal session based &  token auth
-from rest_framework.serializers import IntegerField, ListField, CharField, Serializer
 
-from playmaker.controller import utils
-from playmaker.controller.models import Device
-from playmaker.controller.serializers import QueueActionSerializer
-from playmaker.controller.utils import START_PLAYBACK
+from playmaker.controller import services
+from playmaker.controller.serializers import ActionSerializer
+from playmaker.shared.utils import make_iterable
+from playmaker.controller.visitors import Action
 
-from playmaker.models import User
-from playmaker.controller.models import Controller, Listener
 
-LISTENER = "listener"
+LISTENERS = "listeners"
 CONTROLLER = "controller"
-SONGS = "song_uris"
+URIS = "uris"
 
 
 class SecureAPIView(generics.GenericAPIView):
     pass
     # grab Auth token from request header or auth user in request
 
+    # ensure user making this action is the me of the controller_uuid specified
+
 
 # Play song for current listeners
 
 class PlaySongView(SecureAPIView):
 
-    def get(self, request, *args, **kwargs):
-
-        listener = Listener.objects.get(id=request.GET.get(LISTENER))
-        u = User.objects.get(id=listener.me.id)
-
-        sp = spotipy.client.Spotify(auth=u.token)
-
-        active_device_id = listener.devices.filter(is_active=True).first().sp_id
-
-        sp.start_playback(active_device_id, uris=request.GET.getlist(SONGS))
-        check = sp.current_playback()
-
-        return check
-
-
-class PlaySongForAllListenersView(PlaySongView):
-
     def get_param_serializer_class(self):
-        pass
-
-    def get(self, request, *args, **kwargs):
-        # params = self.get_params(request.GET)
-        controller = Controller.objects.get(id=request.GET.get(CONTROLLER))
-        listeners = controller.listeners
-
-        utils.perform_for_all(START_PLAYBACK, request.GET.get(LISTENER))
-
-
-NEXT = 'next'
-PLAY = 'play'
-PAUSE = 'pause'
-ADD = 'add'
-CLEAR = 'clear'
-
-
-# Combine these with param action=
-class QueueActionView(SecureAPIView):
-
-    def get_param_serializer_class(self):
-        return QueueActionSerializer
+        return ActionSerializer
 
     def get_params(self, query_dict, serializer_cls=None):
         serializer_cls = serializer_cls or self.get_param_serializer_class()
         serializer = serializer_cls(data=query_dict)
         if serializer.is_valid(raise_exception=True):
             return serializer
+
+    def get(self, request, *args, **kwargs):
+        params = self.get_params(request.GET)
+
+        c = params.data.get(CONTROLLER)
+        uris = params.data.get(URIS)
+        failed_results = [r for r in services.perform_action(c, Action.PLAY, uris=make_iterable(uris)) if r]
+
+        if failed_results:
+            return JsonResponse(failed_results)
+
+# Combine these with param action=
+class QueueActionView(PlaySongView):
 
     """
     Returns current list of songs in queue.
@@ -90,12 +60,23 @@ class QueueActionView(SecureAPIView):
     """
     def post(self, request, *args, **kwargs):
         params = self.get_params(request.POST)
-        # return self.render(params)
 
-
+        services.perform_action(params.controller, params.listeners, params.action, params.uris)
+        return self.render(params)
 
 # Seek to section of users current song
+# Queue Song, Play Song @ timestamp?
 
+# Fetch Playlists
+
+# Fetch Recommendations
+#  - filter recs
+
+# Add Song to Playlist
+
+# Save Song
+
+# HOW TO Crossfade into other songs?
 
 # Shuffle
 

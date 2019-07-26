@@ -1,14 +1,40 @@
-import spotipy
+import traceback
+
+from spotipy import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOauthError
+
 from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
-from playmaker.models import User
 
 
-def authenticate(username, auth_code):
-    sp_oauth = spotipy.oauth2.SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET,
-                                           SPOTIFY_REDIRECT_URI, scope=SPOTIFY_SCOPE, state='username-' + username)
-    token_info = sp_oauth.get_access_token(auth_code)
+def get_auth(username):
+    return SpotifyOAuth(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, scope=SPOTIFY_SCOPE,
+                        state='username-' + username)
 
-    # Get user based on username, save token info to User object, return success.
-    user, created = User.objects.get_or_create(username=username)
 
-    return user.save_token(token_info)
+# Responsible for authenticating user via spotify api. Create user object if successful and save is true
+def authenticate(user, auth_code, save=True):
+    sp_oauth = get_auth(user.username)
+    try:
+        token_info = sp_oauth.get_access_token(auth_code)
+    except SpotifyOauthError:
+        print("Authentication exception")
+        traceback.print_stack()
+        # user.delete()
+        return False
+    # Get or create user based on username, save token info to User object, return success.
+    if save:
+        user.save_token(token_info)
+    return True
+
+
+def do_refresh_token(user):
+    sp_oauth = get_auth(user.username)
+
+    token_info = sp_oauth.refresh_access_token(user.refresh_token)
+    if not token_info:
+        print("Refresh token failed.")
+        traceback.print_stack()
+        return False
+
+    user.save_token(token_info)
+    return True
