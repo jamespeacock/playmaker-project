@@ -63,6 +63,7 @@ export default class Login extends React.Component {
                                 name="username" 
                                 className="form-input"
                                 placeholder="rave_shepherd"
+                                required
                                 onChange={ keyInput => this.updateUsername( keyInput.target.value ) }>
                             </input>
                         </div>
@@ -73,7 +74,8 @@ export default class Login extends React.Component {
                                 type="password"
                                 name="password" 
                                 className="form-input"
-                                placeholder="*****"
+                                required
+                                placeholder="*******"
                                 onChange={ keyInput => this.updatePassword( keyInput.target.value ) }>
                             </input>
                         </div>
