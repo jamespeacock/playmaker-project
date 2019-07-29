@@ -9,11 +9,10 @@ services:
     ports:
      - "8000:8000"
   postgres:
-    image:
-
+    image: postgres
     volumes:
-      - /opt/postgres/data:/var/lib/postgresql/data
+      - $HOME//docker/volumes/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD: "docker"
+      - POSTGRES_PASSWORD="docker"
