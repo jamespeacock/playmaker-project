@@ -7,7 +7,9 @@ services:
     volumes:
       - ./playmaker:/app:rw
     ports:
-     - "8000:8000"
+      - "8000:8000"
+    environment:
+      - POSTGRES_PASSWORD=test
     depends_on:
       - postgres
   postgres:
@@ -18,4 +20,4 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD="docker"
+      - POSTGRES_PASSWORD=test
