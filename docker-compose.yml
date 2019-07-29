@@ -1,6 +1,7 @@
 version: '2'
 services:
   interface:
+    container_name: interface
     build:
       context: ./playmaker
     image: playmaker-interface
@@ -13,6 +14,7 @@ services:
     depends_on:
       - postgres
   postgres:
+    container_name: postgres
     build:
       context: ./postgres
     volumes:
