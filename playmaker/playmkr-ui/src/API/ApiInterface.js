@@ -1,32 +1,23 @@
 import config from '../config'
 
-// NEEDS UPDATING FROM NOTEFUL IMPORT.
-
 export default class ApiInterface  {
     
   constructor( options ) {
     // import api configuration.
     this.API_BASE = config.API_BASE
-    this.API_TOKEN = config.API_TOKEN
-    
+
     // bind options to interface and then deconstruct them.
     this.options = options
-    const { method = 'GET', endpoint = 'note', resourceId = false, body = false } = this.options
+    const { method = 'GET', endpoint = 'login', body = false } = this.options
     
     // start building up the request endpoint.
     this.requestEndpoint = `${this.API_BASE}/${endpoint}`
 
-    // by default, all requests are for all resources at a given colleciton point, but you can identify a single one.
-    if ( resourceId ) {
-      this.requestEndpoint += `/${resourceId}`
-    }
-    
     // start building up the request.
     this.request = {
       method,
       headers: {
-        'content-type': 'application/json',
-        'Authorization': `Bearer ${this.API_TOKEN}`
+        'content-type': 'application/json'
       }
     }
       

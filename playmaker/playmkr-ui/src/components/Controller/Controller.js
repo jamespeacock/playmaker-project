@@ -6,13 +6,13 @@ export default class Controller extends React.Component {
         console.log('rendering controller')
         return (
             <React.Fragment>
-                <header class="header-container">
+                <header className="header-container">
                     <h2>Controller Dashboard</h2>
                 </header>
-                <main class="main-area">
-                    <div class="col-container">
-                        <section class="queue-container">
-                            <div class="col-title">Queue</div>
+                <main className="main-area">
+                    <div className="col-container">
+                        <section className="queue-container">
+                            <div className="col-title">Queue</div>
                             <ul>
                                 <li>queue item</li>
                                 <li>queue item</li>
@@ -22,8 +22,8 @@ export default class Controller extends React.Component {
                             </ul>
                         </section>
 
-                        <section class="search-container">
-                            <div class="col-title">Search</div>
+                        <section className="search-container">
+                            <div className="col-title">Search</div>
                                 <ul>
                                     <li>search item</li>
                                     <li>search item</li>
@@ -33,8 +33,8 @@ export default class Controller extends React.Component {
                                 </ul>
                         </section>
 
-                        <section class="recommendations-container">
-                            <div class="col-title">Listeners</div>
+                        <section className="recommendations-container">
+                            <div className="col-title">Listeners</div>
                                 <ul>
                                     <li>rec item</li>
                                     <li>rec item</li>

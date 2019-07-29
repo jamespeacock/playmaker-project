@@ -1,5 +1,6 @@
 import React from 'react'
 import ApiInterface from '../../API/ApiInterface'
+import './login.css'
 
 export default class Login extends React.Component {
 
@@ -24,8 +25,8 @@ export default class Login extends React.Component {
         console.log(`Handling Login with creds —— username: ${username} and password: ${password}`)
 
         this.loginInterface = new ApiInterface( {
-            method : 'GET', 
-            endpoint : 'user', 
+            method : 'POST', 
+            endpoint : 'login', 
             body : { username, password }
         } )
 
@@ -47,41 +48,45 @@ export default class Login extends React.Component {
         console.log('rendering login')
         return (
             <React.Fragment>
-                  <form 
-                    className="login_form"
-                    onSubmit={submitEvent => this.loginInterfaceHandler( submitEvent )}>
-                    <legend><h2 className="form_legend">Playmkr Login</h2></legend>
-                    <div className="username_container">
-                        <label htmlFor="username" className="input_label">Username:</label>
-                        <input  
-                            type="text" 
-                            name="username" 
-                            className="form_input"
-                            placeholder="rave_shepherd"
-                            onChange={ keyInput => this.updateUsername( keyInput.target.value ) }>
-                        </input>
-                    </div>
-                    
-                    <div className="password_container">
-                        <label htmlFor="password" className="input_label">Password:</label>
-                        <input 
-                            type="text"
-                            name="password" 
-                            className="form_input"
-                            placeholder="*****"
-                            onChange={ keyInput => this.updatePassword( keyInput.target.value ) }>
-                        </input>
-                    </div>
+                <header className="header-container">
+                    <h2>play.mkr</h2>
+                </header>
+                <main className="login-area">
+                    <form 
+                        className="login-form"
+                        onSubmit={ submitEvent => this.loginInterfaceHandler( submitEvent ) }>
+                        <legend><h2 className="form-legend">Login</h2></legend>
+                        <div className="username-container">
+                            <label htmlFor="username" className="input-label">Username:</label>
+                            <input  
+                                type="text" 
+                                name="username" 
+                                className="form-input"
+                                placeholder="rave_shepherd"
+                                onChange={ keyInput => this.updateUsername( keyInput.target.value ) }>
+                            </input>
+                        </div>
+                        
+                        <div className="password-container">
+                            <label htmlFor="password" className="input-label">Password:</label>
+                            <input 
+                                type="password"
+                                name="password" 
+                                className="form-input"
+                                placeholder="*****"
+                                onChange={ keyInput => this.updatePassword( keyInput.target.value ) }>
+                            </input>
+                        </div>
 
-                    <div className="form_submit_container">
-                        <input 
-                            type="submit" 
-                            value="Login" 
-                            className="submit_button">
-                            
-                        </input>
-                    </div>
-                </form>
+                        <div className="form-submit-container">
+                            <input 
+                                type="submit" 
+                                value="Login" 
+                                className="submit-button">
+                            </input>
+                        </div>
+                    </form>
+                </main>
             </React.Fragment>
         )
     }

@@ -4,7 +4,7 @@ import Controller from './components/Controller/Controller'
 import Login from './components/Login/Login'
 import Listener from './components/Listener/Listener'
 import './App.css'
-
+require('dotenv').config()
 
 export default class App extends React.Component {
 
