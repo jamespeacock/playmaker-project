@@ -8,8 +8,11 @@ services:
       - ./playmaker:/app:rw
     ports:
      - "8000:8000"
+    depends_on:
+      - postgres
   postgres:
-    image: postgres
+    build:
+      context: ./postgres
     volumes:
       - $HOME//docker/volumes/postgres:/var/lib/postgresql/data
     ports:
