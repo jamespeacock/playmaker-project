@@ -5,6 +5,7 @@ from django.db import models
 from playmaker.controller.visitors import ActionVisitor
 from playmaker.shared.models import SPModel
 from playmaker.models import User
+from playmaker.songs.models import Song
 
 
 class Device(SPModel):
@@ -16,8 +17,29 @@ class Device(SPModel):
     volume_percent = models.IntegerField()
 
 
+class Queue(models.Model):
+    songs = models.ManyToManyField(Song)
+
+    def next(self):
+        ns = self.songs.first()
+        self.songs.remove(ns)
+        return ns
+
+    def add(self, song):
+        self.songs.add(song)
+        return True
+
+    def remove(self, song):
+        self.songs.remove(song)
+
+    def clear(self):
+        self.songs.clear()
+
+
 class Controller(models.Model):
-    me = models.OneToOneField(User, related_name='as_controller', on_delete=models.DO_NOTHING)
+    me = models.OneToOneField(User, on_delete=models.DO_NOTHING)
+
+    queue = models.OneToOneField(Queue, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     @property
     def listeners(self):
@@ -70,6 +92,7 @@ class Listener(models.Model):
             logging.log("Listener: " + self.me.username + " does not have any active devices.")
 
         return ad
+
 
 class Permission(models.Model):  # inherit auth_models.Permission if need be
     actor = models.OneToOneField(Controller, on_delete=models.DO_NOTHING)

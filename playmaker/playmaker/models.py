@@ -31,8 +31,9 @@ class User(auth_models.AbstractUser):
 
     @property
     def token(self):
-        if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
+        if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
             return logins.do_refresh_token(self)
+            # Might need to wait after this refresh
         return self.access_token
 
     def save_token(self, token_info):

@@ -8,3 +8,12 @@ services:
       - ./playmaker:/app:rw
     ports:
      - "8000:8000"
+  postgres:
+    image:
+
+    volumes:
+      - /opt/postgres/data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD: "docker"
