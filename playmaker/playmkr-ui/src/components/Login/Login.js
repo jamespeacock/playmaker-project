@@ -1,5 +1,6 @@
 import React from 'react'
 import ApiInterface from '../../API/ApiInterface'
+import Header from '../Header/Header'
 import './login.css'
 
 export default class Login extends React.Component {
@@ -48,9 +49,7 @@ export default class Login extends React.Component {
         console.log('rendering login')
         return (
             <React.Fragment>
-                <header className="header-container">
-                    <h2>play.mkr</h2>
-                </header>
+                <Header></Header>
                 <main className="login-area">
                     <form 
                         className="login-form"

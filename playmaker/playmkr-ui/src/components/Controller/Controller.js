@@ -1,4 +1,5 @@
 import React from 'react'
+import Header from '../Header/Header'
 import './controler.css'
 
 export default class Controller extends React.Component {
@@ -6,12 +7,10 @@ export default class Controller extends React.Component {
         console.log('rendering controller')
         return (
             <React.Fragment>
-                <header className="header-container">
-                    <h2>Controller Dashboard</h2>
-                </header>
+                <Header></Header>
                 <main className="main-area">
                     <div className="col-container">
-                        <section className="queue-container">
+                        <section className="controller-queue-container">
                             <div className="col-title">Queue</div>
                             <ul>
                                 <li>queue item</li>
