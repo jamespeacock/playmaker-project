@@ -25,6 +25,8 @@ RUN pip install pipenv
 RUN pipenv install --deploy --system --skip-lock
 RUN pip3 freeze
 
+ADD playmaker /app
+
 RUN mkdir -p /app/static
 RUN mkdir -p /var/www/static
 RUN python3.6 manage.py collectstatic
