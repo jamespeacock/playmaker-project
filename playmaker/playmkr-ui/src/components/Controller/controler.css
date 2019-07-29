@@ -1,0 +1,43 @@
+.header-container {
+    display: flex;
+    justify-content: center;
+    background-color: lightgray ;
+    height: 150px;
+}
+.main-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.col-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    max-width: 1000px;
+    width: 100%;
+}
+.queue-container {
+    margin: 20px;
+    height: 500px;
+    width: 175px;
+    background-color: lightsalmon ;
+}
+.search-container {
+    margin: 20px;
+    height: 500px;
+    width: 175px;
+    background-color: lightseagreen ;
+}
+.recommendations-container {
+    margin: 20px;
+    height: 500px;
+    width: 175px;
+    background-color: lightblue ;
+}
+.col-title {
+    text-align: center;
+    font-size: 18px;
+    padding: 20px;
+    color: white;
+    background-color: lightslategray;
+}
