@@ -21,7 +21,10 @@ class SpotifyLoginView(LoginView):
                                            'redirect_uri': SPOTIFY_REDIRECT_URI,'scope': SPOTIFY_SCOPE,
                                            'state': 'username-'+username})
 
-        return redirect('%s?%s' % (url, urlparams))
+        redirect_url = '%s?%s' % (url, urlparams)
+        logging.log(logging.INFO, "Redirecting to: " + redirect_url)
+        print("Redirect url: " + redirect_url)
+        return redirect(redirect_url)
 
 
 # This endpoint/url is called after a user follows redirect to login into spotify.

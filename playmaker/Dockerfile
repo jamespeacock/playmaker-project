@@ -24,6 +24,10 @@ RUN pip install --upgrade pip
 RUN pip install pipenv
 RUN pipenv install --deploy --system --skip-lock
 RUN pip3 freeze
+
+RUN mkdir -p /app/static
+RUN mkdir -p /var/www/static
+RUN python3.6 manage.py collectstatic
 # COPY startup script into known file location in container
 ADD start.sh /start.sh
 
