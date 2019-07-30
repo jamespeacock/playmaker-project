@@ -21,7 +21,15 @@
 
 }
 .listener-queue-item {
-    padding: 8px;
+    margin: 12px;
+    padding: 5px;
+    vertical-align: center;
+    width: 250px;
+    height: 30px;
+    background-color: #3B3636;
+    opacity: .9;
+    border-radius: 4px;
+    font-weight: 600;
 }
 .playing-now {
     text-align: center;
