@@ -17,10 +17,10 @@ class User(auth_models.AbstractUser):
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
     # TODO spotify_username
     # TODO figure out how to store this more secuely - encryptedField
-    access_token = models.CharField(max_length=255, null=True, blank=True)
-    refresh_token = models.CharField(max_length=255, null=True, blank=True)
+    access_token = models.CharField(max_length=511, null=True, blank=True)
+    refresh_token = models.CharField(max_length=511, null=True, blank=True)
     token_expires = DateTimeField(null=True)
-    scope = models.CharField(max_length=255, null=True, blank=True)
+    scope = models.CharField(max_length=511, null=True, blank=True)
     _sp_cached = None
 
     @property
@@ -33,7 +33,7 @@ class User(auth_models.AbstractUser):
     def token(self):
         if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
             return logins.do_refresh_token(self)
-            # Might need to wait after this refresh
+
         return self.access_token
 
     def save_token(self, token_info):

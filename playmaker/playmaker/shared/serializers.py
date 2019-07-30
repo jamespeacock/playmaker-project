@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.serializers import Serializer
 
 
@@ -9,4 +10,4 @@ from rest_framework.serializers import Serializer
 
 
 class ParamSerializer(Serializer):
-    pass
+    uris = serializers.CharField(allow_null=True, allow_blank=True)
