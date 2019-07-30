@@ -24,5 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', include('playmaker.login.urls')),
     path('controller/', include('playmaker.controller.urls')),
-    path('accounts/', include('django.contrib.auth.urls'))
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('songs/', include('playmaker.songs.urls'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

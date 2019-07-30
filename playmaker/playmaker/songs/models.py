@@ -56,7 +56,7 @@ class Song(SPModel):
     # Analysis features TODO
 
     def __str__(self):
-        return "{} - {}".format(self.title, self.artist)
+        return "{} - {}".format(self.name, ','.join([a.name for a in self.artists]))
 
 
 

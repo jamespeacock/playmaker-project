@@ -4,7 +4,7 @@ export default class ApiInterface  {
     
   constructor( options ) {
     // import api configuration.
-    this.API_BASE = config.API_BASE
+    this.API_BASE = 'http://localhost:8000'
 
     // bind options to interface and then deconstruct them.
     this.options = options
@@ -14,10 +14,13 @@ export default class ApiInterface  {
     this.requestEndpoint = `${this.API_BASE}/${endpoint}`
 
     // start building up the request.
+//    var csrftoken = getCookie('csrftoken');
     this.request = {
       method,
+      mode: 'no-cors',
+      credentials: 'include',
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
       }
     }
       

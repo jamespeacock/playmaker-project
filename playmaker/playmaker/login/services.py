@@ -34,7 +34,7 @@ def do_refresh_token(user):
     if not token_info:
         print("Refresh token failed.")
         traceback.print_stack()
-        return False
+        return None
 
     user.save_token(token_info)
-    return True
+    return user.access_token

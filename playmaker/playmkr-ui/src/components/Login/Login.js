@@ -2,6 +2,23 @@ import React from 'react'
 import ApiInterface from '../../API/ApiInterface'
 import Header from '../Header/Header'
 import './login.css'
+import jQuery from 'jquery'
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 export default class Login extends React.Component {
 
@@ -23,15 +40,20 @@ export default class Login extends React.Component {
         evt.preventDefault()
         const { username, password } = this.state
         const { history } = this.props
-        
+        console.log(`Handling Login with creds —— username: ${username} and password: ${password}`)
         this.loginInterface = new ApiInterface( {
             method : 'POST', 
-            endpoint : 'login', 
-            body : { username, password }
+            endpoint : 'login/',
+            body : { username, password },
+            headers: {
+                'content-type': 'application/json',
+                'X-CSRFTOKEN' : csrftoken,
+            }
+
         } )
 
-        // Work this out depending on what's sent back... 
-        // const userLoggedIn = await this.loginInterface.goFetch()
+        // Work this out depending on what's sent back...
+//        const userLoggedIn = await this.loginInterface.goFetch()
 
         history.push('/listener')
     }

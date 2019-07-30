@@ -20,21 +20,36 @@ def get_cls(_t):
 
 
 # TODO this should be a visitor (self method) on each obj. First section is artists, second is songs
-def to_obj(cls, **_kwargs):
+def to_obj(__type, **_kwargs):
+    cls, is_list = get_cls(__type)
     kwargs = _kwargs.copy()
     if cls == Artist:
-        kwargs["num_followers"] = kwargs.pop('followers').get('total')
-        genre_names = kwargs.pop('genres')
-        genres = [Genre.objects.get_or_create(name=g_n) for g_n in genre_names]
-        kwargs["genres"] = genres
+        num_followers = kwargs.pop('followers').get('total')
+        artist = Artist(name=kwargs['name'], uri=kwargs['uri'], num_followers=num_followers)
+        # genre_names = kwargs.pop('genres')
+        # genres = [Genre.objects.get_or_create(name=g_n) for g_n in genre_names]
+        # # kwargs["genres"] = genres
+        return artist
 
     elif cls == Song:
-        kwargs = kwargs
+        song = Song(name=kwargs['name'], uri=kwargs['uri'])
+        for artist in kwargs['artists']:
+            if not Artist.objects.filter(name=artist['name']).first():
+                a = Artist(name=artist['name'])
+                song.artists.add(a)
 
-    return cls(**kwargs)
+        return song
+
+    # return cls(**kwargs)
 
 
-def from_response(spotify_resp, type):
-    cls, is_list = get_cls(type) # get the type (class) of object to cast the response into
+def get_key(str_type):
+    if str_type == SONG:
+        return "tracks"
 
-    return [to_obj(cls, **i) for i in spotify_resp['items']] if is_list else cls(spotify_resp)
+
+def from_response(spotify_resp, __type):
+    # cls, is_list = get_cls(type) # get the type (class) of object to cast the response into
+
+    response_data = spotify_resp[get_key(__type)]
+    return [to_obj(__type, **i) for i in response_data if i]  # if is_list else [spotify_resp]

@@ -4,10 +4,11 @@ from rest_framework import generics
 # TODO implement internal session based &  token auth
 
 from playmaker.controller import services
+from playmaker.controller.models import Controller
 from playmaker.controller.serializers import ActionSerializer, QueueActionSerializer
 from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
-
+from playmaker.shared.views import SecureAPIView
 
 LISTENERS = "listeners"
 CONTROLLER = "controller"
@@ -15,12 +16,6 @@ URIS = "uris"
 
 # Queue action
 ACTION = "action"
-
-
-class SecureAPIView(generics.GenericAPIView):
-    pass
-    # grab Auth token from request header or auth user in request
-    # ensure user making this action is the me of the controller_uuid specified
 
 
 class ControllerView(SecureAPIView):
@@ -42,9 +37,10 @@ class PlaySongView(ControllerView):
         params = self.get_params(request.GET)
 
         failed_results = [r for r in services.perform_action(
-            params.get(CONTROLLER),
+            1,  # params.get(CONTROLLER),
             Action.PLAY,
-            uris=make_iterable(params.get(URIS))) if r]
+            # uris=make_iterable(params.get(URIS))) if r]
+            uris=['spotify:track:4WqyMyDW4LAOIYFNMXGRYR']) if r]
 
         if failed_results:
             return JsonResponse(failed_results)
@@ -58,9 +54,8 @@ class PauseSongView(ControllerView):
         params = self.get_params(request.GET)
 
         failed_results = [r for r in services.perform_action(
-            params.get(CONTROLLER),
-            Action.PAUSE,
-            uris=make_iterable(params.get(URIS))) if r]
+            1, #params.get(CONTROLLER),
+            Action.PAUSE) if r]
 
         if failed_results:
             return JsonResponse(failed_results)
@@ -75,14 +70,30 @@ class NextSongView(ControllerView):
 
         # TODO decide if this should pick next song from internal queue and press play
         #  or skip to next song in each listener's queue
-        c = params.get(CONTROLLER)
+        c = 1  # params.get(CONTROLLER)
         failed_results = [r for r in services.perform_action(
             c,
             Action.NEXT,
-            uris=services.get_next_song(c)) if r]
+            # uris=services.get_next_song(c)) if r]
+            uris=['spotify:track:0UeYCHOETPfai02uskjJ3x']) if r]
 
         if failed_results:
-            return JsonResponse(failed_results)
+            return JsonResponse({"status": "Meh."})
+
+        return JsonResponse({"status": "Success."})
+
+
+class SeekSongView(ControllerView):
+
+    def get(self, request, *args, **kwargs):
+        c = 1  # params.get(CONTROLLER)
+        failed_results = [r for r in services.perform_action(
+            c,
+            Action.SEEK,
+            position_ms=80000) if r]
+
+        if failed_results:
+            return JsonResponse({"status": "Meh."})
 
         return JsonResponse({"status": "Success."})
 
@@ -96,7 +107,14 @@ class QueueActionView(ControllerView):
     Returns current list of songs in queue.
     """
     def get(self, request, *args, **kwargs):
-        pass
+        c = 1
+        cont = Controller.objects.get(id=c)
+        songs = []
+        for song in cont.queue.songs.all():
+            songs.append({"name": song.name, "artists": [a.name for a in song.artists]})
+
+        return JsonResponse(songs)
+
 
     """
     Performs specified action on current queue for current room/group/controller.
@@ -104,7 +122,6 @@ class QueueActionView(ControllerView):
     """
     def post(self, request, *args, **kwargs):
         params = self.get_params(request.POST)
-
 
         services.perform_action(params.get(CONTROLLER), params.get(ACTION), params.get(URIS))
         return self.render(params)
