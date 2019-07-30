@@ -83,19 +83,19 @@ export default class Listener extends React.Component {
 
     render() {
         const { songsList } = this.state
-        console.log('rendering listener')
+        // console.log('rendering listener')
         const sampleData = [
             { 
                 name: 'POP SEMI', 
                 artists: ['pax osa']
             }, 
             { 
-                name: 'SENIORITA', 
-                artists: ['shawn mendez']
-            }, 
-            { 
                 name: 'SHOOTING STARS', 
                 artists: ['the bag raiders']
+            },
+            { 
+                name: 'SENIORITA', 
+                artists: ['shawn mendez']
             }
         ]
 
