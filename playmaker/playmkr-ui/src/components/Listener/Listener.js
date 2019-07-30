@@ -18,7 +18,7 @@ export default class Listener extends React.Component {
     getSongsInterface = async ( ) => {
         this.songsInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : '/controller/queue'
+            endpoint : 'controller/queue'
         } )
         const songsList = await this.songsInterface.goFetch()
         this.setState( { songsList } )

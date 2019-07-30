@@ -3,8 +3,8 @@ from playmaker.shared.serializers import ParamSerializer
 
 
 class ActionSerializer(ParamSerializer):
-    controller = serializers.CharField()
+    controller = serializers.CharField(allow_null=True, allow_blank=True)
 
 
 class QueueActionSerializer(ActionSerializer):
-    action = serializers.CharField()
+    action = serializers.CharField(allow_null=True, allow_blank=True)
