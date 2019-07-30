@@ -16,6 +16,8 @@ class Device(SPModel):
     type = models.CharField(max_length=64)
     volume_percent = models.IntegerField()
 
+    # def __str__
+
 
 class Queue(models.Model):
     songs = models.ManyToManyField(Song)
@@ -67,16 +69,16 @@ class Listener(models.Model):
         return self.me.token
 
     def _refresh_devices(self):
-        if self.devices is None or self.devices.filter(is_active=True).first() is None:
-            devices = []
+        # if self.devices is None or self.devices.filter(is_active=True).first() is None:
+        devices = []
 
-            for d in self.me.sp.devices()['devices']:
-                d['sp_id'] = d.pop('id')
-                dev = Device(**d)
-                dev.save()
-                devices.append(dev)
+        for d in self.me.sp.devices()['devices']:
+            d['sp_id'] = d.pop('id')
+            dev = Device(**d)
+            dev.save()
+            devices.append(dev)
 
-            self.devices.set(devices)
+        self.devices.set(devices)
 
     def refresh(self):
         self._refresh_devices()
@@ -86,7 +88,12 @@ class Listener(models.Model):
 
     @property
     def active_device(self):
-        ad = self.devices.filter(is_active=True).first()
+        opts = self.devices.filter(is_active=True).all()
+        ad = opts.first()
+        if len(opts) > 1:
+
+            phones = opts.filter(name__contains='Phone')
+            ad = phones.first() if len(phones) > 0 else opts.first()
 
         if not ad:
             logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active devices.")

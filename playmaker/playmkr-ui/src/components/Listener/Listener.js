@@ -28,7 +28,7 @@ export default class Listener extends React.Component {
     nextInterface = async ( ) => {
         this.nextApiInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : 'controller/next'
+            endpoint : 'controller/play?controller=1&uris=spotify:track:0UeYCHOETPfai02uskjJ3x'
         } )
         const next = await this.nextApiInterface.goFetch()
 
@@ -37,7 +37,7 @@ export default class Listener extends React.Component {
     pauseInterface = async ( ) => {
         this.pauseApiInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : 'controller/pause'
+            endpoint : 'controller/pause?controller=1'
         } )
         const pause = await this.pauseApiInterface.goFetch()
 
@@ -46,7 +46,7 @@ export default class Listener extends React.Component {
     playInterface = async ( ) => {
         this.playApiInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : 'controller/play'
+            endpoint : 'controller/play?controller=1&uris=spotify:track:4WqyMyDW4LAOIYFNMXGRYR'
         } )
         const play = await this.playApiInterface.goFetch()
     }
@@ -54,7 +54,7 @@ export default class Listener extends React.Component {
     seekInterface = async ( ) => {
         this.seekApiInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : 'controller/seek'
+            endpoint : 'controller/seek?controller=1'
         } )
         const seek = await this.seekApiInterface.goFetch()
     }

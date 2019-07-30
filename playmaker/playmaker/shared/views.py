@@ -12,5 +12,6 @@ class SecureAPIView(generics.GenericAPIView):
     def get_params(self, query_dict, serializer_cls=None):
         serializer_cls = serializer_cls or self.get_param_serializer_class()
         serializer = serializer_cls(data=query_dict)
-        if serializer.is_valid(raise_exception=True):
+        if serializer.is_valid(raise_exception=False):
             return serializer.data
+        return {}

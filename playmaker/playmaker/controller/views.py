@@ -19,14 +19,15 @@ ACTION = "action"
 
 
 class ControllerView(SecureAPIView):
-    def get_param_serializer_class(self):
-        return ActionSerializer
-
-    def get_params(self, query_dict, serializer_cls=None):
-        serializer_cls = serializer_cls or self.get_param_serializer_class()
-        serializer = serializer_cls(data=query_dict)
-        if serializer.is_valid(raise_exception=True):
-            return serializer.data
+    pass
+    # def get_param_serializer_class(self):
+    #     return ActionSerializer
+    #
+    # def get_params(self, query_dict, serializer_cls=None):
+    #     serializer_cls = serializer_cls or self.get_param_serializer_class()
+    #     serializer = serializer_cls(data=query_dict)
+    #     if serializer.is_valid(raise_exception=True):
+    #         return serializer.data
 
 
 # Play song for current listeners
@@ -34,31 +35,30 @@ class ControllerView(SecureAPIView):
 class PlaySongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        # params = self.get_params(request.GET)
+        params = self.get_params(request.GET)
 
         failed_results = [r for r in services.perform_action(
             1,  # params.get(CONTROLLER),
             Action.PLAY,
-            # uris=make_iterable(params.get(URIS))) if r]
-            uris=['spotify:track:4WqyMyDW4LAOIYFNMXGRYR']) if r]
+            uris=make_iterable(params.get(URIS))) if r]
 
-        # if failed_results:
-        #     return JsonResponse({"status": "Meh."}, safe=False)
+        if failed_results:
+            return JsonResponse({"status": "Meh."})
 
-        return JsonResponse(status=200)
+        return JsonResponse({"status": "Success."})
 
 
 class PauseSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        # params = self.get_params(request.GET)
+        params = self.get_params(request.GET)
 
         failed_results = [r for r in services.perform_action(
             1, #params.get(CONTROLLER),
             Action.PAUSE) if r]
 
-        # if failed_results:
-        #     return JsonResponse({"status": "Meh."}, safe=False)
+        if failed_results:
+            return JsonResponse({"status": "Meh."})
 
         return JsonResponse({"status": "Success."})
 
@@ -66,19 +66,18 @@ class PauseSongView(ControllerView):
 class NextSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        # params = self.get_params(request.GET)
+        params = self.get_params(request.GET)
 
         # TODO decide if this should pick next song from internal queue and press play
         #  or skip to next song in each listener's queue
         c = 1  # params.get(CONTROLLER)
         failed_results = [r for r in services.perform_action(
             c,
-            Action.PLAY, # Action.NEXT
-            # uris=services.get_next_song(c)) if r]
-            uris=['spotify:track:0UeYCHOETPfai02uskjJ3x']) if r]
+            Action.NEXT,
+            uris=services.get_next_song(c)) if r]
 
-        # if failed_results:
-        #     return JsonResponse({"status": "Meh."}, safe=False)
+        if failed_results:
+            return JsonResponse({"status": "Meh."})
 
         return JsonResponse({"status": "Success."})
 
@@ -90,10 +89,10 @@ class SeekSongView(ControllerView):
         failed_results = [r for r in services.perform_action(
             c,
             Action.SEEK,
-            position_ms=80000) if r]
+            position_ms=35000) if r]
 
-        # if failed_results:
-        #     return JsonResponse({"status": "Meh."}, safe=False)
+        if failed_results:
+            return JsonResponse({"status": "Meh."})
 
         return JsonResponse({"status": "Success."})
 
@@ -107,15 +106,13 @@ class QueueActionView(ControllerView):
     Returns current list of songs in queue.
     """
     def get(self, request, *args, **kwargs):
-        pass
-        return JsonResponse([], safe=False)
-        # c = 1
-        # cont = Controller.objects.get(id=c)
-        # songs = []
-        # for song in cont.queue.songs.all():
-        #     songs.append({"name": song.name, "artists": [a.name for a in song.artists]})
-        #
-        # return JsonResponse(songs)
+        c = 1
+        cont = Controller.objects.get(id=c)
+        songs = []
+        for song in cont.queue.songs.all():
+            songs.append({"name": song.name, "artists": [a.name for a in song.artists]})
+
+        return JsonResponse({"status": "Meh."})
 
 
     """
@@ -124,6 +121,7 @@ class QueueActionView(ControllerView):
     """
     def post(self, request, *args, **kwargs):
         params = self.get_params(request.POST)
+
 
         services.perform_action(params.get(CONTROLLER), params.get(ACTION), params.get(URIS))
         return self.render(params)
