@@ -42,10 +42,10 @@ class PlaySongView(ControllerView):
             # uris=make_iterable(params.get(URIS))) if r]
             uris=['spotify:track:4WqyMyDW4LAOIYFNMXGRYR']) if r]
 
-        if failed_results:
-            return JsonResponse({"status":"Meh."})
+        # if failed_results:
+        #     return JsonResponse({"status": "Meh."}, safe=False)
 
-        return JsonResponse({"status": "Success."})
+        return JsonResponse(status=200)
 
 
 class PauseSongView(ControllerView):
@@ -57,8 +57,8 @@ class PauseSongView(ControllerView):
             1, #params.get(CONTROLLER),
             Action.PAUSE) if r]
 
-        if failed_results:
-            return JsonResponse({"status":"Meh."})
+        # if failed_results:
+        #     return JsonResponse({"status": "Meh."}, safe=False)
 
         return JsonResponse({"status": "Success."})
 
@@ -77,8 +77,8 @@ class NextSongView(ControllerView):
             # uris=services.get_next_song(c)) if r]
             uris=['spotify:track:0UeYCHOETPfai02uskjJ3x']) if r]
 
-        if failed_results:
-            return JsonResponse({"status": "Meh."})
+        # if failed_results:
+        #     return JsonResponse({"status": "Meh."}, safe=False)
 
         return JsonResponse({"status": "Success."})
 
@@ -92,8 +92,8 @@ class SeekSongView(ControllerView):
             Action.SEEK,
             position_ms=80000) if r]
 
-        if failed_results:
-            return JsonResponse({"status": "Meh."})
+        # if failed_results:
+        #     return JsonResponse({"status": "Meh."}, safe=False)
 
         return JsonResponse({"status": "Success."})
 

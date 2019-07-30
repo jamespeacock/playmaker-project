@@ -26,39 +26,37 @@ export default class Listener extends React.Component {
     }
 
     nextInterface = async ( ) => {
-        this.songsInterface = new ApiInterface( {
+        this.nextApiInterface = new ApiInterface( {
             method : 'GET', 
             endpoint : 'controller/next'
         } )
-        const songsList = await this.songsInterface.goFetch()
+        const next = await this.nextApiInterface.goFetch()
 
     }
 
     pauseInterface = async ( ) => {
-        this.songsInterface = new ApiInterface( {
+        this.pauseApiInterface = new ApiInterface( {
             method : 'GET', 
             endpoint : 'controller/pause'
         } )
-        const songsList = await this.songsInterface.goFetch()
+        const pause = await this.pauseApiInterface.goFetch()
 
     }
 
     playInterface = async ( ) => {
-        this.songsInterface = new ApiInterface( {
+        this.playApiInterface = new ApiInterface( {
             method : 'GET', 
             endpoint : 'controller/play'
         } )
-        const songsList = await this.songsInterface.goFetch()
-
+        const play = await this.playApiInterface.goFetch()
     }
     
     seekInterface = async ( ) => {
-        this.songsInterface = new ApiInterface( {
+        this.seekApiInterface = new ApiInterface( {
             method : 'GET', 
             endpoint : 'controller/seek'
         } )
-        const songsList = await this.songsInterface.goFetch()
-
+        const seek = await this.seekApiInterface.goFetch()
     }
 
     handleNext = () => {
