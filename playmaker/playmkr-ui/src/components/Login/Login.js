@@ -41,8 +41,6 @@ export default class Login extends React.Component {
         const { username, password } = this.state
         const { history } = this.props
         console.log(`Handling Login with creds —— username: ${username} and password: ${password}`)
-
-        var csrftoken = getCookie('csrftoken');
         this.loginInterface = new ApiInterface( {
             method : 'POST', 
             endpoint : 'login/',
@@ -54,7 +52,7 @@ export default class Login extends React.Component {
 
         } )
 
-        // Work this out depending on what's sent back... 
+        // Work this out depending on what's sent back...
 //        const userLoggedIn = await this.loginInterface.goFetch()
 
         history.push('/listener')
