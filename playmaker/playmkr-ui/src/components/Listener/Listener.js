@@ -13,72 +13,72 @@ export default class Listener extends React.Component {
         }
     }
     componentDidMount() {
-        this.getSongsInterface()
+//        this.getSongsInterface()
     }
 
     getSongsInterface = async ( ) => {
         this.songsInterface = new ApiInterface( {
-            method : 'GET', 
+            method : 'GET',
             endpoint : 'controller/queue'
         } )
         const songsList = await this.songsInterface.goFetch()
-        this.setState( { songsList } )
+
     }
 
     nextInterface = async ( ) => {
         this.songsInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : '/controller/next'
+            endpoint : 'controller/next'
         } )
         const songsList = await this.songsInterface.goFetch()
-        this.setState( { songsList } )
+
     }
 
     pauseInterface = async ( ) => {
         this.songsInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : '/controller/pause'
+            endpoint : 'controller/pause'
         } )
         const songsList = await this.songsInterface.goFetch()
-        this.setState( { songsList } )
+
     }
 
     playInterface = async ( ) => {
         this.songsInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : '/controller/play'
+            endpoint : 'controller/play'
         } )
         const songsList = await this.songsInterface.goFetch()
-        this.setState( { songsList } )
+
     }
     
     seekInterface = async ( ) => {
         this.songsInterface = new ApiInterface( {
             method : 'GET', 
-            endpoint : '/controller/seek'
+            endpoint : 'controller/seek'
         } )
         const songsList = await this.songsInterface.goFetch()
-        this.setState( { songsList } )
+
     }
 
-    handleNext= () => {
+    handleNext = () => {
         console.log('next')
-        this.handleNext()
+        this.nextInterface()
     }
 
     handlePause= () => {
         console.log('pause')
-        this.handlePause()
+        this.pauseInterface()
     }
 
     handlePlay = () => {
         console.log('play')
-        this.handlePlay()
+        this.playInterface()
     }
 
     handleSeek = () => {
         console.log('seek')
-        this.handleSeek()
+        this.seekInterface()
     }
 
     render() {

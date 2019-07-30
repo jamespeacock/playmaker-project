@@ -45,11 +45,6 @@ export default class Login extends React.Component {
             method : 'POST', 
             endpoint : 'login/',
             body : { username, password },
-            headers: {
-                'content-type': 'application/json',
-                'X-CSRFTOKEN' : csrftoken,
-            }
-
         } )
 
         // Work this out depending on what's sent back...
