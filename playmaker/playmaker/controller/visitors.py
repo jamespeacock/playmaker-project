@@ -9,6 +9,7 @@ class Action(Enum):
     PAUSE = "pause"
     NEXT = "next"
     CURRENT = "now"
+    SEEK = "seek"
     NULL = None
 
 
@@ -21,7 +22,8 @@ class ActionVisitor(object):
             Action.PLAY: sp.start_playback,
             Action.PAUSE: sp.pause_playback,
             Action.NEXT: sp.next_track,
-            Action.CURRENT: sp.current_playback
+            Action.CURRENT: sp.current_playback,
+            Action.SEEK: sp.seek_track,
         }
     """
     

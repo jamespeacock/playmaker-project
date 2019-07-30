@@ -1,0 +1,5 @@
+version: '2'
+services:
+  interface:
+    environment:
+      - MY_HOST=http://localhost

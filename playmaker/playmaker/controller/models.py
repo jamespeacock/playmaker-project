@@ -89,7 +89,7 @@ class Listener(models.Model):
         ad = self.devices.filter(is_active=True).first()
 
         if not ad:
-            logging.log("Listener: " + self.me.username + " does not have any active devices.")
+            logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active devices.")
 
         return ad
 
