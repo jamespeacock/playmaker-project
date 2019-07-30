@@ -2,6 +2,7 @@ import React from 'react'
 import ApiInterface from '../../API/ApiInterface'
 import Header from '../Header/Header'
 import './listener.css'
+const uuid = require('uuid/v4')
 
 export default class Listener extends React.Component {
 
@@ -23,21 +24,78 @@ export default class Listener extends React.Component {
         const songsList = await this.songsInterface.goFetch()
         this.setState( { songsList } )
     }
+
+    nextInterface = async ( ) => {
+        this.songsInterface = new ApiInterface( {
+            method : 'GET', 
+            endpoint : '/controller/next'
+        } )
+        const songsList = await this.songsInterface.goFetch()
+        this.setState( { songsList } )
+    }
+
+    pauseInterface = async ( ) => {
+        this.songsInterface = new ApiInterface( {
+            method : 'GET', 
+            endpoint : '/controller/pause'
+        } )
+        const songsList = await this.songsInterface.goFetch()
+        this.setState( { songsList } )
+    }
+
+    playInterface = async ( ) => {
+        this.songsInterface = new ApiInterface( {
+            method : 'GET', 
+            endpoint : '/controller/play'
+        } )
+        const songsList = await this.songsInterface.goFetch()
+        this.setState( { songsList } )
+    }
+    
+    seekInterface = async ( ) => {
+        this.songsInterface = new ApiInterface( {
+            method : 'GET', 
+            endpoint : '/controller/seek'
+        } )
+        const songsList = await this.songsInterface.goFetch()
+        this.setState( { songsList } )
+    }
+
+    handleNext= () => {
+        console.log('next')
+        this.handleNext()
+    }
+
+    handlePause= () => {
+        console.log('pause')
+        this.handlePause()
+    }
+
+    handlePlay = () => {
+        console.log('play')
+        this.handlePlay()
+    }
+
+    handleSeek = () => {
+        console.log('seek')
+        this.handleSeek()
+    }
+
     render() {
         const { songsList } = this.state
         console.log('rendering listener')
         const sampleData = [
             { 
-                name: 'pop semi', 
+                name: 'POP SEMI', 
                 artists: ['pax osa']
             }, 
             { 
-                name: 'old town road semi', 
-                artists: ['naz x']
+                name: 'SENIORITA', 
+                artists: ['shawn mendez']
             }, 
             { 
-                name: 'salvation', 
-                artists: ['drake']
+                name: 'SHOOTING STARS', 
+                artists: ['the bag raiders']
             }
         ]
 
@@ -48,8 +106,38 @@ export default class Listener extends React.Component {
                     <section className="listener-queue-container">
                         <h2 className="listener-queue-title">Listening Queue</h2>
                         <ul className="listener-queue-list">
-                            {sampleData.length && sampleData.map( song => (<li className="listener-queue-item"> {`${song.name} by ${song.artists[0]}`}</li>))}
+                            {sampleData.length && sampleData.map( song => (<li className="listener-queue-item"> {song.name} <br></br> {song.artists[0]}</li>))}
                         </ul>
+                        <div className="button-container">
+                            <div className="button-col-left">
+                                <button 
+                                    key={uuid()}
+                                    className="button"
+                                    onClick={this.handlePlay}>
+                                    PLAY
+                                </button>
+                                <button 
+                                    key={uuid()}
+                                    className="button"
+                                    onClick={this.handleSeek}>
+                                    SEEK
+                                </button>
+                            </div>
+                            <div className="button-col-right">
+                                <button 
+                                    key={uuid()}
+                                    className="button"
+                                    onClick={this.handleNext}>
+                                    NEXT
+                                </button>
+                                <button 
+                                    key={uuid()}
+                                    className="button"
+                                    onClick={this.handlePause}>
+                                    PAUSE
+                                </button>
+                            </div>
+                        </div>
                     </section>
                 </main>
             </React.Fragment>

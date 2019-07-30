@@ -23,8 +23,7 @@ export default class Login extends React.Component {
         evt.preventDefault()
         const { username, password } = this.state
         const { history } = this.props
-        console.log(`Handling Login with creds —— username: ${username} and password: ${password}`)
-
+        
         this.loginInterface = new ApiInterface( {
             method : 'POST', 
             endpoint : 'login', 
@@ -32,7 +31,7 @@ export default class Login extends React.Component {
         } )
 
         // Work this out depending on what's sent back... 
-        const userLoggedIn = await this.loginInterface.goFetch()
+        // const userLoggedIn = await this.loginInterface.goFetch()
 
         history.push('/listener')
     }

@@ -18,14 +18,13 @@
     margin-top: 50px;
 }
 .listener-queue-list {
-
 }
 .listener-queue-item {
     margin: 12px;
     padding: 5px;
     vertical-align: center;
     width: 250px;
-    height: 30px;
+    height: 45px;
     background-color: #3B3636;
     opacity: .9;
     border-radius: 4px;
@@ -38,4 +37,40 @@
     margin: 0 auto;
     background-color: slategray;
     color: white;
+}
+.button-container {
+    margin: 0 auto;
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    width: 250px;
+}
+.button-col-left, .button-col-right {
+    width: 100%;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.button-col-right {
+    align-items: flex-end;
+}
+.button {
+    background-color: #FF5F58;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    border-radius: 4px;
+    width: 80%;
+    height: 50px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.button:hover, .button:focus {
+    background-color: #84bd00;
 }
