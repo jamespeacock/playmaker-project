@@ -40,7 +40,7 @@ RUN mkdir -p /var/www/static
 ADD start.sh /start.sh
 
 # EXPOSE port 8000 to allow communication to/from server
-EXPOSE 8000
+EXPOSE 5000
 
 #COPY . /app
 
