@@ -3,3 +3,5 @@ services:
   interface:
     environment:
       - MY_HOST=http://localhost
+    env_file:
+      - dev.env
