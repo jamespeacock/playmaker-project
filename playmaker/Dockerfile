@@ -1,16 +1,24 @@
-FROM heroku/heroku:18-build
+FROM centos:7
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+ENV LC_ALL en_US.utf8
+ENV LANG en_US.utf8
 
 # -- Install Pipenv:
-RUN apt update && apt upgrade -y && apt install python3.6-dev -y
+# gcc because we need regex and pyldap
+# openldap-devel because we need pyldap
+RUN yum update -y \
+    && yum install -y https://centos7.iuscommunity.org/ius-release.rpm \
+    && yum install -y python36u python36u-libs python36u-devel python36u-pip \
+    && yum install -y which gcc \
+    && yum install -y openldap-devel \
+    && yum install -y git
+
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3.6
 
 # Backwards compatility.
 RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.6 /usr/bin/python3
 
+RUN pip3 install --upgrade pip
 RUN pip3 install pipenv
 
 RUN set -ex && mkdir /app

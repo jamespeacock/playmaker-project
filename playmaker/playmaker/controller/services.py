@@ -36,7 +36,7 @@ def perform_action(controller_uuid, action, *args, **kwargs):
 
     # Time how long this takes - are either Spotipy and ActionVisitor being instanced?
     visitors = [l.v for l in listeners]
-    active_devices = [l.active_device.sp_id for l in listeners]
+    active_devices = [l.active_device.sp_id for l in listeners if l.active_device]
 
     # Kickoff loops with visitors,devices + action
     # loop = asyncio.get_event_loop()
