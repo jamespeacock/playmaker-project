@@ -11,7 +11,8 @@ RUN yum update -y \
     && yum install -y python36u python36u-libs python36u-devel python36u-pip \
     && yum install -y which gcc \
     && yum install -y openldap-devel \
-    && yum install -y git
+    && yum install -y git \
+    && yum install -y postgresql-devel
 
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3.6
 
