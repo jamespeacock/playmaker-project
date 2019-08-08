@@ -19,8 +19,8 @@ server {
 }
 
 
-ssl_certificate     /root/certs/myplaymkr.co/myplaymkr.co.crt;
-ssl_certificate_key /root/certs/myplaymkr.co/myplaymkr.co.key;
+ssl_certificate     /etc/nginx/ssl/myplaymkr.co/myplaymkr.co.crt;
+ssl_certificate_key /etc/nginx/ssl/myplaymkr.co/myplaymkr.co.key;
 ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
 ssl_protocols       TLSv1.1 TLSv1.2;
 
