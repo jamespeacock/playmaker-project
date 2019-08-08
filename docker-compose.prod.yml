@@ -5,3 +5,7 @@ services:
       - MY_HOST=https://test.myplaymkr.co
     env_file:
       - production.env
+
+  nginx:
+    volumes:
+      - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw

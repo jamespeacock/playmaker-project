@@ -39,7 +39,8 @@ RUN pip3 freeze
 # COPY startup script into known file location in container
 ADD start.sh /start.sh
 
-RUN ls /app
+RUN mkdir -p /var/www/static
+RUN python3.6 /app/manage.py collectstatic --noinput
 
 EXPOSE 5000
 
