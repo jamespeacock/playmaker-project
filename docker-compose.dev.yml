@@ -5,3 +5,8 @@ services:
       - MY_HOST=http://localhost
     env_file:
       - dev.env
+    volumes:
+      - .:/app:rw
+  nginx:
+    volumes:
+      - .:/app:rw

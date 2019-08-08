@@ -4,17 +4,15 @@ services:
     container_name: interface
     build:
       context: ./playmaker
-    image: playmaker-interface
-    volumes:
-      - ./playmaker:/app:rw
+    image: playmaker-interface:${TAG}
     ports:
       - "5000:5000"
     environment:
       - POSTGRES_PASSWORD=test
-    env_file:
-      - production.env
     depends_on:
       - postgres
+    restart: always
+
   postgres:
     container_name: postgres
     build:
@@ -25,3 +23,17 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=test
+    restart: always
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      args:
+        - TAG=${TAG}
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - interface
+    restart: always

@@ -24,6 +24,8 @@ RUN pip3 install pipenv
 
 RUN set -ex && mkdir /app
 
+ADD . /app
+
 WORKDIR /app
 
 ADD Pipfile.lock Pipfile.lock
@@ -34,16 +36,12 @@ RUN pip install pipenv
 RUN pipenv install --deploy --system --skip-lock
 RUN pip3 freeze
 
-RUN mkdir -p /var/www/static
-#RUN ls /app
 # COPY startup script into known file location in container
 ADD start.sh /start.sh
 
-# EXPOSE port 8000 to allow communication to/from server
+RUN ls /app
+
 EXPOSE 5000
 
-#COPY . /app
-
-# CMD specifcies the command to execute to start the server running.
 CMD ["/start.sh"]
 # done!

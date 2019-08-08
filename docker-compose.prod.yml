@@ -1,0 +1,7 @@
+version: '2'
+services:
+  interface:
+    environment:
+      - MY_HOST=https://test.myplaymkr.co
+    env_file:
+      - production.env
