@@ -8,7 +8,7 @@ map $http_upgrade $connection_upgrade {
     '' close;
 }
 
-add_header X-Frame-Options SAMEORIGIN;
+#add_header X-Frame-Options SAMEORIGIN;
 #add_header X-Content-Type-Options nosniff;
 #add_header X-XSS-Protection "1; mode=block";
 
@@ -19,8 +19,10 @@ server {
 }
 
 
-ssl_certificate     common.crt;
-ssl_certificate_key common.key;
+ssl_certificate     /root/certs/myplaymkr.co/myplaymkr.co.crt;
+ssl_certificate_key /root/certs/myplaymkr.co/myplaymkr.co.key;
+ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
+ssl_protocols       TLSv1.1 TLSv1.2;
 
 server {
     location /static/ {
@@ -33,18 +35,9 @@ server {
         proxy_set_header Host interface;
     }
 
-    client_max_body_size 50M;
-
     listen 443 ssl;
     listen [::]:443 ssl;
 
-    proxy_read_timeout 600s;
-
     server_name localhost;
-
-    ssl_session_cache shared:SSL:20m;
-    ssl_session_timeout 180m;
-
-    ssl_protocols TLSv1.2;
 
 }
