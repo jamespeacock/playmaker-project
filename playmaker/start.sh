@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #Ensure staticfiles are present
-exec python3.6 /app/manage.py collectstatic
 
 # Start Gunicorn processes
 echo Starting Gunicorn.
