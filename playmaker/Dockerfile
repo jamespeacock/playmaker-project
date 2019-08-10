@@ -40,8 +40,8 @@ RUN pip3 freeze
 ADD start.sh /start.sh
 
 RUN mkdir -p /var/www/static
-RUN rm -rf /static
-RUN python3.6 /app/manage.py collectstatic --noinput
+#RUN rm -rf /static
+#RUN python3.6 /app/manage.py collectstatic --noinput
 
 EXPOSE 5000
 
