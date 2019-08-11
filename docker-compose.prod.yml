@@ -5,7 +5,17 @@ services:
       - MY_HOST=https://test.myplaymkr.co
     env_file:
       - production.env
-
-  nginx:
-    volumes:
-      - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw
+  frontend:
+    build:
+      context: ./playmaker/playmkr-ui
+      dockerfile: Dockerfile-prod
+      args:
+        - TAG=${TAG}
+#    volumes:
+#      - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - interface
+    restart: always

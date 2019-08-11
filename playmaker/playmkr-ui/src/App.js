@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Switch } from 'react-router-dom'
+import { Route, Switch, BrowserRouter } from 'react-router-dom'
 import Controller from './components/Controller/Controller'
 import Login from './components/Login/Login'
 import Listener from './components/Listener/Listener'
@@ -10,6 +10,7 @@ export default class App extends React.Component {
 
   render() {
     return (
+    <BrowserRouter>
       <Switch>
         <Route
             exact
@@ -26,6 +27,7 @@ export default class App extends React.Component {
             component={ Login }>
         </Route>
       </Switch>
+    </BrowserRouter>
     )
   }
 }

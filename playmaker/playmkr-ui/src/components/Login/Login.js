@@ -2,6 +2,8 @@ import React from 'react'
 import ApiInterface from '../../API/ApiInterface'
 import Header from '../Header/Header'
 import './login.css'
+import axios from 'axios';
+
 
 export default class Login extends React.Component {
 
@@ -31,7 +33,8 @@ export default class Login extends React.Component {
         } )
 
         // Work this out depending on what's sent back...
-        // const userLoggedIn = await this.loginInterface.goFetch()
+        console.log(this.loginInterface.fetchLoginRedirect())
+//        history.push(this.loginInterface.fetchLoginRedirect())
 
         history.push('/listener')
     }

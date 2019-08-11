@@ -2,11 +2,18 @@ version: '2'
 services:
   interface:
     environment:
-      - MY_HOST=http://localhost
+      - MY_HOST=http://localhost:5000
     env_file:
       - dev.env
     volumes:
       - .:/app:rw
-  nginx:
+  frontend:
+    build:
+      context: ./playmaker/playmkr-ui
+      dockerfile: Dockerfile
     volumes:
-      - .:/app:rw
+      - './playmaker/playmkr-ui:/app'
+      - '/app/node_modules'
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
