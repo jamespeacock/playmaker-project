@@ -10,7 +10,9 @@ export default class ApiInterface  {
     axios.defaults.xsrfCookieName = "csrftoken";
     axios.defaults.withCredentials = true;
     // import api configuration.
-    this.API_BASE = 'http://localhost:5000' //'https://test.myplaymkr.co/api/'
+    this.API_BASE = config.API_BASE
+    console.log(this.API_BASE)
+    console.log(process.env.REACT_APP_API_BASE)
 
     // bind options to interface and then deconstruct them.
     this.options = options
