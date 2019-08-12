@@ -13,8 +13,6 @@ services:
         - TAG=${TAG}
     volumes:
       - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw
-    environment:
-      - REACT_APP_API_BASE=https://test.myplaymkr.co
     ports:
       - "80:80"
       - "443:443"
