@@ -25,18 +25,18 @@ export default class Login extends React.Component {
         evt.preventDefault()
         const { username, password } = this.state
         const { history } = this.props
-        // console.log(`Handling Login with creds —— username: ${username} and password: ${password}`)
+
         this.loginInterface = new ApiInterface( {
             method : 'POST', 
             endpoint : 'login/',
             body : { username, password },
         } )
 
-        // Work this out depending on what's sent back...
-        console.log(this.loginInterface.fetchLoginRedirect())
-//        history.push(this.loginInterface.fetchLoginRedirect())
+        //Redirect user to authentication url
+        window.location.href = await this.loginInterface.fetchLoginRedirect()
+        //Wait for above redirect to finish, then go to listener...but how
+//        history.push('/listener')
 
-        history.push('/listener')
     }
 
     updateUsername = ( username ) => {

@@ -6,7 +6,7 @@ services:
     env_file:
       - dev.env
     volumes:
-      - .:/app:rw
+      - './playmaker:/app:rw'
   frontend:
     build:
       context: ./playmaker/playmkr-ui

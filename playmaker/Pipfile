@@ -12,6 +12,7 @@ spotipy = {git = "https://github.com/jamespeacock/spotipy.git", ref = "master"}
 requests = "*"
 django = "*"
 djangorestframework = "*"
+django-cors-headers = "*"
 markdown = "*"
 django-filter = "*"
 django-tastypie = "*"

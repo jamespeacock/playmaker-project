@@ -1,37 +1,28 @@
 import config from '../config'
 import axios from 'axios';
-axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
-axios.defaults.xsrfCookieName = "csrftoken";
-axios.defaults.withCredentials = true;
+import Cookies from 'js-cookie';
 
 
 export default class ApiInterface  {
     
   constructor( options ) {
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+    axios.defaults.xsrfCookieName = "csrftoken";
+    axios.defaults.withCredentials = true;
     // import api configuration.
-    this.API_BASE = 'https://test.myplaymkr.co'
+    this.API_BASE = 'http://localhost:5000' //'https://test.myplaymkr.co/api/'
 
     // bind options to interface and then deconstruct them.
     this.options = options
     const { method = 'GET', endpoint = 'login', body = false } = this.options
-    
     // start building up the request endpoint.
-    this.requestEndpoint = `${this.API_BASE}/${endpoint}`
+    this.requestEndpoint = `${this.API_BASE}/${options.endpoint}`
 
     // start building up the request.
-//    var csrftoken = getCookie('csrftoken');
-    this.request = {
-      method,
-      mode: 'no-cors',
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-      }
-    }
-      
+
     // not all requests need a body. 
     if ( body ) {
-      this.request.body = JSON.stringify( body )
+      this.request_body = JSON.stringify( body )
     }
   }
   
@@ -48,7 +39,7 @@ export default class ApiInterface  {
         }
         // the next .then chainlinks see whether the response has any content. If the api sends an empty response
         // json() will throw an error because you passed it a null. So this handles the empty status 204 case.
-          return response
+        return response
       })
       .then((res) => res.text())
 	    .then((text) => text.length ? JSON.parse(text) : {})
@@ -56,10 +47,13 @@ export default class ApiInterface  {
   }
 
     fetchLoginRedirect () {
-    return fetch( this.requestEndpoint, this.request )
+    return axios.post( this.requestEndpoint, this.request_body )
       .then( response => {
-        // throw an error when the response is bad
         return response
-        } )
+      })
+      .then((res) => {
+        console.log("res data url", res.data.url)
+        return res.data.url
+      })
   }
 }
