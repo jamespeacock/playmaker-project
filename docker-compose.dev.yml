@@ -17,3 +17,4 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_BASE=http://localhost:5000
