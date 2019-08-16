@@ -20,11 +20,9 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path('/', admin.site.urls),
-    path('/admin/', admin.site.urls),
-    path('admin/', admin.site.urls),
-    path('login/', include('playmaker.login.urls')),
-    path('controller/', include('playmaker.controller.urls')),
+    path('api/admin/', admin.site.urls),
+    path('api/login/', include('playmaker.login.urls')),
+    path('api/controller/', include('playmaker.controller.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('songs/', include('playmaker.songs.urls'))
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
