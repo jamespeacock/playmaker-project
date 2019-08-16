@@ -20,7 +20,7 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path('', include('frontend.urls')),
+    path('', admin.site.urls),
     path('admin/', admin.site.urls),
     path('login/', include('playmaker.login.urls')),
     path('controller/', include('playmaker.controller.urls')),

@@ -8,14 +8,16 @@ services:
   frontend:
     build:
       context: ./playmaker/playmkr-ui
-      dockerfile: Dockerfile-prod
       args:
         - TAG=${TAG}
+    depends_on:
+      - interface
+    restart: always
+  nginx:
+    build:
+      context: ./nginx
     volumes:
       - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw
     ports:
       - "80:80"
       - "443:443"
-    depends_on:
-      - interface
-    restart: always
