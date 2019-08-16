@@ -8,6 +8,6 @@ FROM nginx:latest
 
 RUN rm /etc/nginx/conf.d/default.conf
 RUN apt-get update && apt-get install -y iputils-ping vim
-ADD ../playmaker/playmkr-ui/nginx.conf /etc/nginx/conf.d/default.conf
+ADD nginx.conf /etc/nginx/conf.d/default.conf
 #RUN mkdir /static/
 #COPY --from=builder /app/staticfiles /static
