@@ -28,7 +28,7 @@ services:
   frontend:
     container_name: frontend
     build:
-      context: ./playmaker/playmkr-ui
+      context: ./frontend
     ports:
       - "3000:3000"
     restart: always

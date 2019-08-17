@@ -22,7 +22,10 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', include('playmaker.login.urls')),
+    path('listener/', include('playmaker.listener.urls')),
     path('controller/', include('playmaker.controller.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('songs/', include('playmaker.songs.urls'))
+    path('songs/', include('playmaker.songs.urls')),
+    path('rest-auth/', include('rest_auth.urls')),
+    path('rest-auth/registration/', include('rest_auth.registration.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

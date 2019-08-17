@@ -7,7 +7,7 @@ services:
       - production.env
   frontend:
     build:
-      context: ./playmaker/playmkr-ui
+      context: ./frontend
       dockerfile: Dockerfile-prod
       args:
         - TAG=${TAG}
@@ -18,6 +18,8 @@ services:
           - "443:443"
     depends_on:
       - interface
+    environment:
+      - REACT_APP_API_BASE=https://test.myplaymkr.co
     restart: always
 #  nginx:
 #    container_name: nginx

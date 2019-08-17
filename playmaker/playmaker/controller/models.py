@@ -8,19 +8,11 @@ from playmaker.models import User
 from playmaker.songs.models import Song
 
 
-class Device(SPModel):
-    is_active = models.BooleanField()
-    is_private_session = models.BooleanField()
-    is_restricted = models.BooleanField()
-    name = models.CharField(max_length=255)
-    type = models.CharField(max_length=64)
-    volume_percent = models.IntegerField()
-
-    # def __str__
-
-
 class Queue(models.Model):
     songs = models.ManyToManyField(Song)
+
+    def contents(self):
+        return self.songs
 
     def next(self):
         ns = self.songs.first()
@@ -39,23 +31,30 @@ class Queue(models.Model):
 
 
 class Controller(models.Model):
-    me = models.OneToOneField(User, on_delete=models.DO_NOTHING)
-
+    me = models.OneToOneField(User, on_delete=models.CASCADE)
     queue = models.OneToOneField(Queue, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     @property
     def listeners(self):
         return Listener.objects.filter(group=self.group).all()
 
+    def init(self):
+        if not self.queue:
+            self.queue = Queue.objects.create()
+            self.queue.save()
+
 
 class Group(models.Model):
-    controller = models.OneToOneField(Controller, on_delete=models.DO_NOTHING)
+    controller = models.OneToOneField(Controller, on_delete=models.CASCADE)
+
+    @property
+    def queue(self):
+        return self.controller.queue.songs.all()
 
 
 class Listener(models.Model):
-    me = models.OneToOneField(User, related_name='as_listener', on_delete=models.DO_NOTHING)
-    devices = models.ManyToManyField(Device, related_name='listeners_device', blank=True)
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    me = models.OneToOneField(User, related_name='as_listener', on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, related_name='listeners', on_delete=models.CASCADE)
     _v_cached = None
 
     @property
@@ -68,17 +67,17 @@ class Listener(models.Model):
     def token(self):
         return self.me.token
 
+    @property
+    def queue(self):
+        return self.group.queue
+
     def _refresh_devices(self):
-        # if self.devices is None or self.devices.filter(is_active=True).first() is None:
-        devices = []
-
-        for d in self.me.sp.devices()['devices']:
-            d['sp_id'] = d.pop('id')
-            dev = Device(**d)
-            dev.save()
-            devices.append(dev)
-
-        self.devices.set(devices)
+        if self.devices is None or self.devices.filter(is_active=True).first() is None:
+            for d in self.me.sp.devices()['devices']:
+                d['sp_id'] = d.pop('id')
+                d['listener'] = self
+                dev = Device(**d)
+                dev.save()
 
     def refresh(self):
         self._refresh_devices()
@@ -101,7 +100,19 @@ class Listener(models.Model):
         return ad
 
 
+class Device(SPModel):
+    listener = models.ForeignKey(Listener, related_name='devices', on_delete=models.CASCADE)
+    is_active = models.BooleanField()
+    is_private_session = models.BooleanField()
+    is_restricted = models.BooleanField()
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=64)
+    volume_percent = models.IntegerField()
+
+    # def __str__
+
+
 class Permission(models.Model):  # inherit auth_models.Permission if need be
-    actor = models.OneToOneField(Controller, on_delete=models.DO_NOTHING)
-    listener = models.OneToOneField(Listener, on_delete=models.DO_NOTHING)
+    actor = models.OneToOneField(Controller, on_delete=models.CASCADE)
+    listener = models.OneToOneField(Listener, on_delete=models.CASCADE)
     scope = models.CharField(max_length=256)

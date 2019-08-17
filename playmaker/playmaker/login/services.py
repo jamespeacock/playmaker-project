@@ -1,9 +1,17 @@
 import traceback
-
 from spotipy import SpotifyOAuth
 from spotipy.oauth2 import SpotifyOauthError
-
+import six.moves.urllib.parse as urllibparse
 from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
+
+
+def get_redirect(username):
+
+    url = 'https://accounts.spotify.com/authorize'
+    urlparams = urllibparse.urlencode({'client_id': SPOTIFY_CLIENT_ID, 'response_type': 'code',
+                                       'redirect_uri': SPOTIFY_REDIRECT_URI, 'scope': SPOTIFY_SCOPE,
+                                       'state': 'username-' + username})
+    return '%s?%s' % (url, urlparams)
 
 
 def get_auth(username):

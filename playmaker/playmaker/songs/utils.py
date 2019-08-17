@@ -53,3 +53,5 @@ def from_response(spotify_resp, __type):
 
     response_data = spotify_resp[get_key(__type)]
     return [to_obj(__type, **i) for i in response_data if i]  # if is_list else [spotify_resp]
+
+

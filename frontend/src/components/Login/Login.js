@@ -1,5 +1,5 @@
 import React from 'react'
-import ApiInterface from '../../API/ApiInterface'
+import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
 import './login.css'
 import axios from 'axios';
@@ -27,7 +27,6 @@ export default class Login extends React.Component {
         const { history } = this.props
 
         this.loginInterface = new ApiInterface( {
-            method : 'POST', 
             endpoint : 'login/',
             body : { username, password },
         } )
@@ -53,7 +52,7 @@ export default class Login extends React.Component {
             <React.Fragment>
                 <Header></Header>
                 <main className="login-area">
-                    <form 
+                    <form
                         className="login-form"
                         onSubmit={ submitEvent => this.loginInterfaceHandler( submitEvent ) }>
                         <legend><h2 className="form-legend">Login</h2></legend>
@@ -68,7 +67,6 @@ export default class Login extends React.Component {
                                 onChange={ keyInput => this.updateUsername( keyInput.target.value ) }>
                             </input>
                         </div>
-                        
                         <div className="password-container">
                             <label htmlFor="password" className="input-label">Password:</label>
                             <input 

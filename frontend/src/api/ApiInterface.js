@@ -11,16 +11,17 @@ export default class ApiInterface  {
     axios.defaults.withCredentials = true;
     // import api configuration.
     this.API_BASE = config.API_BASE
-    console.log(this.API_BASE)
-    console.log(process.env.REACT_APP_API_BASE)
 
     // bind options to interface and then deconstruct them.
     this.options = options
-    const { method = 'GET', endpoint = 'login', body = false } = this.options
+    const { endpoint = '', body = false } = this.options
     // start building up the request endpoint.
-    this.requestEndpoint = `${this.API_BASE}/${options.endpoint}`
 
-    // start building up the request.
+    this.axios = axios.create({
+      baseURL: `${this.API_BASE}`,
+      timeout: 2000,
+      headers: {'Content-Type': 'application/json'}
+    });
 
     // not all requests need a body. 
     if ( body ) {
@@ -28,8 +29,8 @@ export default class ApiInterface  {
     }
   }
   
-  goFetch () {
-    return fetch( this.requestEndpoint, this.request )
+  post (url) {
+    return this.axios.post( url, this.request_body )
       .then( response => {
         // throw an error when the response is bad
         if ( !response.ok ) {
@@ -47,14 +48,22 @@ export default class ApiInterface  {
 	    .then((text) => text.length ? JSON.parse(text) : {})
       .then( responseObj => responseObj )
   }
-
-    fetchLoginRedirect () {
-    return axios.post( this.requestEndpoint, this.request_body )
+  
+  get ( url ) {
+    return this.axios.get( url )
       .then( response => {
+        // throw an error when the response is empty
+        if ( !response ) {
+          throw "No response"
+        }
         return response
       })
+      .then((res) => res.data)
+  }
+
+  fetchLoginRedirect () {
+    return this.axios.post( this.options.endpoint, this.request_body )
       .then((res) => {
-        console.log("res data url", res.data.url)
         return res.data.url
       })
   }

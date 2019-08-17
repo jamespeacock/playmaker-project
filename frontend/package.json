@@ -10,9 +10,11 @@
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.1",
     "react": "^16.8.6",
+    "react-bootstrap-table-next": "^3.1.8",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.0.0",
     "react-scripts": "3.0.1",
+    "reactide-config": "^1.0.2",
     "uuid": "^3.3.2"
   },
   "scripts": {

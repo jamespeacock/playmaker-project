@@ -38,6 +38,7 @@ class LoadArtistView(SecureAPIView, generics.RetrieveAPIView):
             to_save = Artist(artist)
         pass
 
+
 class SongDetailView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):

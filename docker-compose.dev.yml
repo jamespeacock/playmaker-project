@@ -1,19 +1,18 @@
 version: '2'
 services:
   interface:
-    environment:
-      - MY_HOST=http://localhost:5000
     env_file:
       - dev.env
     volumes:
       - './playmaker:/app:rw'
   frontend:
     build:
-      context: ./playmaker/playmkr-ui
+      context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - './playmaker/playmkr-ui:/app'
+      - './frontend:/app'
       - '/app/node_modules'
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+      - REACT_APP_API_BASE=http://localhost:5000/api

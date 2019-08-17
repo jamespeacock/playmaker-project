@@ -5,7 +5,7 @@ from playmaker.shared.serializers import ParamSerializer
 
 class SecureAPIView(generics.GenericAPIView):
     # grab Auth token from request header or auth user in request
-    # ensure user making this action is the me of the controller_uuid specified
+    # ensure user making this action is the me of the controller_uuid specified - done in services
     def get_param_serializer_class(self):
         return ParamSerializer
 

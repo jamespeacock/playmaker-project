@@ -1,33 +1,32 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import generics
 
 # TODO implement internal session based &  token auth
 
 from playmaker.controller import services
-from playmaker.controller.models import Controller
+from playmaker.controller.contants import URIS, CONTROLLER, ACTION
+from playmaker.controller.models import Controller, Group, Listener
 from playmaker.controller.serializers import ActionSerializer, QueueActionSerializer
 from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
 from playmaker.shared.views import SecureAPIView
 
-LISTENERS = "listeners"
-CONTROLLER = "controller"
-URIS = "uris"
-
-# Queue action
-ACTION = "action"
-
 
 class ControllerView(SecureAPIView):
     pass
-    # def get_param_serializer_class(self):
-    #     return ActionSerializer
-    #
-    # def get_params(self, query_dict, serializer_cls=None):
-    #     serializer_cls = serializer_cls or self.get_param_serializer_class()
-    #     serializer = serializer_cls(data=query_dict)
-    #     if serializer.is_valid(raise_exception=True):
-    #         return serializer.data
+
+
+# Create a group
+
+class StartListeningView(SecureAPIView):
+
+    def get(self, request, *args, **kwargs):
+
+        controller, created = Controller.objects.get_or_create(me=request.user)
+        controller.init()
+        group, created = Group.objects.get_or_create(controller=controller)
+        return JsonResponse({"group": group.id, "controller": controller.id})
 
 
 # Play song for current listeners
@@ -106,13 +105,10 @@ class QueueActionView(ControllerView):
     Returns current list of songs in queue.
     """
     def get(self, request, *args, **kwargs):
-        c = 1
-        cont = Controller.objects.get(id=c)
-        songs = []
-        for song in cont.queue.songs.all():
-            songs.append({"name": song.name, "artists": [a.name for a in song.artists]})
+        params = request.query_params
+        songs = services.get_queue(params, request.user)
 
-        return JsonResponse({"status": "Meh."})
+        return JsonResponse(songs, safe=False)
 
 
     """

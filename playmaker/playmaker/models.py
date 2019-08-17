@@ -15,23 +15,27 @@ from playmaker.login import services as logins
 class User(auth_models.AbstractUser):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    name = models.CharField(max_length=255, null=True, blank=True, unique=False)
     # TODO spotify_username
     # TODO figure out how to store this more secuely - encryptedField
     access_token = models.CharField(max_length=511, null=True, blank=True)
     refresh_token = models.CharField(max_length=511, null=True, blank=True)
     token_expires = DateTimeField(null=True)
     scope = models.CharField(max_length=511, null=True, blank=True)
+    sp_id = models.CharField(max_length=256, null=True, blank=True)
+    sp_username = models.CharField(max_length=256, null=True, blank=True)
     _sp_cached = None
 
     @property
     def sp(self):
-        if self._sp_cached is None:
+        if self.token and self._sp_cached is None:
             self._sp_cached = spotipy.Spotify(self.token)
         return self._sp_cached
 
     @property
     def token(self):
         if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
+            self._sp_cached = None
             return logins.do_refresh_token(self)
 
         return self.access_token
@@ -42,17 +46,15 @@ class User(auth_models.AbstractUser):
         self.scope = token_info['scope']
         self.token_expires = tz.now() + tz.timedelta(seconds=token_info['expires_in'] - 5)
         self.save()
-
-        user_dict = {"access_token": self.access_token,
-                     "scope": self.scope,
-                     "id": self.id,
-                     "username": self.username}
-
-        return JsonResponse(user_dict, safe=False)
+        return self.info
 
     @property
     def info(self):
-        return self.sp.me()
+        me = self.sp.me()
+        self.sp_id = me.get('id')
+        # TODO make sp_username unique ane throw error here. Give user option to replace user? Maybe don't make it unique but then that can cause other probs
+        self.sp_username = me.get('display_name')
+        return me
 
     @property
     def top_artists(self):

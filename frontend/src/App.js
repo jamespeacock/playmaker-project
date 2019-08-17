@@ -2,6 +2,7 @@ import React from 'react'
 import { Route, Switch, BrowserRouter } from 'react-router-dom'
 import Controller from './components/Controller/Controller'
 import Login from './components/Login/Login'
+import Dashboard from './components/Login/Dashboard'
 import Listener from './components/Listener/Listener'
 import './App.css'
 require('dotenv').config()
@@ -13,13 +14,15 @@ export default class App extends React.Component {
     <BrowserRouter>
       <Switch>
         <Route
-            exact
-            path='/controller'
+            path='/dashboard'
+            component={ Dashboard }>
+        </Route>
+        <Route
+            path='/play'
             component={ Controller }>
         </Route>
         <Route
-            exact
-            path='/listener'
+            path='/listen'
             component={ Listener }>
         </Route>
         <Route
