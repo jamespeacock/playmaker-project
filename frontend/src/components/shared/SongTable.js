@@ -13,7 +13,7 @@ const columns = [{
   text: 'Artists'
 }];
 
-export default class QueueTable extends React.Component {
+export default class SongTable extends React.Component {
     constructor( props ) {
       console.log('in queue table constructor')
       console.log(props)

@@ -1,14 +1,13 @@
 import React from 'react'
 import Header from '../Header/Header'
 import './controler.css'
-
 import ApiInterface from '../../api/ApiInterface'
 import ControllerInterface from '../../api/ControllerInterface'
 import SongsInterface from '../../api/SongsInterface'
+import SongTable from '../shared/SongTable'
 
 const uuid = require('uuid/v4')
 
-//Replace lists with working list display code from listener.js
 export default class Controller extends React.Component {
 
     constructor( props ) {
@@ -17,29 +16,35 @@ export default class Controller extends React.Component {
             searchResults: [],
             recommendationResults: [],
             queue: [],
+            isFetching: true,
             controller: this.props.location.state.controller,
             group: this.props.location.state.group
         }
     }
 
     componentDidMount() {
-        this.initController()
+        this.initInterfaces()
         this.refreshQueueAndRecs()
-        
     }
 
-    initController = async ( ) => {
+    initInterfaces = async ( ) => {
         this.controller = new ControllerInterface( {
             controller : this.state.controller
         } )
+
+        this.songsInterface = new SongsInterface( {
+
+        })
 
     }
 
     refreshQueueAndRecs = async ( ) => {
         //Refresh queue first
-        const songsList = await this.controller.queue()
-        this.state.queue = songsList
-
+        this.setState( { isFetching: true } )
+        const songs = await this.controller.queue()
+        console.log(songs)
+        this.setState( { queue: songs } )
+        this.setState( { isFetching: false } )
         //Then refresh recommendations
 
     }
@@ -54,9 +59,7 @@ export default class Controller extends React.Component {
                     <div className="col-container">
                         <section className="controller-queue-container">
                             <div className="col-title">Queue</div>
-                            <ul>
-
-                            </ul>
+                            <SongTable songs={this.state.queue} isFetching={this.state.isFetching}/>
                         </section>
 
                         <section className="search-container">

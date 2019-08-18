@@ -1,7 +1,7 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
 import SongsInterface from '../../api/SongsInterface'
-import QueueTable from '../shared/Queue'
+import SongTable from '../shared/SongTable'
 import Header from '../Header/Header'
 import './listener.css'
 const uuid = require('uuid/v4')
@@ -42,7 +42,7 @@ export default class Listener extends React.Component {
                 <main className="listener-area">
                     <section className="listener-queue-container">
                         <h2 className="listener-queue-title">Listening Queue</h2>
-                        <QueueTable songs={this.state.songs} isFetching={this.state.isFetching}/>
+                        <SongTable songs={this.state.songs} isFetching={this.state.isFetching}/>
                     </section>
                 </main>
             </React.Fragment>
