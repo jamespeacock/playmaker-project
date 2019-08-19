@@ -16,7 +16,6 @@ class User(auth_models.AbstractUser):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
     name = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    # TODO spotify_username
     # TODO figure out how to store this more secuely - encryptedField
     access_token = models.CharField(max_length=511, null=True, blank=True)
     refresh_token = models.CharField(max_length=511, null=True, blank=True)
@@ -52,7 +51,7 @@ class User(auth_models.AbstractUser):
     def info(self):
         me = self.sp.me()
         self.sp_id = me.get('id')
-        # TODO make sp_username unique ane throw error here. Give user option to replace user? Maybe don't make it unique but then that can cause other probs
+        # TODO make sp_username unique and throw error here. Give user option to replace user? Maybe don't make it unique but then that can cause other probs
         self.sp_username = me.get('display_name')
         return me
 

@@ -12,7 +12,7 @@ export default class SongsInterface  {
   }
 
   search = async ( q ) => {
-    return await this.apiInterface.get('songs/search?q='+q)
+    return await this.apiInterface.get('search/track/?q='+q)
   }
 
   

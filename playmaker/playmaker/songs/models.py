@@ -1,6 +1,8 @@
 from django.db import models
 
 from playmaker.shared.models import SPModel
+from .services import to_song_view, to_artist_view
+from django.core import serializers
 
 
 class Image(models.Model):
@@ -33,8 +35,7 @@ class Album(SPModel):
     artists = models.ManyToManyField(Artist, blank=True)
 
     def view(self):
-        return {"name": self.name}
-
+        return to_artist_view(serializers.serialize('json', self, fields=('name', 'uri')))
 
 
 class Song(SPModel):
@@ -68,7 +69,7 @@ class Song(SPModel):
 
     def view(self):
         # Can update this as more info from song is incorporated into frontend
-        return {"name": self.name, "artists": ','.join([a.view()['name'] for a in self.artists.all()])}
+        return serializers.serialize('json', self, fields=('name', 'artist', 'uri'))
 
 
 

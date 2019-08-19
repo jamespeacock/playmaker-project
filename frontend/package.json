@@ -4,11 +4,13 @@
   "private": true,
   "dependencies": {
     "axios": "^0.19.0",
+    "bootstrap": "^4.3.1",
     "date-fns": "^1.30.1",
     "dotenv": "^8.0.0",
     "jQuery": "^1.7.4",
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.1",
+    "node-sass": "^4.12.0",
     "react": "^16.8.6",
     "react-bootstrap-table-next": "^3.1.8",
     "react-dom": "^16.8.6",

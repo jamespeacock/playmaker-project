@@ -41,7 +41,8 @@ export default class Controller extends React.Component {
     refreshQueueAndRecs = async ( ) => {
         //Refresh queue first
         this.setState( { isFetching: true } )
-        const songs = await this.controller.queue()
+        // const songs = await this.controller.queue()
+        const songs = await this.songsInterface.search('J. Cole')
         console.log(songs)
         this.setState( { queue: songs } )
         this.setState( { isFetching: false } )
