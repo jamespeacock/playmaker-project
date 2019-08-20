@@ -17,12 +17,9 @@ class SpotifyRegisterView(RegisterView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        body = json.loads(request.body)
-        login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
-        assert login.status_code == 200
-        username = body.get('username')
-        # TODO do initial user creation via django user auth with user/pwd first--> then do redirect
-
+        username = json.loads(request.body).get('username')
+        signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
+        assert signup.status_code == 201
         return JsonResponse({'url': get_redirect(username)})
 
 

@@ -19,18 +19,19 @@ export default class Signup extends React.Component {
             name: '',
             username : '',
             email: '', 
-            password : ''
+            password1 : '',
+            password2: ''
         }
     }
 
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault()
-        const { name, username, email, password } = this.state
+        const { name, username, email, password1, password2 } = this.state
         const { history } = this.props
 
         this.loginInterface = new ApiInterface( {
             endpoint : 'signup/',
-            body : { name, email, username, password },
+            body : { name, email, username, password1, password2 },
         } )
 
         //Redirect user to authentication url
@@ -52,8 +53,12 @@ export default class Signup extends React.Component {
         this.setState( { username } )
     }
 
-    updatePassword = ( password ) => {
-        this.setState( { password } )
+    updatePassword1 = ( password1 ) => {
+        this.setState( { password1 } )
+    }
+
+    updatePassword2 = ( password2 ) => {
+        this.setState( { password2 } )
     }
 
     render() {
@@ -99,11 +104,22 @@ export default class Signup extends React.Component {
                             <label htmlFor="password" className="input-label">Password:</label>
                             <input 
                                 type="password"
-                                name="password" 
+                                name="password1" 
                                 className="form-input"
                                 required
                                 placeholder="*******"
-                                onChange={ keyInput => this.updatePassword( keyInput.target.value ) }>
+                                onChange={ keyInput => this.updatePassword1( keyInput.target.value ) }>
+                            </input>
+                        </div>
+                        <div className="password-container">
+                            <label htmlFor="password" className="input-label">Enter Password again:</label>
+                            <input 
+                                type="password"
+                                name="password2" 
+                                className="form-input"
+                                required
+                                placeholder="*******"
+                                onChange={ keyInput => this.updatePassword2( keyInput.target.value ) }>
                             </input>
                         </div>
 

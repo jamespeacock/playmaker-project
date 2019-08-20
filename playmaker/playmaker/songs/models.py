@@ -31,7 +31,7 @@ class Artist(SPModel):
 
 
 class Album(SPModel):
-    name = models.CharField(max_length=255, null=False)
+    name = models.CharField(max_length=255, null=True, blank=True)
     artists = models.ManyToManyField(Artist, blank=True)
 
     def view(self):
