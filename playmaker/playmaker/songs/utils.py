@@ -23,20 +23,22 @@ def get_cls(_t):
 def to_obj(__type, **_kwargs):
     cls, is_list = get_cls(__type)
     kwargs = _kwargs.copy()
+    kwargs['sp_id'] = kwargs.pop('id')
     if cls == Artist:
         num_followers = kwargs.pop('followers').get('total')
-        artist = Artist(name=kwargs['name'], uri=kwargs['uri'], num_followers=num_followers)
+        artist, a_created = Artist.objects.get_or_create(name=kwargs['name'], uri=kwargs['uri'], num_followers=num_followers)
         # genre_names = kwargs.pop('genres')
         # genres = [Genre.objects.get_or_create(name=g_n) for g_n in genre_names]
         # # kwargs["genres"] = genres
         return artist
 
     elif cls == Song:
-        song = Song(name=kwargs['name'], uri=kwargs['uri'])
+        # TODO load as much as possible from a spotify song into Postgres.
+        song, s_created = Song.objects.get_or_create(name=kwargs['name'], uri=kwargs['uri'], sp_id=kwargs['sp_id'])
         for artist in kwargs['artists']:
-            if not Artist.objects.filter(name=artist['name']).first():
-                a = Artist(name=artist['name'])
-                song.artists.add(a)
+            artist['sp_id'] = artist.pop('id')
+            a, a_created = Artist.objects.get_or_create(name=artist['name'], uri=artist['uri'], sp_id=artist['sp_id'])
+            song.artists.add(a)
 
         return song
 

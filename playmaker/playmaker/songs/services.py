@@ -33,5 +33,7 @@ def to_playlist_view(playlist):
 
 # Fetch and save songs
 def fetch_songs(actor, uris):
-    sp = actor.me.sp
-    return [Song(song) for song in from_response(sp.tracks(uris), SONG)]
+    if uris:
+        sp = actor.me.sp
+        return from_response(sp.tracks(uris), SONG)
+    return []

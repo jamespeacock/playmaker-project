@@ -115,16 +115,17 @@ class QueueActionView(ControllerView):
     @:param action - string: action to perform
     """
     def post(self, request, action=None, *args, **kwargs):
-        params = self.get_params(request.POST)
-        c_id = params.get(CONTROLLER)
+        # TODO how to validate contents of request body
+        body = request.data
+        c_id = body.get(CONTROLLER)
         if not services.user_matches_actor(request.user, c_id, Controller):
             return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
         if action == ADD:
-            res = services.add_to_queue(c_id, params.get(URIS))
+            res = services.add_to_queue(c_id, body.get(URIS))
         elif action == REMOVE:
-            res = services.remove_from_queue(c_id, params.get(URIS))
+            res = services.remove_from_queue(c_id, body.get(URIS))
 
-        return JsonResponse(res, status=200, safe=False) if res else\
+        return JsonResponse({"success": res}, status=200, safe=False) if res else\
             JsonResponse("That action could not be completed.", status=500, safe=False)
 
 

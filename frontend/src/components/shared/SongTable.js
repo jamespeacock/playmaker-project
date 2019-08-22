@@ -3,39 +3,6 @@ import Button from 'react-bootstrap/Button'
 import BootstrapTable from 'react-bootstrap-table-next';
 import '../../../node_modules/react-bootstrap-table-next/dist/react-bootstrap-table2.min.css'
 
-function buttonFormatter(cell, row){
-  return (<Button type="submit" onClick={ console.log("clicked") }></Button>);
-}
-
-
-const columns = [{
-  dataField: 'uri',
-  text: '',
-  hidden: true
-},{
-  dataField: 'name',
-  text: 'Song Title'
-}, {
-  dataField: 'artists',
-  text: 'Artists'
-}];
-
-const columnsWithButton = [{
-  dataField: 'uri',
-  text: '',
-  hidden: true
-},{
-  dataField: 'name',
-  text: 'Song Title'
-}, {
-  dataField: 'artists',
-  text: 'Artists'
-},{
-  dataField: 'add',
-  text: 'Add',
-  dataFormat: buttonFormatter
-}];
-
 function songView(song) {
   var songRow = Object.assign({}, song);
   songRow.artists = songRow.artists.map((a) => (a.name)).join()
@@ -43,12 +10,45 @@ function songView(song) {
 }
 
 export default class SongTable extends React.Component {
+  
     constructor( props ) {
       super(props)
+      this.columns = [{
+        dataField: 'uri',
+        text: '',
+        hidden: true
+      },{
+        dataField: 'name',
+        text: 'Song Title'
+      }, {
+        dataField: 'artists',
+        text: 'Artists'
+      }];
+
+      this.columnsWithButton = [{
+        dataField: 'uri',
+        text: '',
+        hidden: true
+      },{
+        dataField: 'name',
+        text: 'Song Title'
+      }, {
+        dataField: 'artists',
+        text: 'Artists'
+      },{
+        dataField: '',
+        text: 'Add',
+        id: 'add-button',
+        formatter: this.buttonFormatter
+      }];
     }
 
-    componentDidMount() {
+    componentDidMount() {}
+
+    buttonFormatter = (cell, row) => {
+      return (<Button onClick={ () => this.props.handleAdd(row) }>Add</Button>);
     }
+
 
     render() {
       return (
@@ -56,7 +56,7 @@ export default class SongTable extends React.Component {
               <BootstrapTable
                 keyField="uri"
                 data={this.props.songs.map(songView)}
-                columns={ (this.props.withButtons) ? columnsWithButton :columns }/>
+                columns={ (this.props.withButtons) ? this.columnsWithButton : this.columns }/>
                 <p>{this.props.isFetching ? 'Fetching queue...' : ''}</p>
           </div>
       )

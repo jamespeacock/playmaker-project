@@ -10,7 +10,7 @@ from rest_framework.serializers import Serializer
 
 
 class ParamSerializer(Serializer):
-    uris = serializers.CharField(allow_null=True, allow_blank=True)
+    uris = serializers.ListField(serializers.CharField(), allow_null=True, allow_empty=True, required=False)
 
 
 class SearchSerializer(Serializer):

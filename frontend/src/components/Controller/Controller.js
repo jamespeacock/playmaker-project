@@ -25,11 +25,12 @@ export default class Controller extends React.Component {
             query: ''
         }
         this.searchHandler = this.searchHandler.bind(this)
+        this.addToQueueHandler = this.addToQueueHandler.bind(this)
     }
 
     componentDidMount() {
         this.initInterfaces()
-        this.refreshQueueAndRecs()
+        this.refreshQueue()
     }
 
     initInterfaces = async ( ) => {
@@ -38,11 +39,9 @@ export default class Controller extends React.Component {
         } )
     }
 
-    refreshQueueAndRecs = async ( ) => {
-        //Refresh queue first
+    refreshQueue = async ( ) => {
         this.setState( { isFetching: true } )
         const songs = await this.controller.queue()
-        
         this.setState( { queue: songs } )
         this.setState( { isFetching: false } )
         //Then refresh recommendations
@@ -51,6 +50,17 @@ export default class Controller extends React.Component {
 
     searchHandler(searchResults) {
         this.setState({searchResults})
+    }
+
+    addToQueueHandler = async (songRow) => {
+      console.log('adding ' + songRow.name + ' to queue.')
+      const success = await this.controller.add(songRow.uri)
+      console.log(success)
+      if (success) {
+        this.refreshQueue()
+      } else { 
+        console.log('Could not add song to queue')
+      }
     }
 
     render() {
@@ -69,11 +79,12 @@ export default class Controller extends React.Component {
 
                         <section className="search-container">
                           <div className="col-title">Search</div>
+                            <SearchBar setSearchResults={this.searchHandler} />
                             <SongTable 
                               songs={this.state.searchResults}
                               isFetching={this.state.isFetching}
-                              withButtons={false}/>
-                            <SearchBar setSearchResults={this.searchHandler} />
+                              withButtons={true}
+                              handleAdd={(row) => this.addToQueueHandler(row)}/>
                         </section>
 
                     </div>

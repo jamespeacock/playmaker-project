@@ -29,24 +29,16 @@ export default class ApiInterface  {
     }
   }
   
-  post (url) {
-    return this.axios.post( url, this.request_body )
+  post (url, body) {
+    return this.axios.post( url, body )
       .then( response => {
         // throw an error when the response is bad
-        if ( !response.ok ) {
-          return response
-            .json()
-            .then( error => {
-              throw error
-            })
+        if ( !response ) {
+          throw "No response!"
         }
-        // the next .then chainlinks see whether the response has any content. If the api sends an empty response
-        // json() will throw an error because you passed it a null. So this handles the empty status 204 case.
         return response
       })
-      .then((res) => res.text())
-	    .then((text) => text.length ? JSON.parse(text) : {})
-      .then( responseObj => responseObj )
+      .then((res) => res.data)
   }
   
   get ( url ) {

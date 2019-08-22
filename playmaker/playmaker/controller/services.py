@@ -98,11 +98,14 @@ def get_queue(params, user):
 
 def add_to_queue(c_id, uris):
     controller = Controller.objects.get(id=int(c_id))
-    songs = fetch_songs(uris)
+    songs = fetch_songs(controller, uris)
     [(s.save(), controller.queue.add(s)) for s in songs]
+    # TODO validation here
+    return True
 
 
 def remove_from_queue(c_id, uris):
     controller = Controller.objects.get(id=int(c_id))
     songs = Song.objects.filter(uri__in=uris).all()
     [controller.queue.remove(s) for s in songs]
+    return True

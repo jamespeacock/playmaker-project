@@ -22,7 +22,7 @@ export default class ControllerInterface  {
   }
 
   add = async ( uri ) => {
-    return await this.apiInterface.post('controller/queue/add/',
+    return await this.apiInterface.post('controller/queue/add',
      {'controller':this.controller,'uris': [uri]}
      )
   }

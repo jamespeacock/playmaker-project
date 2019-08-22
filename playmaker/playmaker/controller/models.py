@@ -76,7 +76,8 @@ class Listener(models.Model):
             for d in self.me.sp.devices()['devices']:
                 d['sp_id'] = d.pop('id')
                 d['listener'] = self
-                dev = Device(**d)
+                dev = Device.objects.create(**d)
+                # dev = Device.objects.get_or_create(**d)
                 dev.save()
 
     def refresh(self):
