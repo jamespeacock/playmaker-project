@@ -3,8 +3,8 @@ import Header from '../Header/Header'
 import './controller.css'
 import ApiInterface from '../../api/ApiInterface'
 import ControllerInterface from '../../api/ControllerInterface'
-import SongsInterface from '../../api/SongsInterface'
 import SongTable from '../shared/SongTable'
+import SearchBar from '../shared/Search'
 
 import { debounce } from "throttle-debounce";
 
@@ -24,8 +24,7 @@ export default class Controller extends React.Component {
             group: this.props.location.state.group,
             query: ''
         }
-
-        this.searchThrottled = debounce(1500, this.search);
+        this.searchHandler = this.searchHandler.bind(this)
     }
 
     componentDidMount() {
@@ -37,11 +36,6 @@ export default class Controller extends React.Component {
         this.controller = new ControllerInterface( {
             controller : this.state.controller
         } )
-
-        this.songsInterface = new SongsInterface( {
-
-        })
-
     }
 
     refreshQueueAndRecs = async ( ) => {
@@ -55,20 +49,8 @@ export default class Controller extends React.Component {
 
     }
 
-    search = async (q ) => {
-        const searchResults = await this.songsInterface.search(q)
-        if (q == this.waitingFor) {
-          this.setState( { searchResults } )
-        }
-    }
-
-    changeQuery = event => {
-      this.setState( { q:event.target.value },() => {
-        if (this.state.q.length > 0) {
-          this.waitingFor = this.state.q;
-          this.searchThrottled(this.state.q)
-        }
-      } )
+    searchHandler(searchResults) {
+        this.setState({searchResults})
     }
 
     render() {
@@ -86,25 +68,12 @@ export default class Controller extends React.Component {
                         </section>
 
                         <section className="search-container">
-                            <div className="col-title">Search</div>
+                          <div className="col-title">Search</div>
                             <SongTable 
                               songs={this.state.searchResults}
                               isFetching={this.state.isFetching}
                               withButtons={false}/>
-                            <input  
-                                type="text" 
-                                name="query" 
-                                className="input-left"
-                                placeholder="J. Cole"
-                                required
-                                onChange={this.changeQuery}>
-                            </input>
-                            <input 
-                                type="submit" 
-                                value="Search" 
-                                className="submit-button"
-                                onClick={e => this.search() }>
-                            </input>
+                            <SearchBar setSearchResults={this.searchHandler} />
                         </section>
 
                     </div>

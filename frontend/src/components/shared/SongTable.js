@@ -48,9 +48,6 @@ export default class SongTable extends React.Component {
     }
 
     componentDidMount() {
-      console.log('here uhg')
-      // const songs = this.props.songs.map(songView)
-      // console.log(songs)
     }
 
     render() {
