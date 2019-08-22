@@ -4,10 +4,11 @@ from playmaker.controller.views import PlaySongView, QueueActionView, PauseSongV
     StartListeningView
 
 urlpatterns = [
-    path('start', StartListeningView.as_view()),
-    path('play', PlaySongView.as_view()),
-    path('queue', QueueActionView.as_view()),
-    path('pause', PauseSongView.as_view()),
     path('next', NextSongView.as_view()),
+    path('pause', PauseSongView.as_view()),
+    path('play', PlaySongView.as_view()),
+    path('queue/<str:action>', QueueActionView.as_view()),
+    path('queue', QueueActionView.as_view()),
     path('seek', SeekSongView.as_view()),
+    path('start', StartListeningView.as_view()),
 ]

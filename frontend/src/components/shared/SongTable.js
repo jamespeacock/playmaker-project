@@ -1,10 +1,17 @@
 import React from 'react'
+import Button from 'react-bootstrap/Button'
 import BootstrapTable from 'react-bootstrap-table-next';
 import '../../../node_modules/react-bootstrap-table-next/dist/react-bootstrap-table2.min.css'
 
+function buttonFormatter(cell, row){
+  return (<Button type="submit" onClick={ console.log("clicked") }></Button>);
+}
+
+
 const columns = [{
-  dataField: 'id',
-  text: 'Position'
+  dataField: 'uri',
+  text: '',
+  hidden: true
 },{
   dataField: 'name',
   text: 'Song Title'
@@ -13,22 +20,47 @@ const columns = [{
   text: 'Artists'
 }];
 
+const columnsWithButton = [{
+  dataField: 'uri',
+  text: '',
+  hidden: true
+},{
+  dataField: 'name',
+  text: 'Song Title'
+}, {
+  dataField: 'artists',
+  text: 'Artists'
+},{
+  dataField: 'add',
+  text: 'Add',
+  dataFormat: buttonFormatter
+}];
+
+function songView(song) {
+  var songRow = Object.assign({}, song);
+  songRow.artists = songRow.artists.map((a) => (a.name)).join()
+  return songRow
+}
+
 export default class SongTable extends React.Component {
     constructor( props ) {
-      console.log('in queue table constructor')
-      console.log(props)
       super(props)
     }
 
-    render() {
+    componentDidMount() {
+      console.log('here uhg')
+      // const songs = this.props.songs.map(songView)
+      // console.log(songs)
+    }
 
+    render() {
       return (
           <div>
               <BootstrapTable
-                keyField="id"
-                data={this.props.songs}
-                columns={ columns }/>
-              <p>{this.props.isFetching ? 'Fetching queue...' : ''}</p>
+                keyField="uri"
+                data={this.props.songs.map(songView)}
+                columns={ (this.props.withButtons) ? columnsWithButton :columns }/>
+                <p>{this.props.isFetching ? 'Fetching queue...' : ''}</p>
           </div>
       )
     }

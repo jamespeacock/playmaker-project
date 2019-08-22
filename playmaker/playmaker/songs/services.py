@@ -1,4 +1,6 @@
 from playmaker.controller.contants import TRACK, ARTIST
+from playmaker.songs.models import Song
+from playmaker.songs.utils import SONG, from_response
 
 
 def to_view(data, _type):
@@ -16,7 +18,8 @@ def to_view(data, _type):
 def to_song_view(song):
     return {'name': song.get('name'),
             'uri': song.get('uri'),
-            'artists': ','.join([a.get('name') for a in song.get('artists')])}
+            'artists': song.get('artists')}
+            # 'artists': ','.join([a.get('name') for a in song.get('artists')])}
 
 
 def to_artist_view(artist):
@@ -26,3 +29,9 @@ def to_artist_view(artist):
 
 def to_playlist_view(playlist):
     pass
+
+
+# Fetch and save songs
+def fetch_songs(actor, uris):
+    sp = actor.me.sp
+    return [Song(song) for song in from_response(sp.tracks(uris), SONG)]

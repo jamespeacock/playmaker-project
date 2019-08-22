@@ -21,6 +21,18 @@ export default class ControllerInterface  {
     return await this.apiInterface.get('controller/queue?controller='+this.controller)
   }
 
+  add = async ( uri ) => {
+    return await this.apiInterface.post('controller/queue/add/',
+     {'controller':this.controller,'uris': [uri]}
+     )
+  }
+
+  remove = async ( uri ) => {
+    return await this.apiInterface.post('controller/queue/remove/',
+     {'controller':this.controller,'uris': [uri]}
+     )
+  }
+
   /* Actions Section */
   next = async ( ) => {
     return await this.apiInterface.get('controller/next?controller='+this.controller)

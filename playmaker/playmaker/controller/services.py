@@ -1,17 +1,24 @@
 import asyncio
 import logging
 
+from django.core.exceptions import ObjectDoesNotExist
 from playmaker.controller.contants import CONTROLLER, LISTENER
 from playmaker.controller.models import Listener, Permission, Controller
 from playmaker.controller.visitors import Action
+from playmaker.songs.models import Song
+from playmaker.songs.serializers import SongSerializer
+from playmaker.songs.services import fetch_songs
 
 TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []
 
 
-def user_matches_actor(user, actor):
+def user_matches_actor(user, actor_id, cls):
     # Is it wasteful to pass entire object
-    return actor.me.id == user.id
+    try:
+        return cls.objects.get(id=int(actor_id)).me.id == user.id
+    except ObjectDoesNotExist:
+        return False
 
 
 def can_perform_action(user, controller, listener_id, action, scope="ALL"):
@@ -66,24 +73,36 @@ def perform_action(user, controller_uuid, action, *args, **kwargs):
 
 
 def order_songs(songs):
-    return [{'id': i+1, **(song.view())} for i, song in enumerate(songs)]
+    return [SongSerializer(instance=song).data for song in songs]
 
 
+## Queue related actions
 def get_queue(params, user):
-    controller = params.get(CONTROLLER, None)
-    listener = params.get(LISTENER, None)
+    c_id = params.get(CONTROLLER, None)
+    l_id = params.get(LISTENER, None)
 
     # TODO handle this better so errors can be clear
-    if controller:
-
-        controller = Controller.objects.get(id=int(controller))
-        assert user_matches_actor(user, controller)
+    if c_id:
+        assert user_matches_actor(user, c_id, Controller)
+        controller = Controller.objects.get(id=int(c_id))
         return order_songs(controller.queue.songs.all())
-    elif listener:
-        listener = Listener.objects.get(id=int(listener))
-        assert user_matches_actor(user, listener)
+    elif l_id:
+        assert user_matches_actor(user, l_id, Listener)
+        listener = Listener.objects.get(id=int(l_id))
         print(len(listener.queue))
         return order_songs(listener.queue)
     else:
         print("No controller or listener specified")
         return []
+
+
+def add_to_queue(c_id, uris):
+    controller = Controller.objects.get(id=int(c_id))
+    songs = fetch_songs(uris)
+    [(s.save(), controller.queue.add(s)) for s in songs]
+
+
+def remove_from_queue(c_id, uris):
+    controller = Controller.objects.get(id=int(c_id))
+    songs = Song.objects.filter(uri__in=uris).all()
+    [controller.queue.remove(s) for s in songs]

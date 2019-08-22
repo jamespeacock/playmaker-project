@@ -6,9 +6,10 @@ Q = 'q'
 
 # Queue action
 ACTION = "action"
+ADD = "add"
+REMOVE = "remove"
 
-
-#Spotify constants
+# Spotify constants
 ARTIST = 'artist'
 ALBUM = 'album'
 TRACK = 'track'

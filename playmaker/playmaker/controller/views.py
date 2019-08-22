@@ -5,7 +5,7 @@ from rest_framework import generics
 # TODO implement internal session based &  token auth
 
 from playmaker.controller import services
-from playmaker.controller.contants import URIS, CONTROLLER, ACTION
+from playmaker.controller.contants import URIS, CONTROLLER, ACTION, ADD, REMOVE
 from playmaker.controller.models import Controller, Group, Listener
 from playmaker.controller.serializers import ActionSerializer, QueueActionSerializer
 from playmaker.shared.utils import make_iterable
@@ -104,10 +104,9 @@ class QueueActionView(ControllerView):
     """
     Returns current list of songs in queue.
     """
-    def get(self, request, *args, **kwargs):
+    def get(self, request, action=None, *args, **kwargs):
         params = request.query_params
         songs = services.get_queue(params, request.user)
-
         return JsonResponse(songs, safe=False)
 
 
@@ -115,12 +114,19 @@ class QueueActionView(ControllerView):
     Performs specified action on current queue for current room/group/controller.
     @:param action - string: action to perform
     """
-    def post(self, request, *args, **kwargs):
+    def post(self, request, action=None, *args, **kwargs):
         params = self.get_params(request.POST)
+        c_id = params.get(CONTROLLER)
+        if not services.user_matches_actor(request.user, c_id, Controller):
+            return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
+        if action == ADD:
+            res = services.add_to_queue(c_id, params.get(URIS))
+        elif action == REMOVE:
+            res = services.remove_from_queue(c_id, params.get(URIS))
 
+        return JsonResponse(res, status=200, safe=False) if res else\
+            JsonResponse("That action could not be completed.", status=500, safe=False)
 
-        services.perform_action(params.get(CONTROLLER), params.get(ACTION), params.get(URIS))
-        return self.render(params)
 
 # Seek to section of users current song
 # Queue Song, Play Song @ timestamp?

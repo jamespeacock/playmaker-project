@@ -25,10 +25,7 @@ class LoadSongView(SecureAPIView, generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         uris = make_iterable(self.get_params(request.GET).get('uris'))
         controller = Controller.objects.get(id=1)
-        sp = controller.me.sp
-        for song in from_response(sp.tracks(uris), SONG):
-            to_save = Song(song)
-            controller.queue.add(to_save)
+        songs = services.load_songs(controller, songs)
 
         return JsonResponse({"status": "Done"})
 
