@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from playmaker.controller.contants import CONTROLLER, LISTENER
 from playmaker.controller.models import Listener, Permission, Controller
 from playmaker.controller.visitors import Action
+from playmaker.models import User
 from playmaker.songs.models import Song
 from playmaker.songs.serializers import SongSerializer
 from playmaker.songs.services import fetch_songs
@@ -72,8 +73,8 @@ def perform_action(user, controller_uuid, action, *args, **kwargs):
     return results # loop.run_until_complete(asyncio.gather(*async_actions))
 
 
-def order_songs(songs):
-    return [SongSerializer(instance=song).data for song in songs]
+def as_views(items, serializer):
+    return [serializer(instance=item).data for item in items]
 
 
 ## Queue related actions
@@ -81,31 +82,32 @@ def get_queue(params, user):
     c_id = params.get(CONTROLLER, None)
     l_id = params.get(LISTENER, None)
 
-    # TODO handle this better so errors can be clear
-    if c_id:
-        assert user_matches_actor(user, c_id, Controller)
-        controller = Controller.objects.get(id=int(c_id))
-        return order_songs(controller.queue.songs.all())
-    elif l_id:
-        assert user_matches_actor(user, l_id, Listener)
-        listener = Listener.objects.get(id=int(l_id))
-        print(len(listener.queue))
-        return order_songs(listener.queue)
+    # TODO Try to get queue directly from user
+    actor_cls, uuid = Controller,c_id if c_id else (Listener,l_id if l_id else None)
+
+    if actor_cls:
+        assert user_matches_actor(user, uuid, actor_cls)
+        actor = actor_cls.objects.get(uuid=uuid)
+        return as_views(actor.get_queue(), SongSerializer)
     else:
-        print("No controller or listener specified")
+        print("User does not have an associated queue.")
         return []
 
 
-def add_to_queue(c_id, uris):
-    controller = Controller.objects.get(id=int(c_id))
-    songs = fetch_songs(controller, uris)
-    [(s.save(), controller.queue.add(s)) for s in songs]
+def update_queue_order(uuid, uris):
+    pass
+
+
+def add_to_queue(uuid, uris):
+    actor = User.objects.get(uuid=uuid)
+    songs = fetch_songs(actor, uris)
+    [(s.save(), actor.queue.add(s)) for s in songs]
     # TODO validation here
     return True
 
 
-def remove_from_queue(c_id, uris):
-    controller = Controller.objects.get(id=int(c_id))
+def remove_from_queue(uuid, uris):
+    actor = User.objects.get(uuid=uuid)
     songs = Song.objects.filter(uri__in=uris).all()
-    [controller.queue.remove(s) for s in songs]
+    [actor.queue.remove(s) for s in songs]
     return True

@@ -65,14 +65,12 @@ class PauseSongView(ControllerView):
 class NextSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        params = self.get_params(request.GET)
+        params = self.get_params(request.query_params)
 
-        # TODO decide if this should pick next song from internal queue and press play
-        #  or skip to next song in each listener's queue
-        c = 1  # params.get(CONTROLLER)
+        next_song = Controller.objects.get(id=params.controller).queue.next()
         failed_results = [r for r in services.perform_action(
             c,
-            Action.NEXT,
+            Action.PLAY,
             uris=services.get_next_song(c)) if r]
 
         if failed_results:

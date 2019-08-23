@@ -6,6 +6,7 @@ from playmaker.controller.visitors import ActionVisitor
 from playmaker.shared.models import SPModel
 from playmaker.models import User
 from playmaker.songs.models import Song
+from playmaker.songs.utils import to_obj
 
 
 class Queue(models.Model):
@@ -31,7 +32,7 @@ class Queue(models.Model):
 
 
 class Controller(models.Model):
-    me = models.OneToOneField(User, on_delete=models.CASCADE)
+    me = models.OneToOneField(User, related_name='controller', on_delete=models.CASCADE)
     queue = models.OneToOneField(Queue, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     @property
@@ -49,11 +50,11 @@ class Group(models.Model):
 
     @property
     def queue(self):
-        return self.controller.queue.songs.all()
+        return self.controller.queue
 
 
 class Listener(models.Model):
-    me = models.OneToOneField(User, related_name='as_listener', on_delete=models.CASCADE)
+    me = models.OneToOneField(User, related_name='listener', on_delete=models.CASCADE)
     group = models.ForeignKey(Group, related_name='listeners', on_delete=models.CASCADE)
     _v_cached = None
 
@@ -76,9 +77,7 @@ class Listener(models.Model):
             for d in self.me.sp.devices()['devices']:
                 d['sp_id'] = d.pop('id')
                 d['listener'] = self
-                dev = Device.objects.create(**d)
-                # dev = Device.objects.get_or_create(**d)
-                dev.save()
+                to_obj(Device, save=True, **d)
 
     def refresh(self):
         self._refresh_devices()

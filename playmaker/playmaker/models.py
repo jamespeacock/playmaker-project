@@ -8,6 +8,7 @@ from django.utils import timesince
 from django.contrib.auth import models as auth_models
 from django.db import models
 
+from playmaker.controller.contants import TRACK, ARTIST
 from playmaker.songs import utils
 from playmaker.login import services as logins
 
@@ -24,6 +25,15 @@ class User(auth_models.AbstractUser):
     sp_id = models.CharField(max_length=256, null=True, blank=True)
     sp_username = models.CharField(max_length=256, null=True, blank=True)
     _sp_cached = None
+
+    @property
+    def actor(self):
+        if self.listener:
+            return self.listener
+        elif self.controller:
+            return self.controller
+        else:
+            return self
 
     @property
     def sp(self):
@@ -57,16 +67,16 @@ class User(auth_models.AbstractUser):
 
     @property
     def top_artists(self):
-        return utils.from_response(self.sp.current_user_top_artists(), utils.ARTIST_LIST)
+        return utils.from_response(self.sp.current_user_top_artists(), ARTIST)
 
     @property
     def top_tracks(self):
-        return utils.from_response(self.sp.current_user_top_tracks(), utils.SONG_LIST)
+        return utils.from_response(self.sp.current_user_top_tracks(), TRACK)
 
     @property
     def recently_played(self):
-        return utils.from_response(self.sp.current_user_recently_played(), utils.SONG_LIST)
+        return utils.from_response(self.sp.current_user_recently_played(), TRACK)
 
     @property
     def saved_tracks(self, limit=20, offset=0):
-        return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), utils.SONG_LIST)
+        return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), TRACK)

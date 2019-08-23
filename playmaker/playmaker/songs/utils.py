@@ -1,59 +1,63 @@
-from playmaker.songs.models import Artist, Song, Genre
+import logging
 
-ARTIST_LIST = "artist_list"
-ARTIST = "artist"
-SONG_LIST = "song_list"
-SONG = "song"
-LIST = "_list"
-TYPES = []
+from playmaker.controller.contants import ARTIST, TRACK
+from playmaker.playlists.models import Playlist
+from playmaker.songs.models import Artist, Song
+from playmaker.songs.serializers import ArtistSerializer, SongSerializer
 
 
 def get_cls(_t):
     if ARTIST in _t:
-        cls = Artist
-    elif SONG in _t:
-        cls = Song
+        cls, ser = Artist, ArtistSerializer
+    elif TRACK in _t:
+        cls, ser = Song, SongSerializer
     else:
         raise Warning("Cannot find class: " + str(_t))
 
-    return cls, LIST in _t
+    return cls, ser
 
 
-# TODO this should be a visitor (self method) on each obj. First section is artists, second is songs
-def to_obj(__type, **_kwargs):
-    cls, is_list = get_cls(__type)
+DONT_SAVE = [Artist, Playlist]
+
+
+def iterable(s):
+    return s + 's'
+
+
+def to_obj(__type, save=False, **_kwargs):
+    if iterable(__type) in _kwargs:
+        return [to_obj(__type, save=save, **o) for o in _kwargs.get(iterable(__type))]
+
+    cls, ser = get_cls(__type)
     kwargs = _kwargs.copy()
     kwargs['sp_id'] = kwargs.pop('id')
-    if cls == Artist:
-        num_followers = kwargs.pop('followers').get('total')
-        artist, a_created = Artist.objects.get_or_create(name=kwargs['name'], uri=kwargs['uri'], num_followers=num_followers)
-        # genre_names = kwargs.pop('genres')
-        # genres = [Genre.objects.get_or_create(name=g_n) for g_n in genre_names]
-        # # kwargs["genres"] = genres
-        return artist
 
-    elif cls == Song:
-        # TODO load as much as possible from a spotify song into Postgres.
-        song, s_created = Song.objects.get_or_create(name=kwargs['name'], uri=kwargs['uri'], sp_id=kwargs['sp_id'])
-        for artist in kwargs['artists']:
-            artist['sp_id'] = artist.pop('id')
-            a, a_created = Artist.objects.get_or_create(name=artist['name'], uri=artist['uri'], sp_id=artist['sp_id'])
-            song.artists.add(a)
+    if not save or cls in DONT_SAVE:
+        return ser(instance=kwargs).data
 
-        return song
+    if cls == Song:
+        # pop from kwargs breaking values
+        cls.pop_kwargs(kwargs)
+        obj, created = cls.objects.get_or_create(**kwargs)
+        logging.log(logging.INFO, "Song: " + obj.name + " was " + "created." if created else "updated.")
+        return ser(instance=kwargs).data
 
-    # return cls(**kwargs)
+    logging.log(logging.INFO, "Wanted to save non song object? NEed to implement.")
+    return ser(instance=kwargs).data
 
 
 def get_key(str_type):
-    if str_type == SONG:
+    if str_type == TRACK:
         return "tracks"
+    else:
+        return str_type
 
 
 def from_response(spotify_resp, __type):
-    # cls, is_list = get_cls(type) # get the type (class) of object to cast the response into
 
     response_data = spotify_resp[get_key(__type)]
-    return [to_obj(__type, **i) for i in response_data if i]  # if is_list else [spotify_resp]
+    return [to_obj(__type, **i) for i in response_data if i] \
+        if isinstance(spotify_resp, list)\
+        else to_obj(__type, **spotify_resp)
 
 
