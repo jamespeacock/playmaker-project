@@ -1,38 +1,13 @@
-from playmaker.controller.contants import TRACK, ARTIST
-from playmaker.songs.utils import from_response
-
-
-def to_view(data, _type):
-
-    m = { TRACK: to_song_view,
-          ARTIST: to_artist_view}
-
-    view = m[_type]
-
-    items = data.get(_type+'s').get('items')
-
-    return [view(i) for i in items]
-
-
-def to_song_view(song):
-    return {'name': song.get('name'),
-            'uri': song.get('uri'),
-            'artists': song.get('artists')}
-
-
-def to_artist_view(artist):
-    return {'name': artist.get('name'),
-            'uri': artist.get('uri')}
-
-
-def to_playlist_view(playlist):
-
-    pass
+from playmaker.shared.models import SPModel
+from playmaker.songs.models import Song
+from playmaker.songs.serializers import SongSerializer
 
 
 # Fetch and save songs
-def fetch_songs(actor, uris):
+
+
+def fetch_songs(actor, uris, save=False):
     if uris:
         sp = actor.me.sp
-        return from_response(sp.tracks(uris), TRACK)
+        return SPModel.from_response(sp.tracks(uris), Song, serializer=SongSerializer, save=save)
     return []

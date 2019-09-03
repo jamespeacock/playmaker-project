@@ -11,16 +11,19 @@ from api.settings import FRONTEND
 from playmaker.login import services
 from playmaker.login.services import get_redirect
 from playmaker.models import User
+from playmaker.shared.views import SecureAPIView
 
 
 class SpotifyRegisterView(RegisterView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        username = json.loads(request.body).get('username')
+        body = json.loads(request.body)
+        username = body.get('username')
+        frontend_redirect = body.get('redirect', 'login')
         signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
         assert signup.status_code == 201
-        return JsonResponse({'url': get_redirect(username)})
+        return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
 
 class SpotifyLoginView(LoginView):
@@ -28,15 +31,16 @@ class SpotifyLoginView(LoginView):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         # TODO check if request already has user and is logged in.
+        body = json.loads(request.body)
+        frontend_redirect = body.get('redirect', 'login')
         if request.user:
             # User is already logged in --> send to dashboard.
-            return redirect(FRONTEND + "/dashboard")
+            return redirect(FRONTEND + "/" + frontend_redirect)
 
-        body = json.loads(request.body)
         login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
         assert login.status_code == 200
         username = body.get('username')
-        return JsonResponse({'url': get_redirect(username)})
+        return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
 
 # This endpoint/url is called after a user follows redirect to login into spotify.
@@ -52,3 +56,9 @@ class SpotifyCallbackView(LoginView):
             print('User does not exist for some reason.')
         # TODO is /dashboard permanent or can this go into state?? ^^
         return redirect(FRONTEND + "/dashboard") if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
+
+
+class IsLoggedInView(SecureAPIView):
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({'isLoggedIn': True if (request.user and request.user.token) else False})

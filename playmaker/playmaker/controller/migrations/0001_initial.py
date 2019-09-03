@@ -39,10 +39,17 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='SongInQueue',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('position', models.IntegerField()),
+            ],
+        ),
+        migrations.CreateModel(
             name='Queue',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('songs', models.ManyToManyField(to='songs.Song')),
+                ('songs', models.ManyToManyField(through='controller.SongInQueue', to='songs.Song')),
             ],
         ),
         migrations.CreateModel(
@@ -72,5 +79,15 @@ class Migration(migrations.Migration):
             model_name='controller',
             name='queue',
             field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, to='controller.Queue'),
+        ),
+        migrations.AddField(
+            model_name='songinqueue',
+            name='queue',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='controller.Queue'),
+        ),
+        migrations.AddField(
+            model_name='songinqueue',
+            name='song',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='songs.Song'),
         ),
     ]

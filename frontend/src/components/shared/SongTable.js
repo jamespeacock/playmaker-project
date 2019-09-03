@@ -13,6 +13,7 @@ export default class SongTable extends React.Component {
   
     constructor( props ) {
       super(props)
+
       this.columns = [{
         dataField: 'uri',
         text: '',
@@ -23,10 +24,14 @@ export default class SongTable extends React.Component {
       }, {
         dataField: 'artists',
         text: 'Artists'
-      }];
+      }]
 
       this.columnsWithButton = [{
         dataField: 'uri',
+        text: '',
+        hidden: true
+      },{
+        dataField: 'position',
         text: '',
         hidden: true
       },{
@@ -54,10 +59,9 @@ export default class SongTable extends React.Component {
       return (
           <div>
               <BootstrapTable
-                keyField="uri"
+                keyField="position"
                 data={this.props.songs.map(songView)}
                 columns={ (this.props.withButtons) ? this.columnsWithButton : this.columns }/>
-                <p>{this.props.isFetching ? 'Fetching queue...' : ''}</p>
           </div>
       )
     }

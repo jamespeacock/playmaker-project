@@ -1,6 +1,10 @@
 LISTENER = "listener"
 CONTROLLER = "controller"
+URI = "uri"
 URIS = "uris"
+ID = "id"
+SP_ID = "sp_id"
+NAME = "name"
 
 Q = 'q'
 LIMIT = 'limit'
@@ -18,3 +22,4 @@ TRACK = 'track'
 SONG = 'song' # internal
 PLAYLIST = 'playlist'
 SEARCH_TYPES = [ARTIST, ALBUM, TRACK, PLAYLIST]
+DEVICE = 'device'

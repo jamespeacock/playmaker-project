@@ -2,47 +2,38 @@ import logging
 
 from django.db import models
 
+from playmaker.controller.contants import LISTENER
 from playmaker.controller.visitors import ActionVisitor
 from playmaker.shared.models import SPModel
 from playmaker.models import User
 from playmaker.songs.models import Song
-from playmaker.songs.utils import to_obj
-
-
-class Queue(models.Model):
-    songs = models.ManyToManyField(Song)
-
-    def contents(self):
-        return self.songs
-
-    def next(self):
-        ns = self.songs.first()
-        self.songs.remove(ns)
-        return ns
-
-    def add(self, song):
-        self.songs.add(song)
-        return True
-
-    def remove(self, song):
-        self.songs.remove(song)
-
-    def clear(self):
-        self.songs.clear()
 
 
 class Controller(models.Model):
     me = models.OneToOneField(User, related_name='controller', on_delete=models.CASCADE)
-    queue = models.OneToOneField(Queue, on_delete=models.DO_NOTHING, blank=True, null=True)
 
     @property
     def listeners(self):
         return Listener.objects.filter(group=self.group).all()
 
-    def init(self):
-        if not self.queue:
-            self.queue = Queue.objects.create()
-            self.queue.save()
+
+class Queue(models.Model):
+    songs = models.ManyToManyField(Song, through='SongInQueue')
+    current_song = models.ForeignKey(Song, related_name='in_groups', on_delete=models.DO_NOTHING, null=True)
+    next_pos = models.IntegerField(default=0, blank=False, null=False)
+    controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
+
+    def contents(self):
+        return self.songs.order_by('in_q__position').all()
+
+    def clear(self):
+        self.songs.clear()
+
+
+class SongInQueue(models.Model):
+    queue = models.ForeignKey(Queue, null=False, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, related_name='in_q', null=False, on_delete=models.CASCADE)
+    position = models.IntegerField(null=False, blank=False)
 
 
 class Group(models.Model):
@@ -74,16 +65,12 @@ class Listener(models.Model):
 
     def _refresh_devices(self):
         if self.devices is None or self.devices.filter(is_active=True).first() is None:
-            for d in self.me.sp.devices()['devices']:
-                d['sp_id'] = d.pop('id')
-                d['listener'] = self
-                to_obj(Device, save=True, **d)
+            for d in self.me.sp.devices()[Device.get_key()]:
+                d[LISTENER] = self
+                Device.from_sp(save=True, **d)
 
     def refresh(self):
         self._refresh_devices()
-
-        if self.active_device:
-            return True
 
     @property
     def active_device(self):
@@ -108,8 +95,19 @@ class Device(SPModel):
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=64)
     volume_percent = models.IntegerField()
+    uri = models.CharField(max_length=255, null=True)
 
-    # def __str__
+    @staticmethod
+    def from_sp(save=False, **kwargs):
+        kwargs = SPModel.from_sp(kwargs)
+        d,_ = Device.objects.get_or_create(**kwargs)
+        if save:
+            d.save()
+        return d
+
+    @staticmethod
+    def get_key():
+        return "devices"
 
 
 class Permission(models.Model):  # inherit auth_models.Permission if need be

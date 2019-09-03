@@ -27,9 +27,9 @@ export default class ControllerInterface  {
      )
   }
 
-  remove = async ( uri ) => {
-    return await this.apiInterface.post('controller/queue/remove/',
-     {'controller':this.controller,'uris': [uri]}
+  remove = async ( uri, pos ) => {
+    return await this.apiInterface.post('controller/queue/remove',
+     {'controller':this.controller, 'uris': [uri], 'positions': [pos]}
      )
   }
 

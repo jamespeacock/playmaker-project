@@ -1,6 +1,7 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
 import SongsInterface from '../../api/SongsInterface'
+import DeviceTable from '../shared/DeviceTable'
 import SongTable from '../shared/SongTable'
 import Header from '../Header/Header'
 import './listener.css'
@@ -13,9 +14,11 @@ export default class Listener extends React.Component {
         this.state = {
             listener: this.props.location.state.listener,
             songs: [],
+            devices: [],
             isFetching: true
         }
     }
+
     componentDidMount() {
         this.initListener()
         this.getAndLoadSongs()
@@ -23,16 +26,17 @@ export default class Listener extends React.Component {
 
     initListener = async ( ) => {
         this.listener = new ListenerInterface( {
-          listener: this.state.listener
         } )
+        this.state.devices = await this.listener.devices()
     }
 
     getAndLoadSongs = async ( ) => {
-        this.setState( { isFetching: true } )
         const songs = await this.listener.queue()
-        console.log(songs)
         this.setState( { songs: songs } )
-        this.setState( { isFetching: false } )
+    }
+
+    setDevice = async ( deviceRow ) => {
+      const success = await this.listener.setDevice(deviceRow.uri)
     }
 
     render() {
@@ -42,7 +46,15 @@ export default class Listener extends React.Component {
                 <main className="listener-area">
                     <section className="listener-queue-container">
                         <h2 className="listener-queue-title">Listening Queue</h2>
-                        <SongTable songs={this.state.songs} isFetching={this.state.isFetching}/>
+                        <SongTable
+                        songs={this.state.songs}
+                        withButtons={false}/>
+                    </section>
+                    <section className="listener-devices-container">
+                        <h2 className="listener-devices-title">Your Devices</h2>
+                        <DeviceTable
+                        devices={this.state.devices}
+                        selectDeviceHandler={(deviceRow) => this.setDevice(deviceRow)} />
                     </section>
                 </main>
             </React.Fragment>

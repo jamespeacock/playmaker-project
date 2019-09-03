@@ -5,12 +5,12 @@ import six.moves.urllib.parse as urllibparse
 from api.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI, SPOTIFY_SCOPE
 
 
-def get_redirect(username):
+def get_redirect(username, frontend_redirect='login'):
 
     url = 'https://accounts.spotify.com/authorize'
     urlparams = urllibparse.urlencode({'client_id': SPOTIFY_CLIENT_ID, 'response_type': 'code',
                                        'redirect_uri': SPOTIFY_REDIRECT_URI, 'scope': SPOTIFY_SCOPE,
-                                       'state': 'username-' + username})
+                                       'state': 'username-' + username + '|frontend_redirect=' + frontend_redirect})
     return '%s?%s' % (url, urlparams)
 
 

@@ -29,15 +29,19 @@ export default class Signup extends React.Component {
         const { name, username, email, password1, password2 } = this.state
         const { history } = this.props
 
-        this.loginInterface = new ApiInterface( {
-            endpoint : 'signup/',
-            body : { name, email, username, password1, password2 },
-        } )
+        this.loginInterface = new ApiInterface( {} )
 
-        //Redirect user to authentication url
-        window.location.href = await this.loginInterface.fetchLoginRedirect()
-        //Wait for above redirect to finish, then go to listener...but how
-//        history.push('/listener')
+        //This request will redirect to dashboard
+        const resp = await this.loginInterface.fetchLoginRedirect(
+          'signup/',
+          { name, email, username, password1, password2, redirect: 'dashboard'}
+        )
+
+        if (resp.url) {
+          window.location.href = resp.url
+        } else {
+          //display error
+        }
 
     }
 

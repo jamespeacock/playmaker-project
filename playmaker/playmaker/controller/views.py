@@ -1,20 +1,25 @@
+from collections import defaultdict
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from rest_framework import generics
 
 # TODO implement internal session based &  token auth
 
 from playmaker.controller import services
-from playmaker.controller.contants import URIS, CONTROLLER, ACTION, ADD, REMOVE
-from playmaker.controller.models import Controller, Group, Listener
-from playmaker.controller.serializers import ActionSerializer, QueueActionSerializer
+from playmaker.controller.contants import URIS, CONTROLLER, ADD, REMOVE, URI
+from playmaker.controller.models import Controller, Group, Queue
+from playmaker.controller.serializers import QueueActionSerializer
+from playmaker.controller.services import next_in_queue
 from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
 from playmaker.shared.views import SecureAPIView
 
 
 class ControllerView(SecureAPIView):
-    pass
+
+    def get(self, request):
+        if not services.user_matches_actor(request.user, request.query_params.get(CONTROLLER), Controller):
+            return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
 
 
 # Create a group
@@ -22,9 +27,8 @@ class ControllerView(SecureAPIView):
 class StartListeningView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
-
         controller, created = Controller.objects.get_or_create(me=request.user)
-        controller.init()
+        Queue.objects.create(controller=controller)
         group, created = Group.objects.get_or_create(controller=controller)
         return JsonResponse({"group": group.id, "controller": controller.id})
 
@@ -34,10 +38,11 @@ class StartListeningView(SecureAPIView):
 class PlaySongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        params = self.get_params(request.GET)
+        super(PlaySongView, self).get(request)
+        params = self.get_params(request.query_params)
 
         failed_results = [r for r in services.perform_action(
-            1,  # params.get(CONTROLLER),
+            request.user,
             Action.PLAY,
             uris=make_iterable(params.get(URIS))) if r]
 
@@ -50,10 +55,9 @@ class PlaySongView(ControllerView):
 class PauseSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        params = self.get_params(request.GET)
-
+        super(PauseSongView, self).get(request)
         failed_results = [r for r in services.perform_action(
-            1, #params.get(CONTROLLER),
+            request.user,
             Action.PAUSE) if r]
 
         if failed_results:
@@ -65,13 +69,17 @@ class PauseSongView(ControllerView):
 class NextSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        params = self.get_params(request.query_params)
+        super(NextSongView, self).get(request)
 
-        next_song = Controller.objects.get(id=params.controller).queue.next()
-        failed_results = [r for r in services.perform_action(
-            c,
-            Action.PLAY,
-            uris=services.get_next_song(c)) if r]
+        next_song = next_in_queue(request.user.actor.queue)
+        if next_song:
+            failed_results = [r for r in services.perform_action(
+                request.user,
+                Action.PLAY,
+                uris=next_song) if r]
+        else:
+            pass
+            # Handle empty queue
 
         if failed_results:
             return JsonResponse({"status": "Meh."})
@@ -82,14 +90,15 @@ class NextSongView(ControllerView):
 class SeekSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        c = 1  # params.get(CONTROLLER)
-        failed_results = [r for r in services.perform_action(
-            c,
-            Action.SEEK,
-            position_ms=35000) if r]
+        pos = request.query_params.get('position', None)
+        if pos:
+            failed_results = [r for r in services.perform_action(
+                request.user,
+                Action.SEEK,
+                position_ms=pos) if r]
 
-        if failed_results:
-            return JsonResponse({"status": "Meh."})
+            if failed_results:
+                return JsonResponse({"status": "Meh."})
 
         return JsonResponse({"status": "Success."})
 
@@ -105,6 +114,12 @@ class QueueActionView(ControllerView):
     def get(self, request, action=None, *args, **kwargs):
         params = request.query_params
         songs = services.get_queue(params, request.user)
+        # post filter songs to make sure each song has just one position
+        seen = defaultdict(int)
+        for s in songs:
+            s['position'] = s.pop('in_q')[seen[s[URI]]]
+            seen[s[URI]] += 1
+
         return JsonResponse(songs, safe=False)
 
 
@@ -119,9 +134,9 @@ class QueueActionView(ControllerView):
         if not services.user_matches_actor(request.user, c_id, Controller):
             return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
         if action == ADD:
-            res = services.add_to_queue(c_id, body.get(URIS))
+            res = services.add_to_queue(request.user.uuid, body.get(URIS))
         elif action == REMOVE:
-            res = services.remove_from_queue(c_id, body.get(URIS))
+            res = services.remove_from_queue(request.user.uuid, body.get(URIS), body.get('positions'))
 
         return JsonResponse({"success": res}, status=200, safe=False) if res else\
             JsonResponse("That action could not be completed.", status=500, safe=False)

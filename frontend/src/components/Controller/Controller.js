@@ -16,7 +16,7 @@ export default class Controller extends React.Component {
         super( props )
         //TODO handle what happens if this page is loaded w/o controller + group
         this.state = {
-            searchResults: [],
+            searchResults: {'tracks':[]},
             recommendationResults: [],
             queue: [],
             isFetching: true,
@@ -63,6 +63,17 @@ export default class Controller extends React.Component {
       }
     }
 
+    removeFromQueueHandler = async (songRow) => {
+      console.log('removing ' + songRow.name + ' from queue.')
+      const success = await this.controller.remove(songRow.uri, songRow.position)
+      console.log(success)
+      if (success) {
+        this.refreshQueue()
+      } else { 
+        console.log('Could not remove song from queue')
+      }
+    }
+
     render() {
         return (
             <React.Fragment>
@@ -72,17 +83,16 @@ export default class Controller extends React.Component {
                         <section className="controller-queue-container">
                             <div className="col-title">Queue</div>
                             <SongTable 
-                            songs={this.state.queue} 
-                            isFetching={this.state.isFetching}
-                            withButtons={false}/>
+                            songs={this.state.queue}
+                            withButtons={true}
+                            handleAdd={(row) => this.removeFromQueueHandler(row)}/>
                         </section>
 
                         <section className="search-container">
                           <div className="col-title">Search</div>
                             <SearchBar setSearchResults={this.searchHandler} />
                             <SongTable 
-                              songs={this.state.searchResults}
-                              isFetching={this.state.isFetching}
+                              songs={this.state.searchResults.tracks}
                               withButtons={true}
                               handleAdd={(row) => this.addToQueueHandler(row)}/>
                         </section>

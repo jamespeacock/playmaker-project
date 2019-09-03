@@ -1,4 +1,5 @@
 import React from 'react'
+import { Redirect } from 'react-router-dom'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
 import './login.css'
@@ -15,27 +16,31 @@ export default class Login extends React.Component {
 
     constructor( props ) {
         super( props )
+        
+        this.loginInterface = new ApiInterface( {} )
+        const isLoggedIn = this.loginInterface.isLoggedIn()
         this.state = {
             username : '', 
-            password : ''
+            password : '',
+            isLoggedIn
         }
+
     }
 
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault()
         const { username, password } = this.state
         const { history } = this.props
-
-        this.loginInterface = new ApiInterface( {
-            endpoint : 'login/',
-            body : { username, password },
-        } )
-
-        //Redirect user to authentication url
-        window.location.href = await this.loginInterface.fetchLoginRedirect()
-        //Wait for above redirect to finish, then go to listener...but how
-//        history.push('/listener')
-
+        //Redirect user to authentication url. The backend will redirect to dashboard.
+        const resp = await this.loginInterface.fetchLoginRedirect(
+          'login/',
+          { username, password, redirect: 'dashboard' })
+        
+        if (resp.url) {
+          window.location.href = resp.url
+        } else {
+          //display error
+        }
     }
 
     updateUsername = ( username ) => {
@@ -48,6 +53,12 @@ export default class Login extends React.Component {
 
     render() {
         console.log('rendering login')
+        if (this.state.isLoggedIn) {
+          console.log('is logged in')
+          return <Redirect
+            to="/dashboard"
+            />
+        }
         return (
             <React.Fragment>
                 <Header></Header>

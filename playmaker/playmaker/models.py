@@ -1,23 +1,25 @@
+import logging
+
 import spotipy
 import uuid as uuid
 from django.db.models import DateTimeField
-from django.http import JsonResponse
 from django.utils import timezone as tz
 from django.utils import timesince
 
 from django.contrib.auth import models as auth_models
 from django.db import models
 
-from playmaker.controller.contants import TRACK, ARTIST
+from playmaker.controller.contants import ID
 from playmaker.songs import utils
 from playmaker.login import services as logins
+from playmaker.songs.models import Artist, Song
 
 
 class User(auth_models.AbstractUser):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
     name = models.CharField(max_length=255, null=True, blank=True, unique=False)
-    # TODO figure out how to store this more secuely - encryptedField
+    # TODO figure out how to store this more securely - encryptedField
     access_token = models.CharField(max_length=511, null=True, blank=True)
     refresh_token = models.CharField(max_length=511, null=True, blank=True)
     token_expires = DateTimeField(null=True)
@@ -26,14 +28,15 @@ class User(auth_models.AbstractUser):
     sp_username = models.CharField(max_length=256, null=True, blank=True)
     _sp_cached = None
 
+    # @memoized
     @property
     def actor(self):
-        if self.listener:
+        if hasattr(self, 'listener') and self.listener:
             return self.listener
-        elif self.controller:
+        elif hasattr(self, 'controller') and self.controller:
             return self.controller
-        else:
-            return self
+        logging.log(logging.ERROR, "User does not have a listener or a controller!")
+        return None
 
     @property
     def sp(self):
@@ -60,23 +63,23 @@ class User(auth_models.AbstractUser):
     @property
     def info(self):
         me = self.sp.me()
-        self.sp_id = me.get('id')
+        self.sp_id = me.get(ID)
         # TODO make sp_username unique and throw error here. Give user option to replace user? Maybe don't make it unique but then that can cause other probs
         self.sp_username = me.get('display_name')
         return me
 
     @property
     def top_artists(self):
-        return utils.from_response(self.sp.current_user_top_artists(), ARTIST)
+        return utils.from_response(self.sp.current_user_top_artists(), Artist)
 
     @property
     def top_tracks(self):
-        return utils.from_response(self.sp.current_user_top_tracks(), TRACK)
+        return utils.from_response(self.sp.current_user_top_tracks(), Song)
 
     @property
     def recently_played(self):
-        return utils.from_response(self.sp.current_user_recently_played(), TRACK)
+        return utils.from_response(self.sp.current_user_recently_played(), Song)
 
     @property
     def saved_tracks(self, limit=20, offset=0):
-        return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), TRACK)
+        return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), Song)
