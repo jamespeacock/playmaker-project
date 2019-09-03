@@ -18,13 +18,22 @@ export default class Login extends React.Component {
         super( props )
         
         this.loginInterface = new ApiInterface( {} )
-        const isLoggedIn = this.loginInterface.isLoggedIn()
+        
         this.state = {
             username : '', 
             password : '',
-            isLoggedIn
+            isLoggedIn: false,
         }
 
+    }
+
+    checkLoggedIn = async () => {
+        const isLoggedIn = await this.loginInterface.isLoggedIn()
+        this.setState({isLoggedIn})
+    }
+
+    componentWillMount () {
+        this.checkLoggedIn()
     }
 
     loginInterfaceHandler = async ( evt ) => {
@@ -36,6 +45,7 @@ export default class Login extends React.Component {
           'login/',
           { username, password, redirect: 'dashboard' })
         
+        console.log('got response')
         if (resp.url) {
           window.location.href = resp.url
         } else {
@@ -54,7 +64,7 @@ export default class Login extends React.Component {
     render() {
         console.log('rendering login')
         if (this.state.isLoggedIn) {
-          console.log('is logged in')
+          console.log('jumping to dashboard.')
           return <Redirect
             to="/dashboard"
             />

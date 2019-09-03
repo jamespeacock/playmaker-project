@@ -64,4 +64,8 @@ export default class ApiInterface  {
         return res.data.isLoggedIn
       })
   }
+
+  logout = async () => {
+    await this.axios.post('rest-auth/logout/')
+  }
 }

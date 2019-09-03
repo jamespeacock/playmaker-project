@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
-from rest_auth.views import LoginView
+from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
 
 from api.settings import FRONTEND
@@ -12,6 +12,10 @@ from playmaker.login import services
 from playmaker.login.services import get_redirect
 from playmaker.models import User
 from playmaker.shared.views import SecureAPIView
+
+
+def is_logged_in(request):
+    return request.user and hasattr(request.user, 'token') and request.user.token
 
 
 class SpotifyRegisterView(RegisterView):
@@ -33,7 +37,7 @@ class SpotifyLoginView(LoginView):
         # TODO check if request already has user and is logged in.
         body = json.loads(request.body)
         frontend_redirect = body.get('redirect', 'login')
-        if request.user:
+        if is_logged_in(request):
             # User is already logged in --> send to dashboard.
             return redirect(FRONTEND + "/" + frontend_redirect)
 
@@ -49,16 +53,26 @@ class SpotifyCallbackView(LoginView):
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         auth_code = request.GET.get('code')
-        username = request.GET.get('state').split('username-')[1]
+        args = request.GET.get('state').split('|')
+        username = args[0].split('username=')[1]
+        redirect_path = args[1].split('frontend_redirect=')[1]
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
             print('User does not exist for some reason.')
-        # TODO is /dashboard permanent or can this go into state?? ^^
-        return redirect(FRONTEND + "/dashboard") if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
+        return redirect(FRONTEND + "/" + redirect_path) if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
 
 
 class IsLoggedInView(SecureAPIView):
 
+    @csrf_exempt
     def get(self, request, *args, **kwargs):
-        return JsonResponse({'isLoggedIn': True if (request.user and request.user.token) else False})
+        return JsonResponse({'isLoggedIn': is_logged_in(request)})
+
+
+class LogoutView(LogoutView):
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        super(LogoutView, self).post(request, *args, **kwargs)
+        return redirect(FRONTEND + "/login")
