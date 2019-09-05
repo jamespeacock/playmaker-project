@@ -17,6 +17,18 @@
     margin: 0 auto;
     margin-top: 50px;
 }
+.listener-devices-title {
+    text-align: center;
+}
+.listener-devices-container {
+    background-color: #2e2d2d;;
+    border-radius: 4px;
+    max-width: 350px;
+    height: 420px;
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 50px;
+}
 .listener-queue-list {
 }
 .listener-queue-item {

@@ -1,9 +1,11 @@
 from django.http import HttpResponse
+from rest_framework.exceptions import APIException
 from rest_framework.views import exception_handler
 
 
-class NotLoggedInException(Exception):
-    pass
+class NotLoggedInException(APIException):
+    status_code = 401
+    default_detail = {"Reason": "Not logged in."}
 
 
 def make_iterable(data):
@@ -13,6 +15,7 @@ def make_iterable(data):
         return [data]
 
 
+# TODO not utilized yet
 def exception_handler(exc, context):
     response = exception_handler(exc, context)
 

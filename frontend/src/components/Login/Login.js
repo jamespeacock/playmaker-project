@@ -40,16 +40,13 @@ export default class Login extends React.Component {
         evt.preventDefault()
         const { username, password } = this.state
         const { history } = this.props
-        //Redirect user to authentication url. The backend will redirect to dashboard.
         const resp = await this.loginInterface.fetchLoginRedirect(
           'login/',
           { username, password, redirect: 'dashboard' })
-        
-        console.log('got response')
         if (resp.url) {
           window.location.href = resp.url
         } else {
-          //display error
+          console.log('Failed to get auth redirect. Please try again.')
         }
     }
 

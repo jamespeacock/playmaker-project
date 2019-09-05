@@ -8,7 +8,6 @@ export default class ListenerInterface  {
 
   constructor( options ) {
     this.apiInterface = new ApiInterface({})
-
   }
 
   queue = async ( ) => {

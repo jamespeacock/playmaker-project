@@ -28,7 +28,7 @@ export default class SongTable extends React.Component {
     componentDidMount() {}
 
     buttonFormatter = (cell, row) => {
-      return (<Button onClick={ () => this.props.selectDeviceHandler(row) }>Add</Button>);
+      return (<Button onClick={ () => this.props.selectDeviceHandler(row) }>Select</Button>);
     }
 
 

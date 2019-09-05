@@ -29,6 +29,9 @@ class StartListeningView(SecureAPIView):
         controller, created = Controller.objects.get_or_create(me=request.user)
         Queue.objects.get_or_create(controller=controller)
         group, created = Group.objects.get_or_create(controller=controller)
+
+        # TODO start a poller every 60s after song starts and then every 15s for current song
+        # If it is different from queue current song, update it and send it out to listeners.
         return JsonResponse({"group": group.id, "controller": controller.id})
 
 
@@ -148,8 +151,7 @@ class QueueActionView(ControllerView):
 
 # Add Song to Playlist
 
-# Get devices / Transfer playback
-#?
+# Transfer playback
 
 ### Listener/Group Data Section
 

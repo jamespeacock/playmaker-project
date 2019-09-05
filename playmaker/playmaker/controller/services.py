@@ -13,6 +13,7 @@ TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []
 
 
+# TODO change this method to ensure user actor matches Listener vs. Controller so that listeners can only do listener actions, etc.
 def user_matches_actor(user, actor_uuid, cls):
     # Is it wasteful to pass entire object
     try:

@@ -12,10 +12,8 @@ export default class Listener extends React.Component {
     constructor( props ) {
         super( props )
         this.state = {
-            listener: (this.props.location.state) ? this.props.location.state.listener: '',
             songs: [],
-            devices: [],
-            isFetching: true
+            devices: []
         }
     }
 
@@ -25,8 +23,7 @@ export default class Listener extends React.Component {
     }
 
     initListener = async ( ) => {
-        this.listener = new ListenerInterface( {
-        } )
+        this.listener = new ListenerInterface()
         this.state.devices = await this.listener.devices()
     }
 

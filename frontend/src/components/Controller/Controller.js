@@ -35,12 +35,8 @@ export default class Controller extends React.Component {
     }
 
     refreshQueue = async ( ) => {
-        this.setState( { isFetching: true } )
         const songs = await this.controller.queue()
         this.setState( { queue: songs } )
-        this.setState( { isFetching: false } )
-        //Then refresh recommendations
-
     }
 
     searchHandler(searchResults) {

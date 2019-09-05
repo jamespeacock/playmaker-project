@@ -19,7 +19,7 @@ export default class ApiInterface  {
 
     this.axios = axios.create({
       baseURL: `${this.API_BASE}`,
-      timeout: 2500,
+      timeout: 1500,
       headers: {'Content-Type': 'application/json'}
     });
 

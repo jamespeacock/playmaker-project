@@ -8,7 +8,9 @@ from playmaker.shared.models import SPModel
 from playmaker.models import User
 from playmaker.songs.models import Song
 
-
+# TODO let Controller have two modes - control & follow
+# Control means playmaker queue is sent out to listeners and controller is free to listen to different tracks (to prepare)
+# Follow means controller does not have to mess with UI and just listens, the app will throw songs out to users upon changes
 class Controller(models.Model):
     me = models.OneToOneField(User, related_name='controller', on_delete=models.CASCADE)
 
@@ -74,17 +76,31 @@ class Listener(models.Model):
 
     @property
     def active_device(self):
-        opts = self.devices.filter(is_active=True).all()
-        ad = opts.first()
-        if len(opts) > 1:
+        active = self.devices.filter(is_active=True).all()
+        ad = active.first()
+        if ad:
+            return ad
 
-            phones = opts.filter(name__contains='Phone')
-            ad = phones.first() if len(phones) > 0 else opts.first()
+        selected = self.devices.filter(is_selected=True).all()
+        sd = selected.first()
+        if sd:
+            return sd
 
-        if not ad:
-            logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active devices.")
+        logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active or selected devices.")
+        return None
 
-        return ad
+    def set_device(self, device_uri):
+        device = self.devices.get(uri=device_uri)
+        if device:
+            # Set all other devices for this user to is_selected=False
+            for d in self.devices.filter(is_selected=True).all():
+                d.is_selected=False
+                d.save()
+            device.is_selected=True
+            device.save()
+            return True
+        else:
+            return False
 
 
 class Device(SPModel):

@@ -22,13 +22,16 @@ export default class Dashboard extends React.Component {
 
     createGroup = async () => {
       var state = await new ApiInterface({}).get('controller/start')
-      state.isLoggedIn = true
+      //replace this shit with redux. have isLoggedIn live in ONE place
+      state.isLoggedIn = this.props.location.state.isLoggedIn
       return state
     }
 
     findGroup = async () => {
       const path = 'listener/join?group=' + this.state.group
-      return await new ApiInterface({}).get(path)
+      var state = await new ApiInterface({}).get(path)
+      state.isLoggedIn = this.props.location.state.isLoggedIn
+      return state
     }
 
     handlePlay = async () => {
