@@ -1,6 +1,8 @@
 from rest_framework import generics
 
+from playmaker.models import User
 from playmaker.shared.serializers import ParamSerializer
+from playmaker.shared.utils import NotLoggedInException
 
 
 class SecureAPIView(generics.GenericAPIView):
@@ -15,3 +17,11 @@ class SecureAPIView(generics.GenericAPIView):
         if serializer.is_valid(raise_exception=False):
             return serializer.data
         return {}
+
+    def get(self, request, *args, **kwargs):
+        if not isinstance(request.user, User):
+            raise NotLoggedInException
+
+    def post(self, request, *args, **kwargs):
+        if not isinstance(request.user, User):
+            raise NotLoggedInException

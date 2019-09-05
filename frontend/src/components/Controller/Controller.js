@@ -19,9 +19,6 @@ export default class Controller extends React.Component {
             searchResults: {'tracks':[]},
             recommendationResults: [],
             queue: [],
-            isFetching: true,
-            controller: this.props.location.state.controller,
-            group: this.props.location.state.group,
             query: ''
         }
         this.searchHandler = this.searchHandler.bind(this)
@@ -34,9 +31,7 @@ export default class Controller extends React.Component {
     }
 
     initInterfaces = async ( ) => {
-        this.controller = new ControllerInterface( {
-            controller : this.state.controller
-        } )
+        this.controller = new ControllerInterface()
     }
 
     refreshQueue = async ( ) => {
@@ -75,6 +70,9 @@ export default class Controller extends React.Component {
     }
 
     render() {
+        if (!this.props.location.state || !this.props.location.state.isLoggedIn) {
+          this.props.history.push('/login')
+        }
         return (
             <React.Fragment>
                 <Header></Header>

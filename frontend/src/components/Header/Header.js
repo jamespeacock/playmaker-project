@@ -7,36 +7,37 @@ const uuid = require('uuid/v4')
 
 export default class Header extends React.Component {
 
-  constructor (props) {
-    super(props)
-    
-    this.state = {
-      isLoggedIn:true
-    }
-    this.logout = this.logout.bind(this)
-  }
+    static defaultProps = {
+          history: {
+            push: () => {}
+          },
+      }
 
-  logout = async () => {
-      await new ApiInterface().logout()
-      this.setState({isLoggedIn:false})
-  }
-
-  render() {
-    if (this.state.isLoggedIn) {
-      return (
-          <header className="header-container">
-              <img className="logo" alt="playmkr logo" src={logo}/>
-              <button
-                key={uuid()}
-                onClick={this.logout}>
-                Log Out
-            </button>
-          </header>
-      )
-    } else {
-      return (
-        <Redirect to="/login"/>
-      )
+    constructor (props) {
+      super(props)
+      this.logout = this.logout.bind(this)
     }
-  }
+
+    //This logic needs to live somewhere shared - how to get this to affect other components state??
+    logout = async () => {
+        console.log('logout clicked')
+        await new ApiInterface().logout()
+        this.props.history.push({
+            pathname: '/login',
+            state: {isLoggedIn: false}
+        })
+    }
+
+    render() {
+        return (
+            <header className="header-container">
+                <img className="logo" alt="playmkr logo" src={logo}/>
+                <button
+                  key={uuid()}
+                  onClick={this.logout}>
+                  Log Out
+              </button>
+            </header>
+        )
+    }
 }

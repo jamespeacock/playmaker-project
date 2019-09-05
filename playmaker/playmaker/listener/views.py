@@ -46,6 +46,9 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         return DeviceSerializer
 
     def get(self, request, *args, **kwargs):
+        not_authed_resp = super(DevicesView, self).get(request)
+        if not_authed_resp:
+            return not_authed_resp
         actor = request.user.actor
         ser = self.get_serializer_class()
         if not actor.devices.first():

@@ -6,7 +6,7 @@ from playmaker.controller.models import SongInQueue
 from playmaker.controller.visitors import Action
 from playmaker.models import User
 from playmaker.songs.models import Song
-from playmaker.songs.serializers import SongSerializer
+from playmaker.songs.serializers import QueuedSongSerializer
 from playmaker.songs.services import fetch_songs
 
 TOP_ARTISTS = "current_user_top_artists"
@@ -75,7 +75,7 @@ def as_views(items, serializer):
 def get_queue(params, user):
 
     if user.actor:
-        return as_views(user.actor.queue.contents(), SongSerializer)
+        return as_views(user.actor.queue.contents(), QueuedSongSerializer)
     else:
         print("User does not have an associated listener or controller.")
         return []

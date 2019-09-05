@@ -1,10 +1,5 @@
 from collections import defaultdict
-
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-
-# TODO implement internal session based &  token auth
-
 from playmaker.controller import services
 from playmaker.controller.contants import URIS, CONTROLLER, ADD, REMOVE, URI
 from playmaker.controller.models import Controller, Group, Queue
@@ -18,8 +13,11 @@ from playmaker.shared.views import SecureAPIView
 class ControllerView(SecureAPIView):
 
     def get(self, request):
-        if not services.user_matches_actor(request.user, request.query_params.get(CONTROLLER), Controller):
-            return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
+        super(ControllerView, self).get(request)
+        # Leaving this instead of deleting it in case it does become required to pass in controller ID for action
+        # instead of just looking it up via user.
+        # if not services.user_matches_actor(request.user, request.query_params.get(CONTROLLER), Controller):
+        #     return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
 
 
 # Create a group
@@ -27,8 +25,9 @@ class ControllerView(SecureAPIView):
 class StartListeningView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
+        super(StartListeningView, self).get(request)
         controller, created = Controller.objects.get_or_create(me=request.user)
-        Queue.objects.create(controller=controller)
+        Queue.objects.get_or_create(controller=controller)
         group, created = Group.objects.get_or_create(controller=controller)
         return JsonResponse({"group": group.id, "controller": controller.id})
 
@@ -70,7 +69,6 @@ class NextSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
         super(NextSongView, self).get(request)
-
         next_song = next_in_queue(request.user.actor.queue)
         if next_song:
             failed_results = [r for r in services.perform_action(
@@ -90,6 +88,9 @@ class NextSongView(ControllerView):
 class SeekSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
+        not_authed_resp = super(SeekSongView, self).get(request)
+        if not_authed_resp:
+            return not_authed_resp
         pos = request.query_params.get('position', None)
         if pos:
             failed_results = [r for r in services.perform_action(
@@ -112,6 +113,7 @@ class QueueActionView(ControllerView):
     Returns current list of songs in queue.
     """
     def get(self, request, action=None, *args, **kwargs):
+        super(QueueActionView, self).get(request)
         params = request.query_params
         songs = services.get_queue(params, request.user)
         # post filter songs to make sure each song has just one position
@@ -122,17 +124,14 @@ class QueueActionView(ControllerView):
 
         return JsonResponse(songs, safe=False)
 
-
     """
     Performs specified action on current queue for current room/group/controller.
     @:param action - string: action to perform
     """
     def post(self, request, action=None, *args, **kwargs):
         # TODO how to validate contents of request body
+        super(QueueActionView, self).post(request)
         body = request.data
-        c_id = body.get(CONTROLLER)
-        if not services.user_matches_actor(request.user, c_id, Controller):
-            return JsonResponse("You cannot perform this action for controller specified.", status=401, safe=False)
         if action == ADD:
             res = services.add_to_queue(request.user.uuid, body.get(URIS))
         elif action == REMOVE:
@@ -142,22 +141,12 @@ class QueueActionView(ControllerView):
             JsonResponse("That action could not be completed.", status=500, safe=False)
 
 
-# Seek to section of users current song
-# Queue Song, Play Song @ timestamp?
-
 # Fetch Playlists
 
 # Fetch Recommendations
 #  - filter recs
 
 # Add Song to Playlist
-
-# Save Song
-
-# HOW TO Crossfade into other songs?
-
-# Shuffle
-
 
 # Get devices / Transfer playback
 #?

@@ -13,11 +13,18 @@ class ArtistSerializer(serializers.ModelSerializer):
 
 class SongSerializer(serializers.ModelSerializer):
     artists = ArtistSerializer(many=True)
+
+    class Meta:
+        model = Song
+        fields = ['name', 'artists', 'uri']
+
+
+class QueuedSongSerializer(SongSerializer):
     in_q = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field='position'
-    )
+            many=True,
+            read_only=True,
+            slug_field='position'
+        )
 
     class Meta:
         model = Song

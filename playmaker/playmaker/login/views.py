@@ -35,15 +35,15 @@ class SpotifyLoginView(LoginView):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         # TODO check if request already has user and is logged in.
-        body = json.loads(request.body)
-        frontend_redirect = body.get('redirect', 'login')
+        data = request.data
+        frontend_redirect = data.get('redirect', 'login')
         if is_logged_in(request):
             # User is already logged in --> send to dashboard.
             return redirect(FRONTEND + "/" + frontend_redirect)
 
         login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
         assert login.status_code == 200
-        username = body.get('username')
+        username = data.get('username')
         return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
 
@@ -75,4 +75,7 @@ class LogoutView(LogoutView):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         super(LogoutView, self).post(request, *args, **kwargs)
-        return redirect(FRONTEND + "/login")
+        # Not used, but example for how to fix CORS null Origin on redirect
+        response = redirect(FRONTEND + "/login")
+        response['Origin'] = FRONTEND
+        return response

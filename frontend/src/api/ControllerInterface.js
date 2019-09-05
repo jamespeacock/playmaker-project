@@ -10,8 +10,6 @@ export default class ControllerInterface  {
   constructor( options ) {
     // bind options to interface and then deconstruct them.
     this.options = options
-    const {controller = '-1'} = this.options
-    this.controller = controller
     console.log('controller interface: ' + this.controller)
     this.apiInterface = new ApiInterface({})
 
@@ -19,28 +17,28 @@ export default class ControllerInterface  {
 
  /* Get Current Room Queue */
   queue = async ( ) => {
-    return await this.apiInterface.get('controller/queue?controller='+this.controller)
+    return await this.apiInterface.get('controller/queue')
   }
 
   add = async ( uri ) => {
     return await this.apiInterface.post('controller/queue/add',
-     {'controller':this.controller,'uris': [uri]}
+     {'uris': [uri]}
      )
   }
 
   remove = async ( uri, pos ) => {
     return await this.apiInterface.post('controller/queue/remove',
-     {'controller':this.controller, 'uris': [uri], 'positions': [pos]}
+     {'uris': [uri], 'positions': [pos]}
      )
   }
 
-  /* Actions Section */
+  /* Actions Section TODO these should all be PUT*/
   next = async ( ) => {
-    return await this.apiInterface.get('controller/next?controller='+this.controller)
+    return await this.apiInterface.get('controller/next')
   }
 
   pause = async ( ) => {
-    return await this.apiInterface.get('controller/pause?controller='+this.controller)
+    return await this.apiInterface.get('controller/pause')
   }
 
   play = async ( uri ) => {
@@ -51,7 +49,7 @@ export default class ControllerInterface  {
 
   seek = async ( position ) => {
     return await this.apiInterface.get(
-      'controller/seek?controller={0}&position={1}'.format(this.controller, position)
+      'controller/seek?position='+position
     )
   }
 

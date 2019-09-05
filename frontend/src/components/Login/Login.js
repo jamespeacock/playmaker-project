@@ -65,9 +65,11 @@ export default class Login extends React.Component {
         console.log('rendering login')
         if (this.state.isLoggedIn) {
           console.log('jumping to dashboard.')
-          return <Redirect
-            to="/dashboard"
-            />
+          //TODO jump to whatever is in "next" from initial request e.g. a room/dashboard/etc.
+          this.props.history.push({
+              pathname: '/dashboard',
+              state: {isLoggedIn: true}
+          })
         }
         return (
             <React.Fragment>

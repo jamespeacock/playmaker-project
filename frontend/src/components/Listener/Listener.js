@@ -12,7 +12,7 @@ export default class Listener extends React.Component {
     constructor( props ) {
         super( props )
         this.state = {
-            listener: this.props.location.state.listener,
+            listener: (this.props.location.state) ? this.props.location.state.listener: '',
             songs: [],
             devices: [],
             isFetching: true
@@ -40,6 +40,9 @@ export default class Listener extends React.Component {
     }
 
     render() {
+        if (!this.props.location.state || !this.props.location.state.isLoggedIn) {
+          this.props.history.push('/login')
+        }
         return (
             <React.Fragment>
                 <Header></Header>

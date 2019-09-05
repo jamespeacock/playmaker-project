@@ -16,11 +16,13 @@ class SPModel(models.Model):
 
     @staticmethod
     def from_response(spotify_resp, cls, save=False, serializer=None, query=False):
-        response_data = spotify_resp[cls.get_key()]
+        data = spotify_resp[cls.get_key()]
 
         if query:
-            data = [cls.from_sp(save=save, **item) for item in response_data['items']]
-            return {cls.get_key(): [serializer(d).data if serializer else d for d in data],
-                    "next": response_data['next']}
-        data = [cls.from_sp(save=save, **obj) for obj in response_data]
-        return [serializer(d).data if serializer else d for d in data]
+            # Is it necessary to serialize this into an object just for querying? 
+            # data = [cls.from_sp(save=save, **item) for item in data['items']]
+            return {cls.get_key(): [serializer(d).data for d in data['items']] if serializer else data['items'],
+                    "next": data['next']}
+        else:
+            data = [cls.from_sp(save=save, **obj) for obj in data]
+            return [serializer(d).data if serializer else d for d in data]

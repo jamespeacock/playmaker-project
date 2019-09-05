@@ -5,7 +5,7 @@ import './dashboard.css'
 const uuid = require('uuid/v4')
 
 
-export default class Login extends React.Component {
+export default class Dashboard extends React.Component {
 
     static defaultProps = {
         history: {
@@ -16,12 +16,14 @@ export default class Login extends React.Component {
     constructor ( props ) {
       super(props)
       this.state = {
-            group : ''
-        }
+          group : ''
+      }
     }
 
     createGroup = async () => {
-      return await new ApiInterface({}).get('controller/start')
+      var state = await new ApiInterface({}).get('controller/start')
+      state.isLoggedIn = true
+      return state
     }
 
     findGroup = async () => {
@@ -52,6 +54,9 @@ export default class Login extends React.Component {
 
     render() {
         console.log('rendering dashboard')
+        if (!this.props.location.state || this.props.location.state.isLoggedIn != true) {
+          this.props.history.push('/login')
+        }
         return (
             <React.Fragment>
                 <Header></Header>
