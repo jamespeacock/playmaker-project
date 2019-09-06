@@ -22,11 +22,12 @@ class SpotifyRegisterView(RegisterView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        body = json.loads(request.body)
+        body = request.data
         username = body.get('username')
         frontend_redirect = body.get('redirect', 'login')
         signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
-        assert signup.status_code == 201
+        if signup.status_code != 201:
+            return JsonResponse(signup, safe=False, status=400)
         return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
 

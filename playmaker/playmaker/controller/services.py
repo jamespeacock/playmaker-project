@@ -46,6 +46,7 @@ def perform_action(user, action, *args, **kwargs):
     listeners = [listener for listener in user.actor.listeners if can_perform_action(user, listener, str(action))]
 
     # Filter out listeners without active devices
+    # Not sure i want to do this. Just verify all listeners ahve a selected device. Notify those who dont?
     listeners = [l for l in listeners if l.refresh()]
 
     # Time how long this takes - are either Spotipy and ActionVisitor being instanced?

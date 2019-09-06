@@ -77,7 +77,7 @@ class NextSongView(ControllerView):
             failed_results = [r for r in services.perform_action(
                 request.user,
                 Action.PLAY,
-                uris=next_song) if r]
+                uris=[next_song.uri]) if r]
         else:
             pass
             # Handle empty queue

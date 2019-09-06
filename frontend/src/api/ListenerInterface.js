@@ -19,7 +19,7 @@ export default class ListenerInterface  {
   }
 
   setDevice = async ( deviceId ) => {
-    return await this.apiInterface.post('listener/device', {'device': deviceId})
+    return await this.apiInterface.post('listener/devices', {'device': deviceId})
   }
 
 }

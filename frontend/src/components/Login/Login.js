@@ -50,11 +50,13 @@ export default class Login extends React.Component {
         }
     }
 
-    updateUsername = ( username ) => {
+    updateUsername = ( keyInput ) => {
+        const username = keyInput.target.value
         this.setState( { username } )
     }
 
-    updatePassword = ( password ) => {
+    updatePassword = ( keyInput ) => {
+        const password = keyInput.target.value
         this.setState( { password } )
     }
 
@@ -84,7 +86,7 @@ export default class Login extends React.Component {
                                 className="form-input"
                                 placeholder="rave_shepherd"
                                 required
-                                onChange={ keyInput => this.updateUsername( keyInput.target.value ) }>
+                                onChange={this.updateUsername}>
                             </input>
                         </div>
                         <div className="password-container">
@@ -95,7 +97,7 @@ export default class Login extends React.Component {
                                 className="form-input"
                                 required
                                 placeholder="*******"
-                                onChange={ keyInput => this.updatePassword( keyInput.target.value ) }>
+                                onChange={this.updatePassword}>
                             </input>
                         </div>
 

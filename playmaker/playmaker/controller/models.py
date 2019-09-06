@@ -66,13 +66,14 @@ class Listener(models.Model):
         return self.group.queue
 
     def _refresh_devices(self):
-        if self.devices is None or self.devices.filter(is_active=True).first() is None:
+        if self.devices is None or self.devices.filter(is_selected=True).first() is None:
             for d in self.me.sp.devices()[Device.get_key()]:
                 d[LISTENER] = self
                 Device.from_sp(save=True, **d)
+        return True
 
     def refresh(self):
-        self._refresh_devices()
+        return self._refresh_devices()
 
     @property
     def active_device(self):
@@ -105,6 +106,7 @@ class Listener(models.Model):
 
 class Device(SPModel):
     listener = models.ForeignKey(Listener, related_name='devices', on_delete=models.CASCADE)
+    is_selected = models.BooleanField()
     is_active = models.BooleanField()
     is_private_session = models.BooleanField()
     is_restricted = models.BooleanField()

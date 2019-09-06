@@ -23,6 +23,20 @@ export default class Controller extends React.Component {
         }
         this.searchHandler = this.searchHandler.bind(this)
         this.addToQueueHandler = this.addToQueueHandler.bind(this)
+        this.handleNext = this.handleNext.bind(this)
+        this.handlePause = this.handlePause.bind(this)
+        // this.handlePlay = this.handlePlay.bind(this)
+        // this.handleSeek = this.handleSeek.bind(this)
+        
+    }
+
+    handleNext() {
+      this.controller.next()
+      this.refreshQueue()
+    }
+
+    handlePause() {
+      this.controller.pause()
     }
 
     componentDidMount() {
@@ -79,7 +93,7 @@ export default class Controller extends React.Component {
                             <SongTable 
                             songs={this.state.queue}
                             withButtons={true}
-                            handleAdd={(row) => this.removeFromQueueHandler(row)}/>
+                            handleAdd={this.removeFromQueueHandler}/>
                         </section>
 
                         <section className="search-container">
@@ -88,7 +102,7 @@ export default class Controller extends React.Component {
                             <SongTable 
                               songs={this.state.searchResults.tracks}
                               withButtons={true}
-                              handleAdd={(row) => this.addToQueueHandler(row)}/>
+                              handleAdd={this.addToQueueHandler}/>
                         </section>
 
                     </div>
