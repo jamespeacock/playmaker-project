@@ -1,4 +1,5 @@
 import React from 'react'
+import { Redirect } from 'react-router-dom'
 import Header from '../Header/Header'
 import ApiInterface from '../../api/ApiInterface'
 import './dashboard.css'
@@ -15,6 +16,7 @@ export default class Dashboard extends React.Component {
 
     constructor ( props ) {
       super(props)
+      console.log(this.props)
       this.state = {
           group : ''
       }
@@ -57,8 +59,8 @@ export default class Dashboard extends React.Component {
 
     render() {
         console.log('rendering dashboard')
-        if (!this.props.location.state || this.props.location.state.isLoggedIn != true) {
-          this.props.history.push('/login')
+        if (!this.props.isLoggedIn) {
+          return <Redirect to='/login' />
         }
         return (
             <React.Fragment>

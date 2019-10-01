@@ -74,7 +74,7 @@ export default class Signup extends React.Component {
                     <form
                         className="login-form"
                         onSubmit={ submitEvent => this.loginInterfaceHandler( submitEvent ) }>
-                        <legend><h2 className="form-legend">Login</h2></legend>
+                        <legend><h2 className="form-legend">Sign Up</h2></legend>
                         <div className="username-container">
                             <label htmlFor="name" className="input-label">Name:</label>
                             <input  
@@ -126,11 +126,10 @@ export default class Signup extends React.Component {
                                 onChange={ keyInput => this.updatePassword2( keyInput.target.value ) }>
                             </input>
                         </div>
-
                         <div className="form-submit-container">
                             <input 
                                 type="submit" 
-                                value="Login" 
+                                value="Create Account" 
                                 className="submit-button">
                             </input>
                         </div>

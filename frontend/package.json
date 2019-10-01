@@ -20,6 +20,8 @@
     "react-scripts": "3.0.1",
     "reactide-config": "^1.0.2",
     "redux": "^4.0.4",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
     "throttle-debounce": "^2.1.0",
     "uuid": "^3.3.2"
   },

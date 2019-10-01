@@ -1,11 +1,11 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React  from 'react';
+import { render } from 'react-dom'
 import { BrowserRouter as Router } from 'react-router-dom';
-// import './index.css';
-import './spotify.scss';
-import App from './App';
+import './index.css';
+// import './spotify.scss';
+import Root from './Root';
 
-ReactDOM.render(
-    <App />,
+render(
+    <Root />,
     document.getElementById('root')
 )

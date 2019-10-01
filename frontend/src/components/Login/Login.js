@@ -17,7 +17,7 @@ export default class Login extends React.Component {
     constructor( props ) {
         super( props )
         
-        this.loginInterface = new ApiInterface( {} )
+        this.loginInterface = new ApiInterface()
         
         this.state = {
             username : '', 
@@ -25,15 +25,6 @@ export default class Login extends React.Component {
             isLoggedIn: false,
         }
 
-    }
-
-    checkLoggedIn = async () => {
-        const isLoggedIn = await this.loginInterface.isLoggedIn()
-        this.setState({isLoggedIn})
-    }
-
-    componentWillMount () {
-        this.checkLoggedIn()
     }
 
     loginInterfaceHandler = async ( evt ) => {
@@ -62,13 +53,11 @@ export default class Login extends React.Component {
 
     render() {
         console.log('rendering login')
-        if (this.state.isLoggedIn) {
+        console.log(this.props)
+        if (this.props.isLoggedIn) {
           console.log('jumping to dashboard.')
           //TODO jump to whatever is in "next" from initial request e.g. a room/dashboard/etc.
-          this.props.history.push({
-              pathname: '/dashboard',
-              state: {isLoggedIn: true}
-          })
+          return <Redirect to='/dashboard' />
         }
         return (
             <React.Fragment>

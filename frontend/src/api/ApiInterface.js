@@ -11,7 +11,6 @@ export default class ApiInterface  {
     axios.defaults.withCredentials = true;
     // import api configuration.
     this.API_BASE = config.API_BASE
-    console.log(this.API_BASE)
 
     // bind options to interface and then deconstruct them.
     this.options = options
@@ -56,12 +55,15 @@ export default class ApiInterface  {
       })
   }
 
-  isLoggedIn = async (url, body) => {
+  async isLoggedIn() {
+    console.log('in api')
     return await this.axios.get( 'has_user' )
       .then((res) => {
         if ( !res ) {
+          // setLoggedIn(false)
           return false
         }
+        // setLoggedIn(res.data.isLoggedIn)
         return res.data.isLoggedIn
       })
   }
