@@ -1,11 +1,11 @@
-import json
-
+from time import sleep
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
+from rest_framework.response import Response
 
 from api.settings import FRONTEND
 from playmaker.login import services
@@ -15,7 +15,7 @@ from playmaker.shared.views import SecureAPIView
 
 
 def is_logged_in(request):
-    return request.user and hasattr(request.user, 'token') and request.user.token
+    return request.user and hasattr(request.user, 'token') and len(request.user.token)
 
 
 class SpotifyRegisterView(RegisterView):
@@ -68,7 +68,13 @@ class IsLoggedInView(SecureAPIView):
 
     @csrf_exempt
     def get(self, request, *args, **kwargs):
-        return JsonResponse({'isLoggedIn': is_logged_in(request)})
+        super(IsLoggedInView, self).get(request)
+        return Response({'user': {
+            'username': request.user.username,
+            'sp_username': request.user.sp_username,
+            'sp_id': request.user.sp_id,
+            'isLoggedIn': True}
+        })
 
 
 class LogoutView(LogoutView):

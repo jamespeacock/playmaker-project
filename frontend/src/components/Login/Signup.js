@@ -69,7 +69,7 @@ export default class Signup extends React.Component {
         console.log('rendering login')
         return (
             <React.Fragment>
-                <Header></Header>
+                <Header isLoggedIn={this.props.isLoggedIn} ></Header>
                 <main className="login-area">
                     <form
                         className="login-form"

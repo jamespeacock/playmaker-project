@@ -19,9 +19,11 @@ class SecureAPIView(generics.GenericAPIView):
         return {}
 
     def get(self, request, *args, **kwargs):
+        # This check if only true if the user has a valid token and is therefore not an AnonymousUser
         if not isinstance(request.user, User):
             raise NotLoggedInException
 
     def post(self, request, *args, **kwargs):
+        # This check if only true if the user has a valid token and is therefore not an AnonymousUser
         if not isinstance(request.user, User):
             raise NotLoggedInException

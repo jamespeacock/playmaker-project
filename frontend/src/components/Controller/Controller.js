@@ -1,16 +1,15 @@
 import React from 'react'
 import Header from '../Header/Header'
+import { Redirect, withRouter } from 'react-router-dom'
 import './controller.css'
-import ApiInterface from '../../api/ApiInterface'
 import ControllerInterface from '../../api/ControllerInterface'
 import SongTable from '../shared/SongTable'
 import SearchBar from '../shared/Search'
 
-import { debounce } from "throttle-debounce";
 
 const uuid = require('uuid/v4')
 
-export default class Controller extends React.Component {
+class Controller extends React.Component {
 
     constructor( props ) {
         super( props )
@@ -25,8 +24,8 @@ export default class Controller extends React.Component {
         this.addToQueueHandler = this.addToQueueHandler.bind(this)
         this.handleNext = this.handleNext.bind(this)
         this.handlePause = this.handlePause.bind(this)
-        // this.handlePlay = this.handlePlay.bind(this)
-        // this.handleSeek = this.handleSeek.bind(this)
+        this.handlePlay = this.handlePlay.bind(this)
+        this.handleSeek = this.handleSeek.bind(this)
         
     }
 
@@ -39,6 +38,15 @@ export default class Controller extends React.Component {
       this.controller.pause()
     }
 
+    handlePlay( uri ) {
+        this.controller.play(uri)
+    }
+
+    handleSeek( position ) {
+        this.controller.seek(position)
+    }
+
+
     componentDidMount() {
         this.initInterfaces()
         this.refreshQueue()
@@ -50,10 +58,12 @@ export default class Controller extends React.Component {
 
     refreshQueue = async ( ) => {
         const songs = await this.controller.queue()
+        //dispatch update queue
         this.setState( { queue: songs } )
     }
 
     searchHandler(searchResults) {
+        //dispatch update search results
         this.setState({searchResults})
     }
 
@@ -80,8 +90,8 @@ export default class Controller extends React.Component {
     }
 
     render() {
-        if (!this.props.location.state || !this.props.location.state.isLoggedIn) {
-          this.props.history.push('/login')
+        if (!this.props.user.isLoggedIn) {
+            return <Redirect to='/login' />
         }
         return (
             <React.Fragment>
@@ -139,3 +149,5 @@ export default class Controller extends React.Component {
         )
     }
 }
+
+export default withRouter(Controller);

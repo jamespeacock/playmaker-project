@@ -19,6 +19,7 @@ export default class ApiInterface  {
     this.axios = axios.create({
       baseURL: `${this.API_BASE}`,
       timeout: 1500,
+      origin: `${this.API_BASE}`,
       headers: {'Content-Type': 'application/json'}
     });
 
@@ -59,12 +60,14 @@ export default class ApiInterface  {
     console.log('in api')
     return await this.axios.get( 'has_user' )
       .then((res) => {
-        if ( !res ) {
-          // setLoggedIn(false)
-          return false
+        if (res.data.user) {
+          return res.data.user
+        } else {
+          return {isLoggedIn: false}
         }
-        // setLoggedIn(res.data.isLoggedIn)
-        return res.data.isLoggedIn
+      })
+      .catch((res) => {
+        return {isLoggedIn: false}
       })
   }
 

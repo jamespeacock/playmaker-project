@@ -63,9 +63,12 @@ class User(auth_models.AbstractUser):
     @property
     def info(self):
         me = self.sp.me()
+        null_username = self.sp_username is None
         self.sp_id = me.get(ID)
         # TODO make sp_username unique and throw error here. Give user option to replace user? Maybe don't make it unique but then that can cause other probs
         self.sp_username = me.get('display_name')
+        if null_username:
+            self.save()
         return me
 
     @property

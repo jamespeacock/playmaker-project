@@ -1,24 +1,23 @@
 import { combineReducers } from 'redux'
 import {CHECK_LOGGED_IN} from './actions/actions.js'
 
-
-//Define reducers here
-function isLoggedIn(state = false, action) {
-  switch (action.type) {
-    case CHECK_LOGGED_IN:
-      return action.isLoggedIn
-      // const retLoggedIn = action.checkLoggedIn(setLoggedIn)
-      // console.log("Returned from isLoggedIn:")
-      // console.log(retLoggedIn)
-      // return retLoggedIn
-    default:
-      return state
-  }
-  
+const defaultUser = {
+    isLoggedIn: false
 }
 
-const rootReducer = combineReducers({
-  isLoggedIn
+//Define reducers here
+function user(state = defaultUser, action) {
+  switch (action.type) {
+    case CHECK_LOGGED_IN:
+      return Object.assign({}, state, action.user)
+    default:
+      return defaultUser
+  }
+}
+
+
+const playmakerApp = combineReducers({
+  user
 })
 
-export default rootReducer
+export default playmakerApp

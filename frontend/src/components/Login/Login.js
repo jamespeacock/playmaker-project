@@ -21,8 +21,7 @@ export default class Login extends React.Component {
         
         this.state = {
             username : '', 
-            password : '',
-            isLoggedIn: false,
+            password : ''
         }
 
     }
@@ -30,7 +29,6 @@ export default class Login extends React.Component {
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault()
         const { username, password } = this.state
-        const { history } = this.props
         const resp = await this.loginInterface.fetchLoginRedirect(
           'login/',
           { username, password, redirect: 'dashboard' })
@@ -53,15 +51,35 @@ export default class Login extends React.Component {
 
     render() {
         console.log('rendering login')
-        console.log(this.props)
-        if (this.props.isLoggedIn) {
-          console.log('jumping to dashboard.')
+        console.log(this.props.user.isLoggedIn)
+        console.log(this.props.user)
+        if (this.props.user.isLoggedIn) {
           //TODO jump to whatever is in "next" from initial request e.g. a room/dashboard/etc.
           return <Redirect to='/dashboard' />
         }
+        // <Form>
+        //   <Form.Group controlId="formBasicEmail">
+        //     <Form.Label>Email address</Form.Label>
+        //     <Form.Control type="email" placeholder="Enter email" />
+        //     <Form.Text className="text-muted">
+        //       We'll never share your email with anyone else.
+        //     </Form.Text>
+        //   </Form.Group>
+
+        //   <Form.Group controlId="formBasicPassword">
+        //     <Form.Label>Password</Form.Label>
+        //     <Form.Control type="password" placeholder="Password" />
+        //   </Form.Group>
+        //   <Form.Group controlId="formBasicCheckbox">
+        //     <Form.Check type="checkbox" label="Check me out" />
+        //   </Form.Group>
+        //   <Button variant="primary" type="submit">
+        //     Submit
+        //   </Button>
+        // </Form>
         return (
             <React.Fragment>
-                <Header></Header>
+                <Header user={this.props.user}></Header>
                 <main className="login-area">
                     <form
                         className="login-form"

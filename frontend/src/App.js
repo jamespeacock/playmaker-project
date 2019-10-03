@@ -2,26 +2,24 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { Route, Switch, BrowserRouter } from 'react-router-dom'
+import AppContext from './components/AppContext'
 import Controller from './components/Controller/Controller'
 import Login from './components/Login/Login'
 import Signup from './components/Login/Signup'
 import Dashboard from './components/Login/Dashboard'
 import Listener from './components/Listener/Listener'
 import checkLoggedIn from './actions/actions'
-import {CHECK_LOGGED_IN} from './actions/actions.js'
 import './App.css'
+import ApiInterface from "./api/ApiInterface";
 require('dotenv').config()
+
+//This logic needs to live somewhere shared - how to get this to affect other components state??
 
 class App extends React.Component {
 
   constructor(props) {
     super(props)
   }
-
-  // checkLoggedIn = async () => {
-  //     const isLoggedIn = await this.loginInterface.isLoggedIn()
-  //     this.setState({isLoggedIn})
-  // }
 
   componentWillMount () {
     // this.setState(store.getState());
@@ -31,56 +29,63 @@ class App extends React.Component {
     dispatch(checkLoggedIn())
   }
 
+  logout = async () => {
+    console.log('logout clicked')
+    await new ApiInterface().logout()
+    this.props.dispatch(checkLoggedIn())
+  }
+
   render() {
-    console.log('rendering app')
+    console.log('rendering app with props')
     console.log(this.props)
     return (
-    <BrowserRouter>
-      <Switch>
-        <Route
-            path='/dashboard'
-            render={() => <Dashboard isLoggedIn={this.props.isLoggedIn} />}>
-        </Route>
-        <Route
-            path='/play'
-            render={() => <Controller isLoggedIn={this.props.isLoggedIn} />}>
-        </Route>
-        <Route
-            path='/listen'
-            render={() => <Listener isLoggedIn={this.props.isLoggedIn} />}>
-        </Route>
-        <Route
-            path='/login'
-            render={() => <Login isLoggedIn={this.props.isLoggedIn} />}>
-        </Route>
-        <Route
-            path='/signup'
-            render={() => <Signup isLoggedIn={this.props.isLoggedIn} />}>
-        </Route>
-      </Switch>
-    </BrowserRouter>
+    <AppContext.Provider value={{value:this.logout}}>
+      <BrowserRouter>
+        <Switch>
+          <Route
+              path='/dashboard'
+              render={() => <Dashboard user={this.props.user} />}>
+          </Route>
+          <Route
+              path='/play'
+              render={() => <Controller user={this.props.user} />}>
+          </Route>
+          <Route
+              path='/listen'
+              render={() => <Listener user={this.props.user} />}>
+          </Route>
+          <Route
+              path='/login'
+              render={() => <Login user={this.props.user} />}>
+          </Route>
+          <Route
+              path='/signup'
+              render={() => <Signup user={this.props.user} />}>
+          </Route>
+        </Switch>
+      </BrowserRouter>
+    </AppContext.Provider>
     )
   }
 }
 
 App.propTypes = {
-  isLoggedIn: PropTypes.bool.isRequired,
+  user: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
-  // const { selectedSubreddit, postsBySubreddit } = state
+  const { user } = state
   // const { isFetching, lastUpdated, items: posts } = postsBySubreddit[
   //   selectedSubreddit
   // ] || {
   //   isFetching: true,
   //   items: []
   // }
-  const {isLoggedIn} = state;
-  console.log('inAPP is logged in?')
-  console.log(isLoggedIn)
+  console.log('mapping state to props')
+  console.log(state)
   return {
-    isLoggedIn
+    user
   }
 }
 
