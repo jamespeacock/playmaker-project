@@ -1,4 +1,3 @@
-from time import sleep
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect

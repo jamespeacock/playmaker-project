@@ -10,7 +10,6 @@ export default class ControllerInterface  {
   constructor( options ) {
     // bind options to interface and then deconstruct them.
     this.options = options
-    console.log('controller interface: ' + this.controller)
     this.apiInterface = new ApiInterface({})
 
   }

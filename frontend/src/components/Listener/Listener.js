@@ -1,11 +1,11 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
-import SongsInterface from '../../api/SongsInterface'
 import DeviceTable from '../shared/DeviceTable'
 import SongTable from '../shared/SongTable'
 import Header from '../Header/Header'
 import './listener.css'
-const uuid = require('uuid/v4')
+import {Redirect} from "react-router-dom";
+import {Button} from "react-bootstrap";
 
 export default class Listener extends React.Component {
 
@@ -15,15 +15,15 @@ export default class Listener extends React.Component {
             songs: [],
             devices: []
         }
+        this.listener = new ListenerInterface()
     }
 
     componentDidMount() {
-        this.initListener()
+        this.refreshDevices()
         this.getAndLoadSongs()
     }
 
-    initListener = async ( ) => {
-        this.listener = new ListenerInterface()
+    refreshDevices = async ( ) => {
         this.state.devices = await this.listener.devices()
     }
 
@@ -37,8 +37,8 @@ export default class Listener extends React.Component {
     }
 
     render() {
-        if (!this.props.location.state || !this.props.location.state.isLoggedIn) {
-          this.props.history.push('/login')
+        if (!this.props.user.isLoggedIn) {
+            return <Redirect to='/login' />
         }
         return (
             <React.Fragment>
@@ -52,6 +52,7 @@ export default class Listener extends React.Component {
                     </section>
                     <section className="listener-devices-container">
                         <h2 className="listener-devices-title">Your Devices</h2>
+                        <Button onClick={this.refreshDevices}>Refresh Devices</Button>
                         <DeviceTable
                         devices={this.state.devices}
                         selectDeviceHandler={(deviceRow) => this.setDevice(deviceRow)} />

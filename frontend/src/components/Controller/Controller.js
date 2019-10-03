@@ -5,6 +5,7 @@ import './controller.css'
 import ControllerInterface from '../../api/ControllerInterface'
 import SongTable from '../shared/SongTable'
 import SearchBar from '../shared/Search'
+import {Card} from "react-bootstrap";
 
 
 const uuid = require('uuid/v4')
@@ -13,12 +14,14 @@ class Controller extends React.Component {
 
     constructor( props ) {
         super( props )
+        console.log(props)
         //TODO handle what happens if this page is loaded w/o controller + group
         this.state = {
             searchResults: {'tracks':[]},
             recommendationResults: [],
             queue: [],
-            query: ''
+            query: '',
+            group: this.props.location.state.group,
         }
         this.searchHandler = this.searchHandler.bind(this)
         this.addToQueueHandler = this.addToQueueHandler.bind(this)
@@ -29,8 +32,8 @@ class Controller extends React.Component {
         
     }
 
-    handleNext() {
-      this.controller.next()
+    async handleNext() {
+      await this.controller.next()
       this.refreshQueue()
     }
 
@@ -96,6 +99,13 @@ class Controller extends React.Component {
         return (
             <React.Fragment>
                 <Header></Header>
+                <Card style={{ width: '18rem' }}>
+                    <Card.Body>
+                        <Card.Text style={{color: 'black'}}>
+                            {this.state.group}
+                        </Card.Text>
+                    </Card.Body>
+                </Card>
                 <main className="main-area">
                     <div className="col-container">
                         <section className="controller-queue-container">

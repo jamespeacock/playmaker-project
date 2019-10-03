@@ -7,6 +7,7 @@ export default class SongTable extends React.Component {
   
     constructor( props ) {
       super(props)
+      console.log(this.props)
       this.columns = [{
         dataField: 'uri',
         text: '',

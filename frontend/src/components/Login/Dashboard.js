@@ -18,6 +18,7 @@ class Dashboard extends React.Component {
 
     createGroup = async () => {
       var state = await new ApiInterface({}).get('controller/start')
+      console.log(state)
       return state
     }
 
@@ -28,7 +29,6 @@ class Dashboard extends React.Component {
     }
 
     handlePlay = async () => {
-        const { history } = this.props
         console.log('play')
         this.props.history.push({
           pathname: '/play',
@@ -37,8 +37,8 @@ class Dashboard extends React.Component {
     }
 
     handleListen = async () => {
-        const { history } = this.props
-        history.push({
+        console.log('listen')
+        this.props.history.push({
           pathname: '/listen',
           state: await this.findGroup()
         })
@@ -62,8 +62,9 @@ class Dashboard extends React.Component {
                         type="text"
                         placeholder="shared listening code"
                         onChange={ keyInput => this.updateGroup( keyInput.target.value ) }
-                        onSubmit={this.handleListen}/>
-                      <Button>Join Room & Start Listening</Button>
+                        />
+                      <Button
+                        onClick={this.handleListen}>Join Room & Start Listening</Button>
                     </Form>
                 
                     <Button
