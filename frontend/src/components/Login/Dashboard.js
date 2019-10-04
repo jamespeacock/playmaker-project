@@ -4,7 +4,6 @@ import {Form, FormControl, Button, Container} from 'react-bootstrap'
 import Header from '../Header/Header'
 import ApiInterface from '../../api/ApiInterface'
 import './dashboard.css'
-const uuid = require('uuid/v4')
 
 
 class Dashboard extends React.Component {

@@ -3,7 +3,6 @@ import { Redirect } from 'react-router-dom'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
 import './login.css'
-import axios from 'axios';
 
 
 export default class Login extends React.Component {

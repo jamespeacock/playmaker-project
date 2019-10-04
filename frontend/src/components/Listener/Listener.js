@@ -1,11 +1,29 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
-import DeviceTable from '../shared/DeviceTable'
+import DevicesModal from '../shared/Devices'
 import SongTable from '../shared/SongTable'
 import Header from '../Header/Header'
 import './listener.css'
 import {Redirect} from "react-router-dom";
-import {Button} from "react-bootstrap";
+
+
+function ShowDevicesModal(props) {
+    const [modalShow, setModalShow] = React.useState(true);
+    console.log('in modal')
+    console.log(props.user)
+    if (false) {
+        {/*<p>Listening on {this.props.user.selectedDevice.name}</p>*/}
+        return (<p>Listening on Selected Device</p>)
+    } else {
+        return(<DevicesModal
+            user={props.user}
+            devices={props.devices}
+            selectDeviceHandler={props.handler}
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            />)
+    }
+};
 
 export default class Listener extends React.Component {
 
@@ -34,9 +52,11 @@ export default class Listener extends React.Component {
 
     setDevice = async ( deviceRow ) => {
       const success = await this.listener.setDevice(deviceRow.uri)
+        //set user selectedDevice name here with reducer
     }
 
     render() {
+
         if (!this.props.user.isLoggedIn) {
             return <Redirect to='/login' />
         }
@@ -51,13 +71,13 @@ export default class Listener extends React.Component {
                         withButtons={false}/>
                     </section>
                     <section className="listener-devices-container">
-                        <h2 className="listener-devices-title">Your Devices</h2>
-                        <Button onClick={this.refreshDevices}>Refresh Devices</Button>
-                        <DeviceTable
-                        devices={this.state.devices}
-                        selectDeviceHandler={(deviceRow) => this.setDevice(deviceRow)} />
+                        <ShowDevicesModal
+                            user={this.props.user}
+                            devices={this.state.devices}
+                            handler={(deviceRow) => this.setDevice(deviceRow)}/>
                     </section>
                 </main>
+
             </React.Fragment>
         )
     }

@@ -1,17 +1,10 @@
 import React from 'react'
 import './header.css'
 import logo from '../../assets/logo.png'
-import { Navbar, Nav, NavDropdown, Form, FormControl, Button, Image, Col, Container } from 'react-bootstrap'
+import { Navbar, NavDropdown, Image, Col } from 'react-bootstrap'
 import AppContext from '../AppContext'
-const uuid = require('uuid/v4')
 
 export default class Header extends React.Component {
-
-    static defaultProps = {
-          history: {
-            push: () => {}
-          },
-      }
 
     constructor (props) {
       super(props)

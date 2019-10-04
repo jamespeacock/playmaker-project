@@ -2,16 +2,9 @@ import React from 'react'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
 import './login.css'
-import axios from 'axios';
 
 
 export default class Signup extends React.Component {
-
-    static defaultProps = {
-        history: {
-          push: () => {}
-        },
-    }   
 
     constructor( props ) {
         super( props )
@@ -27,9 +20,8 @@ export default class Signup extends React.Component {
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault()
         const { name, username, email, password1, password2 } = this.state
-        const { history } = this.props
 
-        this.loginInterface = new ApiInterface( {} )
+        this.loginInterface = new ApiInterface()
 
         //This request will redirect to dashboard
         const resp = await this.loginInterface.fetchLoginRedirect(
