@@ -1,8 +1,10 @@
 import React from 'react'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
-import './login.css'
+import {loginHandleErrors, validateInput} from "./shared";
+import {Button, Container, Form} from "react-bootstrap";
 
+const LoginHandleError = loginHandleErrors
 
 export default class Signup extends React.Component {
 
@@ -13,26 +15,31 @@ export default class Signup extends React.Component {
             username : '',
             email: '', 
             password1 : '',
-            password2: ''
+            password2: '',
+            loginError: ''
         }
     }
 
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault()
-        const { name, username, email, password1, password2 } = this.state
+        const { name, username, email, password1, password2 } = this.state;
 
-        this.loginInterface = new ApiInterface()
+        this.loginInterface = new ApiInterface();
+
+        validateInput(this.setState);
 
         //This request will redirect to dashboard
         const resp = await this.loginInterface.fetchLoginRedirect(
           'signup/',
-          { name, email, username, password1, password2, redirect: 'dashboard'}
+          { name, email, username, password1, password2, redirect: 'dashboard'} //replace with this.props.redirect
         )
 
         if (resp.url) {
           window.location.href = resp.url
         } else {
-          //display error
+            this.setState((prevState, props) => {
+                return { loginError: resp.error }
+            })
         }
 
     }
@@ -62,71 +69,36 @@ export default class Signup extends React.Component {
         return (
             <React.Fragment>
                 <Header isLoggedIn={this.props.isLoggedIn} ></Header>
-                <main className="login-area">
-                    <form
-                        className="login-form"
-                        onSubmit={ submitEvent => this.loginInterfaceHandler( submitEvent ) }>
-                        <legend><h2 className="form-legend">Sign Up</h2></legend>
-                        <div className="username-container">
-                            <label htmlFor="name" className="input-label">Name:</label>
-                            <input  
-                                type="text" 
-                                name="name" 
-                                className="form-input"
-                                placeholder="Rave"
-                                required
-                                onChange={ keyInput => this.updateName( keyInput.target.value ) }>
-                            </input>
-                            <label htmlFor="username" className="input-label">Username:</label>
-                            <input  
-                                type="text" 
-                                name="username" 
-                                className="form-input"
-                                placeholder="rave_shepherd"
-                                required
-                                onChange={ keyInput => this.updateUsername( keyInput.target.value ) }>
-                            </input>
-                            <label htmlFor="email" className="input-label">Email:</label>
-                            <input  
-                                type="text" 
-                                name="email" 
-                                className="form-input"
-                                placeholder="rave@shepherd.com"
-                                required
-                                onChange={ keyInput => this.updateEmail( keyInput.target.value ) }>
-                            </input>
-                        </div>
-                        <div className="password-container">
-                            <label htmlFor="password" className="input-label">Password:</label>
-                            <input 
-                                type="password"
-                                name="password1" 
-                                className="form-input"
-                                required
-                                placeholder="*******"
-                                onChange={ keyInput => this.updatePassword1( keyInput.target.value ) }>
-                            </input>
-                        </div>
-                        <div className="password-container">
-                            <label htmlFor="password" className="input-label">Enter Password again:</label>
-                            <input 
-                                type="password"
-                                name="password2" 
-                                className="form-input"
-                                required
-                                placeholder="*******"
-                                onChange={ keyInput => this.updatePassword2( keyInput.target.value ) }>
-                            </input>
-                        </div>
-                        <div className="form-submit-container">
-                            <input 
-                                type="submit" 
-                                value="Create Account" 
-                                className="submit-button">
-                            </input>
-                        </div>
-                    </form>
-                </main>
+                <Container>
+                    Sign Up
+                    <Form>
+                        <Form.Group controlId="formBasicEmail">
+                            <Form.Label >Name</Form.Label>
+                            <Form.Control type="username" placeholder="your name" onChange={this.updateName}/>
+                        </Form.Group>
+                        <Form.Group controlId="formBasicEmail">
+                            <Form.Label>Username</Form.Label>
+                            <Form.Control type="email" placeholder="username" onChange={this.updateUsername}/>
+                        </Form.Group>
+                        <Form.Group controlId="formBasicEmail">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control type="email" placeholder="email" onChange={this.updateEmail}/>
+                        </Form.Group>
+
+                        <Form.Group controlId="formBasicPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control type="password" placeholder="password" onChange={this.updatePassword1}/>
+                        </Form.Group>
+                        <Form.Group controlId="formBasicPassword">
+                            <Form.Label>Enter Password Again</Form.Label>
+                            <Form.Control type="password" placeholder="password" onChange={this.updatePassword2}/>
+                        </Form.Group>
+                        <Button variant="primary" type="submit" onClick={this.loginInterfaceHandler}>
+                            Create Account
+                        </Button>
+                        <LoginHandleError loginError={this.state.loginError}/>
+                    </Form>
+                </Container>
             </React.Fragment>
         )
     }

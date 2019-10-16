@@ -1,11 +1,13 @@
 import React from 'react'
 import Header from '../Header/Header'
 import { Redirect, withRouter } from 'react-router-dom'
-import './controller.css'
 import ControllerInterface from '../../api/ControllerInterface'
 import SongTable from '../shared/SongTable'
 import SearchBar from '../shared/Search'
 import {Card} from "react-bootstrap";
+import ApiInterface from "../../api/ApiInterface";
+import {connect} from "react-redux";
+import {startController} from "../../actions/actions";
 
 
 const uuid = require('uuid/v4')
@@ -14,14 +16,13 @@ class Controller extends React.Component {
 
     constructor( props ) {
         super( props )
-        console.log(props)
         //TODO handle what happens if this page is loaded w/o controller + group
         this.state = {
             searchResults: {'tracks':[]},
             recommendationResults: [],
             queue: [],
             query: '',
-            group: this.props.location.state.group,
+            group: this.props.location.group || ''
         }
         this.searchHandler = this.searchHandler.bind(this)
         this.addToQueueHandler = this.addToQueueHandler.bind(this)
@@ -29,7 +30,17 @@ class Controller extends React.Component {
         this.handlePause = this.handlePause.bind(this)
         this.handlePlay = this.handlePlay.bind(this)
         this.handleSeek = this.handleSeek.bind(this)
+
+        this.controller = new ControllerInterface()
         
+    }
+
+    createGroup = async () => {
+        this.props.dispatch(startController())
+        // const state = await new ApiInterface({}).get('controller/start')
+        // this.setState({group: state.group})
+        // this.initInterfaces()
+        // this.refreshQueue()
     }
 
     async handleNext() {
@@ -49,14 +60,19 @@ class Controller extends React.Component {
         this.controller.seek(position)
     }
 
-
-    componentDidMount() {
-        this.initInterfaces()
-        this.refreshQueue()
+    componentWillMount() {
+        if (!this.props.user.isLoggedIn) {
+            this.props.history.push({
+                pathname: '/login',
+                redirect: 'play'
+            })
+        }
     }
 
-    initInterfaces = async ( ) => {
-        this.controller = new ControllerInterface()
+    componentDidMount() {
+        if (this.props.user.isLoggedIn) {
+            this.createGroup()
+        }
     }
 
     refreshQueue = async ( ) => {
@@ -73,7 +89,6 @@ class Controller extends React.Component {
     addToQueueHandler = async (songRow) => {
       console.log('adding ' + songRow.name + ' to queue.')
       const success = await this.controller.add(songRow.uri)
-      console.log(success)
       if (success) {
         this.refreshQueue()
       } else { 
@@ -93,9 +108,6 @@ class Controller extends React.Component {
     }
 
     render() {
-        if (!this.props.user.isLoggedIn) {
-            return <Redirect to='/login' />
-        }
         return (
             <React.Fragment>
                 <Header></Header>
@@ -160,4 +172,4 @@ class Controller extends React.Component {
     }
 }
 
-export default withRouter(Controller);
+export default withRouter(connect()(Controller));

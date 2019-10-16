@@ -1,6 +1,3 @@
-import config from '../config'
-import axios from 'axios';
-import Cookies from 'js-cookie';
 import ApiInterface from './ApiInterface'
 
 
@@ -15,7 +12,8 @@ export default class ListenerInterface  {
   }
 
   devices = async ( ) => {
-    return await this.apiInterface.get('listener/devices')
+    const devices = await this.apiInterface.get('listener/devices');
+    return devices || [];
   }
 
   setDevice = async ( deviceId ) => {

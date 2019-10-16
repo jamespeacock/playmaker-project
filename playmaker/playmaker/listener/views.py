@@ -1,4 +1,7 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.generics import RetrieveAPIView
 
@@ -24,6 +27,8 @@ def find_group(group_identifier):
         return Group.objects.get(id=group_identifier)
     except ObjectDoesNotExist as e:
         return None
+    except ValueError:
+        return None
 
 
 class StartListeningView(SecureAPIView):
@@ -31,16 +36,22 @@ class StartListeningView(SecureAPIView):
     def get(self, request, *args, **kwargs):
         super(StartListeningView, self).get(request)
         group_id = request.query_params.get('group')
-
         group = find_group(group_id)
         if not group:
             return JsonResponse("Group with indicator %s does not exist" % str(group_id), status=404, safe=False)
 
-        listener, created = Listener.objects.get_or_create(me=request.user, group=group)
-        listener.refresh()
+        try:
+            listener, created = Listener.objects.get_or_create(me=request.user, group=group)
+            listener.refresh()
+            if request.user.controller:
+                request.user.controller.delete()
+        except IntegrityError:
+            logging.log(logging.INFO, "Mismatch for user/group/listener")
+            return JsonResponse("Mismatch for user/group/listener", safe=False)
 
-        #TODO return group/session info instead of listener uuid. UUID not needed as it is in request.user
-        return JsonResponse({"listener": listener.me.uuid})
+        #TODO return group/session info
+        #Send back current queue, other listeners, etc.
+        return JsonResponse({"group": group_id, "songs": []})
 
 
 class DevicesView(SecureAPIView, RetrieveAPIView):

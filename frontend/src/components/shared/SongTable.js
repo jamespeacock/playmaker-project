@@ -1,7 +1,7 @@
 import React from 'react'
 import Button from 'react-bootstrap/Button'
 import BootstrapTable from 'react-bootstrap-table-next';
-import '../../../node_modules/react-bootstrap-table-next/dist/react-bootstrap-table2.min.css'
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
 function songView(song) {
   var songRow = Object.assign({}, song);
@@ -13,6 +13,7 @@ export default class SongTable extends React.Component {
   
     constructor( props ) {
       super(props)
+      console.log(this.props)
 
       this.columns = [{
         dataField: 'uri',
@@ -38,8 +39,8 @@ export default class SongTable extends React.Component {
         dataField: 'name',
         text: 'Song Title'
       }, {
-        dataField: 'artists',
-        text: 'Artists'
+        dataField: 'artist',
+        text: 'Artist'
       },{
         dataField: '',
         text: 'Add',

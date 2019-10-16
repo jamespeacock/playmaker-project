@@ -19,7 +19,6 @@ export default class ApiInterface  {
     this.axios = axios.create({
       baseURL: `${this.API_BASE}`,
       timeout: 15000,
-      origin: `${this.API_BASE}`,
       headers: {'Content-Type': 'application/json'}
     });
 
@@ -35,6 +34,12 @@ export default class ApiInterface  {
         return response
       })
       .then((res) => res.data)
+        .catch(e => {
+            console.log(e.response)
+            if (e.response.status != 500) {
+                return e.response.data
+            }
+        })
   }
   
   get ( url ) {
@@ -47,6 +52,12 @@ export default class ApiInterface  {
         return response
       })
       .then((res) => res.data)
+        .catch(e => {
+            console.log(e.response)
+            if (e.response.status != 500) {
+                return e.response.data
+            }
+        })
   }
 
   fetchLoginRedirect (url, body) {
@@ -54,10 +65,10 @@ export default class ApiInterface  {
       .then((res) => {
         return {url:res.data.url, error:res.data.error}
       })
+        .catch((e) => e.response.data)
   }
 
   async isLoggedIn() {
-    console.log('in api')
     return await this.axios.get( 'has_user' )
       .then((res) => {
         if (res.data.user) {
@@ -72,6 +83,9 @@ export default class ApiInterface  {
   }
 
   logout = async () => {
-    await this.axios.post('rest-auth/logout/')
+    await this.axios.post('rest-auth/logout/').catch(e => {
+        console.log("could not log out.")
+        console.log(e.response.data)
+    })
   }
 }

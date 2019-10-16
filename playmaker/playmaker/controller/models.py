@@ -69,7 +69,7 @@ class Listener(models.Model):
         if self.devices is None or self.devices.filter(is_selected=True).first() is None:
             for d in self.me.sp.devices()[Device.get_key()]:
                 d[LISTENER] = self
-                Device.from_sp(save=True, **d)
+                Device.from_sp(save=True, **d) # TODO determine if i really want to be saving all the devices even unused.
         return True
 
     def refresh(self):
@@ -95,9 +95,10 @@ class Listener(models.Model):
         if device:
             # Set all other devices for this user to is_selected=False
             for d in self.devices.filter(is_selected=True).all():
-                d.is_selected=False
+                d.is_selected = False
                 d.save()
-            device.is_selected=True
+            device.listener = self
+            device.is_selected = True
             device.save()
             return True
         else:
@@ -119,6 +120,7 @@ class Device(SPModel):
     def from_sp(save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         kwargs['is_selected'] = False
+        kwargs.pop(LISTENER)
         d,_ = Device.objects.get_or_create(**kwargs)
         if save:
             d.save()

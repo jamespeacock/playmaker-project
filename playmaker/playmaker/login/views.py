@@ -39,7 +39,10 @@ class SpotifyLoginView(LoginView):
         frontend_redirect = data.get('redirect', 'login')
         if is_logged_in(request):
             # User is already logged in --> send to dashboard.
-            return redirect(FRONTEND + "/" + frontend_redirect)
+            user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
+            # user_redirect['Access-Control-Allow-Origin'] = "*"
+            # user_redirect['Origin'] = FRONTEND
+            return user_redirect
 
         login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
         assert login.status_code == 200
@@ -68,6 +71,7 @@ class IsLoggedInView(SecureAPIView):
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         super(IsLoggedInView, self).get(request)
+        #replace this with user serializer
         return Response({'user': {
             'username': request.user.username,
             'sp_username': request.user.sp_username,

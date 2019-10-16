@@ -1,82 +1,49 @@
 import React from 'react'
 import { Redirect, withRouter } from 'react-router-dom'
-import {Form, FormControl, Button, Container} from 'react-bootstrap'
-import Header from '../Header/Header'
-import ApiInterface from '../../api/ApiInterface'
-import './dashboard.css'
+import {Button, Container, Row, Col, Jumbotron} from 'react-bootstrap'
 
 
 class Dashboard extends React.Component {
 
     constructor ( props ) {
       super(props)
-      this.state = {
-          group : ''
-      }
-    }
-
-    createGroup = async () => {
-      var state = await new ApiInterface({}).get('controller/start')
-      console.log(state)
-      return state
-    }
-
-    findGroup = async () => {
-      const path = 'listener/join?group=' + this.state.group
-      var state = await new ApiInterface({}).get(path)
-      return state
     }
 
     handlePlay = async () => {
-        console.log('play')
         this.props.history.push({
-          pathname: '/play',
-          state: await this.createGroup()
+          pathname: '/play'
         })
     }
 
     handleListen = async () => {
-        console.log('listen')
         this.props.history.push({
-          pathname: '/listen',
-          state: await this.findGroup()
+          pathname: '/listen'
         })
     }
 
-    updateGroup = ( group ) => {
-        this.setState( { group } )
-    }
-
     render() {
-        console.log('rendering dashboard')
-        console.log(this.props.user.isLoggedIn)
-        console.log(this.props.user)
-        if (this.props.user.isLoggedIn) {
-          return (
-              <React.Fragment>
-                  <Header></Header>
+      return (
+          <React.Fragment>
+              <Jumbotron>
                   <Container>
-                    <Form inline>
-                      <FormControl 
-                        type="text"
-                        placeholder="shared listening code"
-                        onChange={ keyInput => this.updateGroup( keyInput.target.value ) }
-                        />
-                      <Button
-                        onClick={this.handleListen}>Join Room & Start Listening</Button>
-                    </Form>
-                
-                    <Button
-                        onClick={this.handlePlay}>
-                        Curate for Others
-                    </Button>
+                      <Row>
+                          <Col>
+                              <Button
+                                  onClick={this.handlePlay}>
+                                  Curate for Others
+                              </Button>
+                          </Col>
+                          <Col>
+                              <Button
+                                  onClick={this.handleListen}>
+                                  Join Room & Start Listening
+                              </Button>
+                          </Col>
+                      </Row>
                   </Container>
-              </React.Fragment>
-          )
-        }
-        else {
-          return <Redirect to='/login' />
-        }
+              </Jumbotron>
+          </React.Fragment>
+      )
     }
 }
 

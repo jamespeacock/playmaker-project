@@ -8,12 +8,10 @@ import Login from './components/Login/Login'
 import Signup from './components/Login/Signup'
 import Dashboard from './components/Login/Dashboard'
 import Listener from './components/Listener/Listener'
-import checkLoggedIn from './actions/actions'
+import {checkLoggedIn} from './actions/actions'
 import './App.css'
 import ApiInterface from "./api/ApiInterface";
 require('dotenv').config()
-
-//This logic needs to live somewhere shared - how to get this to affect other components state??
 
 class App extends React.Component {
 
@@ -22,26 +20,22 @@ class App extends React.Component {
   }
 
   componentWillMount () {
-    // this.setState(store.getState());
-    // store.subscribe(() => this.setState(store.getState()));
-    console.log(this.props)
-    const { dispatch } = this.props
-    dispatch(checkLoggedIn())
+    this.props.dispatch(checkLoggedIn())
   }
 
   logout = async () => {
-    console.log('logout clicked')
     await new ApiInterface().logout()
     this.props.dispatch(checkLoggedIn())
   }
 
   render() {
-    console.log('rendering app with props')
-    console.log(this.props)
     return (
-    <AppContext.Provider value={{value:this.logout}}>
+    <AppContext.Provider value={{user:this.props.user, logout:this.logout}}>
       <BrowserRouter>
         <Switch>
+          <Route exact path='/'
+                 render={() => <Dashboard user={this.props.user} />}>
+          </Route>
           <Route
               path='/dashboard'
               render={() => <Dashboard user={this.props.user} />}>
@@ -82,8 +76,6 @@ function mapStateToProps(state) {
   //   isFetching: true,
   //   items: []
   // }
-  console.log('mapping state to props')
-  console.log(state)
   return {
     user
   }
