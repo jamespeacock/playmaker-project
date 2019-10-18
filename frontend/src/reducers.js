@@ -38,7 +38,7 @@ function controller(state=defaultController, action) {
     case START_CONTROLLER:
       return Object.assign({}, state, action.controller)
     default:
-      return Object.assign({}, state, action.controller)
+      return defaultController
   }
 }
 
@@ -54,13 +54,14 @@ function createReducer(initialState, handlers) {
   }
 }
 
-const userReducer = createReducer({}, {
-  user,
-  controller
-})
+// const userReducer = createReducer({}, {
+//   user,
+//   controller
+// })
 
 const playmakerApp = combineReducers({
-  user: userReducer
+  user,
+  controller
 })
 
 export default playmakerApp

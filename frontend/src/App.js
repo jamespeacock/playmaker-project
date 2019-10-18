@@ -20,6 +20,7 @@ class App extends React.Component {
   }
 
   componentWillMount () {
+    console.log('app will mount')
     this.props.dispatch(checkLoggedIn())
   }
 

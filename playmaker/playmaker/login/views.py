@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -27,6 +29,7 @@ class SpotifyRegisterView(RegisterView):
         signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
         if signup.status_code != 201:
             return JsonResponse(signup, safe=False, status=400)
+        logging.log(logging.INFO, frontend_redirect)
         return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
 
@@ -40,11 +43,13 @@ class SpotifyLoginView(LoginView):
         if is_logged_in(request):
             # User is already logged in --> send to dashboard.
             user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
-            # user_redirect['Access-Control-Allow-Origin'] = "*"
-            # user_redirect['Origin'] = FRONTEND
+            user_redirect['Access-Control-Allow-Origin'] = "*"
             return user_redirect
-
-        login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
+        try:
+            login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
+        except Exception as e:
+            #Todo return more specific exception
+            return JsonResponse({"error": "Invalid credentials."}, status=401)
         assert login.status_code == 200
         username = data.get('username')
         return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
@@ -63,7 +68,8 @@ class SpotifyCallbackView(LoginView):
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
             print('User does not exist for some reason.')
-        return redirect(FRONTEND + "/" + redirect_path) if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
+        user_redirect = redirect(FRONTEND + "/" + redirect_path)
+        return user_redirect if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
 
 
 class IsLoggedInView(SecureAPIView):
@@ -87,5 +93,5 @@ class LogoutView(LogoutView):
         super(LogoutView, self).post(request, *args, **kwargs)
         # Not used, but example for how to fix CORS null Origin on redirect
         response = redirect(FRONTEND + "/login")
-        response['Origin'] = FRONTEND
+        response['Origin'] = FRONTEND #TODO do i need this?
         return response

@@ -1,17 +1,13 @@
 import React from 'react'
-import { Redirect, withRouter } from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import { Form, Button, Container } from 'react-bootstrap'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
+import {checkLoggedIn} from "../../actions/actions";
+import {connect} from "react-redux";
 
 
 class Login extends React.Component {
-
-    static defaultProps = {
-        history: {
-          push: () => {}
-        },
-    }   
 
     constructor( props ) {
         super( props )
@@ -19,21 +15,25 @@ class Login extends React.Component {
         
         this.state = {
             username : '', 
-            password : ''
+            password : '',
+            error:''
         }
 
     }
 
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault()
-        const { username, password, redirect} = this.state
+        const { username, password} = this.state
         const resp = await this.loginInterface.fetchLoginRedirect(
           'login/',
-          { username, password, redirect })
+          { username, password, redirect: this.props.location.redirect || 'dashboard' })
         if (resp.url) {
+          this.props.dispatch(checkLoggedIn())
           window.location.href = resp.url
         } else {
-          console.log('Failed to get auth redirect. Please try again.')
+          console.log('Failed to login. Please try again.')
+          console.log(resp)
+          this.setState({error: 'Invalid credentials.'})
         }
     }
 
@@ -47,11 +47,17 @@ class Login extends React.Component {
         this.setState( { password } )
     }
 
-    render() {
+    componentWillMount() {
+        console.log('rendering login')
+        console.log(this.props.location.redirect)
+        console.log(this.props.user.isLoggedIn)
         if (this.props.user.isLoggedIn) {
-          return <Redirect to={this.props.location.redirect || 'dashboard'} />
+            this.props.history.push(this.props.location.redirect || '/dashboard')
         }
+    }
 
+    render() {
+        console.log('rendering', this.state.error)
         return (
             <React.Fragment>
                 <Header user={this.props.user}></Header>
@@ -64,11 +70,15 @@ class Login extends React.Component {
                                 We'll never share your email with anyone else.
                             </Form.Text>
                         </Form.Group>
-
                         <Form.Group controlId="formBasicPassword">
                             <Form.Label>Password</Form.Label>
-                            <Form.Control type="password" placeholder="Password" onChange={this.updatePassword}/>
+                            <Form.Control type="password" placeholder="Password" onChange={this.updatePassword}
+                                    isInvalid={this.state.error && this.state.error != ''}/>
+                            <Form.Control.Feedback type="invalid">
+                                {this.state.error}
+                            </Form.Control.Feedback>
                         </Form.Group>
+
                         <Button variant="primary" type="submit" onClick={this.loginInterfaceHandler }>
                             Login
                         </Button>
@@ -79,4 +89,4 @@ class Login extends React.Component {
     }
 }
 
-export default withRouter(Login)
+export default withRouter(connect()(Login))

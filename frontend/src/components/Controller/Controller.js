@@ -5,7 +5,6 @@ import ControllerInterface from '../../api/ControllerInterface'
 import SongTable from '../shared/SongTable'
 import SearchBar from '../shared/Search'
 import {Card} from "react-bootstrap";
-import ApiInterface from "../../api/ApiInterface";
 import {connect} from "react-redux";
 import {startController} from "../../actions/actions";
 

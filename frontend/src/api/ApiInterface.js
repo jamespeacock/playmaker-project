@@ -61,8 +61,13 @@ export default class ApiInterface  {
   }
 
   fetchLoginRedirect (url, body) {
-    return this.axios.post( url, body )
+      console.log('fetching', url)
+    return this.axios.post( url, body)
       .then((res) => {
+          console.log(res)
+          if (!res) {
+            return {error: 'No data. Server Error'}
+          }
         return {url:res.data.url, error:res.data.error}
       })
         .catch((e) => e.response.data)

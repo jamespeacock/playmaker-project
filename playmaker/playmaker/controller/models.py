@@ -2,7 +2,7 @@ import logging
 
 from django.db import models
 
-from playmaker.controller.contants import LISTENER
+from playmaker.controller.contants import LISTENER, DEVICE
 from playmaker.controller.visitors import ActionVisitor
 from playmaker.shared.models import SPModel
 from playmaker.models import User
@@ -24,6 +24,15 @@ class Queue(models.Model):
     current_song = models.ForeignKey(Song, related_name='in_groups', on_delete=models.DO_NOTHING, null=True)
     next_pos = models.IntegerField(default=0, blank=False, null=False)
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
+
+    def currently_playing(self):
+        # TODO need to lock around this to prevent multiple updates
+        sp_current_song = self.controller.me.sp.current_user_playing_track()
+        if not self.current_song or self.current_song.uri != sp_current_song:
+            self.current_song = sp_current_song # from _obj or whatever
+            self.save()
+
+        return self.current_song()
 
     def contents(self):
         return self.songs.order_by('in_q__position').all()
@@ -67,6 +76,12 @@ class Listener(models.Model):
 
     def _refresh_devices(self):
         if self.devices is None or self.devices.filter(is_selected=True).first() is None:
+
+            current_device = self.me.sp.current_playback()[DEVICE]
+            if current_device:
+                current_device[LISTENER] = self
+                Device.from_sp(save=True, **current_device)
+
             for d in self.me.sp.devices()[Device.get_key()]:
                 d[LISTENER] = self
                 Device.from_sp(save=True, **d) # TODO determine if i really want to be saving all the devices even unused.

@@ -7,6 +7,7 @@ import AppContext from "../AppContext";
 import ApiInterface from "../../api/ApiInterface";
 import {Button, Form} from "react-bootstrap";
 import {showDevicesModal} from "../shared/utils";
+import {connect} from "react-redux";
 
 class Listener extends React.Component {
 
@@ -87,4 +88,4 @@ class Listener extends React.Component {
     }
 }
 
-export default withRouter(Listener)
+export default withRouter(connect()(Listener))

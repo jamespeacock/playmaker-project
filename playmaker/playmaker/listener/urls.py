@@ -1,10 +1,10 @@
 from django.urls import path
 
-from playmaker.controller.views import QueueActionView
-from playmaker.listener.views import StartListeningView, DevicesView
+from playmaker.listener.views import StartListeningView, DevicesView, GetQueueView, ListenView
 
 urlpatterns = [
-    path('queue', QueueActionView.as_view()),
+    path('queue', GetQueueView.as_view()),
     path('join', StartListeningView.as_view()),
     path('devices', DevicesView.as_view()),
+    path('current', ListenView.as_view()),
 ]

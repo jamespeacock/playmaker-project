@@ -1,10 +1,19 @@
 import React from 'react'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
-import {loginHandleErrors, validateInput} from "./shared";
 import {Button, Container, Form} from "react-bootstrap";
 
-const LoginHandleError = loginHandleErrors
+// const { Formik } = formik;
+
+// const schema = yup.object({
+//     firstName: yup.string().required(),
+//     lastName: yup.string().required(),
+//     username: yup.string().required(),
+//     city: yup.string().required(),
+//     state: yup.string().required(),
+//     zip: yup.string().required(),
+//     terms: yup.bool().required(),
+// });
 
 export default class Signup extends React.Component {
 
@@ -20,48 +29,46 @@ export default class Signup extends React.Component {
         }
     }
 
-    loginInterfaceHandler = async ( evt ) => {
-        evt.preventDefault()
+    signupHandler = async ( ) => {
+        console.log('starting signupHandler')
+        // evt.preventDefault()
         const { name, username, email, password1, password2 } = this.state;
 
         this.loginInterface = new ApiInterface();
 
-        validateInput(this.setState);
-
-        //This request will redirect to dashboard
+        console.log('calling login redirect')
         const resp = await this.loginInterface.fetchLoginRedirect(
           'signup/',
           { name, email, username, password1, password2, redirect: 'dashboard'} //replace with this.props.redirect
         )
+        console.log('signup_resp', resp)
 
         if (resp.url) {
           window.location.href = resp.url
         } else {
-            this.setState((prevState, props) => {
-                return { loginError: resp.error }
-            })
+          this.setState({ loginError: resp.error })
         }
 
     }
 
     updateName = ( name ) => {
-        this.setState( { name } )
+        this.setState( { name: name.target.value } )
     }
 
     updateEmail= ( email ) => {
-        this.setState( { email } )
+        this.setState( { email: email.target.value } )
     }
 
     updateUsername = ( username ) => {
-        this.setState( { username } )
+        this.setState( { username: username.target.value } )
     }
 
     updatePassword1 = ( password1 ) => {
-        this.setState( { password1 } )
+        this.setState( { password1: password1.target.value } )
     }
 
     updatePassword2 = ( password2 ) => {
-        this.setState( { password2 } )
+        this.setState( { password2: password2.target.value } )
     }
 
     render() {
@@ -78,7 +85,7 @@ export default class Signup extends React.Component {
                         </Form.Group>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Label>Username</Form.Label>
-                            <Form.Control type="email" placeholder="username" onChange={this.updateUsername}/>
+                            <Form.Control type="username" placeholder="username" onChange={this.updateUsername}/>
                         </Form.Group>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Label>Email</Form.Label>
@@ -90,13 +97,13 @@ export default class Signup extends React.Component {
                             <Form.Control type="password" placeholder="password" onChange={this.updatePassword1}/>
                         </Form.Group>
                         <Form.Group controlId="formBasicPassword">
-                            <Form.Label>Enter Password Again</Form.Label>
+                            <Form.Label>Confirm Password</Form.Label>
                             <Form.Control type="password" placeholder="password" onChange={this.updatePassword2}/>
                         </Form.Group>
-                        <Button variant="primary" type="submit" onClick={this.loginInterfaceHandler}>
+
+                        <Button variant="primary" type="submit" onClick={this.signupHandler}>
                             Create Account
                         </Button>
-                        <LoginHandleError loginError={this.state.loginError}/>
                     </Form>
                 </Container>
             </React.Fragment>

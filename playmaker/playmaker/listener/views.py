@@ -78,3 +78,13 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         return JsonResponse("Failed", safe=False, status=500)
 
 
+class ListenView(SecureAPIView, RetrieveAPIView):
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(request.user.listener.group.currently_playing())
+
+
+class GetQueueView(SecureAPIView, RetrieveAPIView):
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse(request.user.listener.group.queue)

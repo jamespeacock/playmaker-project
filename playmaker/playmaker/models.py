@@ -31,11 +31,15 @@ class User(auth_models.AbstractUser):
     # @memoized
     @property
     def actor(self):
-        if hasattr(self, 'listener') and self.listener:
-            return self.listener
-        elif hasattr(self, 'controller') and self.controller:
+        if hasattr(self, 'controller') and self.controller:
+            if hasattr(self, 'listener') and self.listener:
+                logging.log(logging.WARN, "User has both controller and listener. Deleting listener.")
+                self.listener.delete()
+                self.save()
             return self.controller
-        logging.log(logging.ERROR, "User does not have a listener or a controller!")
+        elif hasattr(self, 'listener') and self.listener:
+            return self.listener
+        logging.log(logging.ERROR, "User %s does not have a listener or a controller!" % self.username)
         return None
 
     @property

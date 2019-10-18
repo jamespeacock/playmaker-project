@@ -43,13 +43,16 @@ class PlaySongView(ControllerView):
         super(PlaySongView, self).get(request)
         params = self.get_params(request.query_params)
 
+        if not params.get(URIS):
+            return
+
         failed_results = [r for r in services.perform_action(
             request.user,
             Action.PLAY,
             uris=make_iterable(params.get(URIS))) if r]
 
         if failed_results:
-            return JsonResponse({"status": "Meh."})
+            return JsonResponse({"status": []})
 
         return JsonResponse({"status": "Success."})
 
@@ -79,11 +82,10 @@ class NextSongView(ControllerView):
                 Action.PLAY,
                 uris=[next_song.uri]) if r]
         else:
-            pass
-            # Handle empty queue
+            return JsonResponse("No songs remain in the queue.", safe=False)
 
         if failed_results:
-            return JsonResponse({"status": "Meh."})
+            return JsonResponse({"status": failed_results})
 
         return JsonResponse({"status": "Success."})
 
@@ -115,7 +117,7 @@ class QueueActionView(ControllerView):
     """
     Returns current list of songs in queue.
     """
-    def get(self, request, action=None, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         super(QueueActionView, self).get(request)
         params = request.query_params
         songs = services.get_queue(params, request.user)
