@@ -87,7 +87,8 @@ export default class ApiInterface  {
   }
 
   logout = async () => {
-    await this.axios.post('rest-auth/logout/').catch(e => {
+      //was 'rest-auth/logout/' before
+    await this.axios.post('login/logout').catch(e => {
         console.log("could not log out.")
         console.log(e.response.data)
     })

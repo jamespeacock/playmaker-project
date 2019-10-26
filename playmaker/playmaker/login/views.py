@@ -84,11 +84,15 @@ class IsLoggedInView(SecureAPIView):
         #replace this with user serializer
         actor = {}
         try:
+            ser = None
             if type(request.user.actor) == Listener:
                 ser = ListenerSerializer
             elif type(request.user.actor) == Controller:
                 ser = ControllerSerializer
-            actor = ser(request.user.actor).data
+            if ser:
+                actor = ser(request.user.actor).data
+            else:
+                actor = {}
         except (Listener.DoesNotExist, Controller.DoesNotExist):
             pass
 
@@ -104,11 +108,15 @@ class LogoutView(LogoutView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
+        try:
+            request.user.listener.delete()
+        except Listener.DoesNotExist:
+            pass
+        try:
+            request.user.controller.delete()
+        except Controller.DoesNotExist:
+            pass
+        request.user.save()
         super(LogoutView, self).post(request, *args, **kwargs)
-        #TODO request.user.listener.delete()
-        # TODO request.user.controller.delete()
-        # TODO request.user.save()
-        # Not used, but example for how to fix CORS null Origin on redirect
-        response = redirect(FRONTEND + "/login")
-        response['Origin'] = FRONTEND #TODO do i need this?
-        return response
+
+        return {"success": True}
