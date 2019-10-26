@@ -2,6 +2,7 @@ import React from 'react'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
 import {Button, Container, Form} from "react-bootstrap";
+import {checkLoggedIn} from "../../actions/actions";
 
 // const { Formik } = formik;
 
@@ -25,7 +26,7 @@ export default class Signup extends React.Component {
             email: '', 
             password1 : '',
             password2: '',
-            loginError: ''
+            error: ''
         }
     }
 
@@ -41,14 +42,14 @@ export default class Signup extends React.Component {
           'signup/',
           { name, email, username, password1, password2, redirect: 'dashboard'} //replace with this.props.redirect
         )
-        console.log('signup_resp', resp)
-
         if (resp.url) {
-          window.location.href = resp.url
+            this.props.dispatch(checkLoggedIn())
+            window.location.href = resp.url
         } else {
-          this.setState({ loginError: resp.error })
+            console.log('Failed to login. Please try again.')
+            console.log(resp)
+            this.setState({error: 'Invalid credentials.'})
         }
-
     }
 
     updateName = ( name ) => {
@@ -98,7 +99,11 @@ export default class Signup extends React.Component {
                         </Form.Group>
                         <Form.Group controlId="formBasicPassword">
                             <Form.Label>Confirm Password</Form.Label>
-                            <Form.Control type="password" placeholder="password" onChange={this.updatePassword2}/>
+                            <Form.Control type="password" placeholder="password" onChange={this.updatePassword2}
+                                          isInvalid={this.state.error && this.state.error != ''}/>
+                            <Form.Control.Feedback type="invalid">
+                                {this.state.error}
+                            </Form.Control.Feedback>
                         </Form.Group>
 
                         <Button variant="primary" type="submit" onClick={this.signupHandler}>

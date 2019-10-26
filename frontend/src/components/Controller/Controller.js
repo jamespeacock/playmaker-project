@@ -6,7 +6,7 @@ import SongTable from '../shared/SongTable'
 import SearchBar from '../shared/Search'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
-import {startController} from "../../actions/actions";
+import {checkLoggedIn, startController} from "../../actions/actions";
 
 
 const uuid = require('uuid/v4')
@@ -38,7 +38,6 @@ class Controller extends React.Component {
         this.props.dispatch(startController())
         // const state = await new ApiInterface({}).get('controller/start')
         // this.setState({group: state.group})
-        // this.initInterfaces()
         // this.refreshQueue()
     }
 
@@ -59,14 +58,9 @@ class Controller extends React.Component {
         this.controller.seek(position)
     }
 
-    componentWillMount() {
-        if (!this.props.user.isLoggedIn) {
-            this.props.history.push({
-                pathname: '/login',
-                redirect: 'play'
-            })
-        }
-    }
+    // componentWillMount() {
+    //     this.props.dispatch(checkLoggedIn())
+    // }
 
     componentDidMount() {
         if (this.props.user.isLoggedIn) {
@@ -107,6 +101,12 @@ class Controller extends React.Component {
     }
 
     render() {
+        if (!this.props.user.isLoggedIn) {
+            this.props.history.push({
+                pathname: '/login',
+                redirect: 'play'
+            })
+        }
         return (
             <React.Fragment>
                 <Header></Header>

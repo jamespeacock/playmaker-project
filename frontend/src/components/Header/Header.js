@@ -27,6 +27,10 @@ export default class Header extends React.Component {
                         <Col xs={4} md={3}>
                             <Navbar.Text>playmkr</Navbar.Text>
                         </Col>
+                        {/*Move this somewhere legit lol.*/}
+                        <Col xs={2} md={2}>
+                            <Navbar.Text>{user.username}</Navbar.Text>
+                        </Col>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                             <NavDropdown title="Account" id="basic-nav-dropdown">
@@ -34,7 +38,9 @@ export default class Header extends React.Component {
                                 <NavDropdown.Item href="#action/3.2">Go Curate</NavDropdown.Item>
                                 <NavDropdown.Item href="#action/3.3">Settings</NavDropdown.Item>
                                 <NavDropdown.Item onClick={() => {
-                                    this.state.showDevices=true
+                                    console.log('clicked')
+                                    this.setState({showDevices:true})
+                                    console.log(this.state)
                                 }}>Devices</NavDropdown.Item>
                                 <NavDropdown.Divider/>
                                 <NavDropdown.Item onClick={showSubmitReportProblem}>Report a Problem</NavDropdown.Item>

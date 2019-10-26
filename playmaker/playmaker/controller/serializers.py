@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from playmaker.controller.models import Device
+from playmaker.controller.models import Device, Listener
 from playmaker.shared.serializers import ParamSerializer
 
 
@@ -23,3 +23,18 @@ class DeviceSerializer(serializers.ModelSerializer):
         model = Device
         fields = ['name', 'type', 'is_active', 'uri']
 
+
+class ActorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = None
+        fields = ['group']
+
+    def create(self, validated_data):
+        listener = validated_data.pop('listener')
+        if listener:
+            return {'group': listener.group}
+        controller = validated_data.pop('controller')
+        if controller:
+            return {'group': controller.group}
+        return {}

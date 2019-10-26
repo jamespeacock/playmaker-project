@@ -1,5 +1,5 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
+import {Redirect, withRouter} from 'react-router-dom'
 import { Form, Button, Container } from 'react-bootstrap'
 import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
@@ -47,17 +47,15 @@ class Login extends React.Component {
         this.setState( { password } )
     }
 
-    componentWillMount() {
-        console.log('rendering login')
-        console.log(this.props.location.redirect)
-        console.log(this.props.user.isLoggedIn)
-        if (this.props.user.isLoggedIn) {
-            this.props.history.push(this.props.location.redirect || '/dashboard')
-        }
-    }
+    // componentWillMount() {
+    //     this.props.dispatch(checkLoggedIn())
+    // }
 
     render() {
         console.log('rendering', this.state.error)
+        if (this.props.user.isLoggedIn) {
+            return (<Redirect to={this.props.location.redirect || '/dashboard'}/>)
+        }
         return (
             <React.Fragment>
                 <Header user={this.props.user}></Header>

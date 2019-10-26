@@ -21,11 +21,9 @@ django-tastypie = "*"
 pytest = "*"
 gunicorn = "*"
 numpy = "*"
+polling = "*"
 prompt-toolkit="*"
 psycopg2 = "*"
 #jupyter = "*"
 #matplotlib = "*"
 #seaborn = "*"
-
-[requires]
-python_version = "2.7"

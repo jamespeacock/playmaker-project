@@ -14,6 +14,9 @@ from playmaker.songs.models import Song
 class Controller(models.Model):
     me = models.OneToOneField(User, related_name='controller', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return 'ID: {} - username: {}'.format(self.id, self.me.username)
+
     @property
     def listeners(self):
         return Listener.objects.filter(group=self.group).all()
@@ -77,8 +80,9 @@ class Listener(models.Model):
     def _refresh_devices(self):
         if self.devices is None or self.devices.filter(is_selected=True).first() is None:
 
-            current_device = self.me.sp.current_playback()[DEVICE]
-            if current_device:
+            current_playback = self.me.sp.current_playback()
+            if current_playback:
+                current_device = current_playback[DEVICE]
                 current_device[LISTENER] = self
                 Device.from_sp(save=True, **current_device)
 
@@ -135,7 +139,6 @@ class Device(SPModel):
     def from_sp(save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         kwargs['is_selected'] = False
-        kwargs.pop(LISTENER)
         d,_ = Device.objects.get_or_create(**kwargs)
         if save:
             d.save()

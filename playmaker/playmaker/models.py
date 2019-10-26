@@ -26,6 +26,8 @@ class User(auth_models.AbstractUser):
     scope = models.CharField(max_length=511, null=True, blank=True)
     sp_id = models.CharField(max_length=256, null=True, blank=True)
     sp_username = models.CharField(max_length=256, null=True, blank=True)
+    is_listener = models.BooleanField(default=False)
+    is_controller = models.BooleanField(default=False)
     _sp_cached = None
 
     # @memoized
@@ -36,8 +38,12 @@ class User(auth_models.AbstractUser):
                 logging.log(logging.WARN, "User has both controller and listener. Deleting listener.")
                 self.listener.delete()
                 self.save()
+            self.is_controller = True
+            self.save()
             return self.controller
         elif hasattr(self, 'listener') and self.listener:
+            self.is_listener = True
+            self.save()
             return self.listener
         logging.log(logging.ERROR, "User %s does not have a listener or a controller!" % self.username)
         return None

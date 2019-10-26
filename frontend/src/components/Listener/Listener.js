@@ -4,83 +4,67 @@ import SongTable from '../shared/SongTable'
 import Header from '../Header/Header'
 import {Redirect, withRouter} from "react-router-dom";
 import AppContext from "../AppContext";
-import ApiInterface from "../../api/ApiInterface";
-import {Button, Form} from "react-bootstrap";
-import {showDevicesModal} from "../shared/utils";
+import {showDevicesModal, showJoinGroupModal} from "../shared/utils";
 import {connect} from "react-redux";
+import {checkLoggedIn, startListener} from "../../actions/actions";
+import ApiInterface from "../../api/ApiInterface";
 
 class Listener extends React.Component {
 
     constructor( props ) {
         super( props )
-        this.state = {
-            songs: [],
-            group: ''
-        }
         this.listener = new ListenerInterface()
+        console.log('listener props', this.props)
     }
 
-    componentDidMount() {
-        if (this.state.group) {
-            console.log('calling refresh')
-            this.getAndLoadSongs()
+    // componentDidMount() {
+    //     if (this.state.group) {
+    //         console.log('calling refresh')
+    //         this.getAndLoadSongs()
+    //     } else {
+    //         console.log('no group yet')
+    //     }
+    // }
+
+    findGroup = async (group) => {
+        const path = 'listener/join?group=' + group
+        const resp = await new ApiInterface({}).get(path)
+        if (resp && resp.group) {
+            const action = startListener(resp.group, resp.songs)
+            this.props.dispatch(action)
+            return true
         } else {
-            console.log('no group yet')
-            this.setState( { songs: [] } )
+            return false
         }
     }
 
-    componentWillMount() {
+    // getAndLoadSongs = async ( ) => {
+    //     const songs = await this.listener.queue()
+    //     this.setState( { songs: songs } )
+    // }
+
+    render() {
         if (!this.props.user.isLoggedIn) {
             this.props.history.push({
                 pathname: '/login',
-                redirect: '/listen'
+                redirect: 'listen'
             })
         }
-    }
-
-    findGroup = async () => {
-        const path = 'listener/join?group=' + this.state.group
-        const resp = await new ApiInterface({}).get(path)
-        if (resp.songs) {
-            this.setState({songs: resp.songs})
-        }
-    }
-
-    getAndLoadSongs = async ( ) => {
-        const songs = await this.listener.queue()
-        this.setState( { songs: songs } )
-    }
-
-    updateGroup = ( group ) => {
-        this.setState( { group } )
-    }
-
-    render() {
         return (
             <AppContext.Consumer>
                 {() =>
                     <React.Fragment>
                         <Header></Header>
-                        <Form>
-                            <Form.Control
-                                type="text"
-                                placeholder="shared listening code"
-                                onChange={this.updateGroup}
-                            />
-                            <Button variant="primary" type="submit" onClick={this.findGroup}>
-                                Join Group
-                            </Button>
-                        </Form>
                         <main className="listener-area">
                             <section className="listener-queue-container">
                                 <h2 className="listener-queue-title">Listening Queue</h2>
                                 <SongTable
-                                    songs={this.state.songs}
+                                    songs={this.props.listener.queue}
                                     withButtons={false}/>
                             </section>
                         </main>
-                        {showDevicesModal(this.props.user, this.props.user.isLoggedIn ? this.props.user.devices.length === 0 : false)}
+                        {showJoinGroupModal(this.findGroup, !(this.props.user.isListener && this.props.listener.group))}
+                        {showDevicesModal(this.props.user, this.props.user.isLoggedIn && this.props.user.isListener ? this.props.user.devices.length === 0 : false)}
                     </React.Fragment>
                 }
             </AppContext.Consumer>

@@ -5,6 +5,7 @@ export const SET_CURRENT_DEVICE = 'SET_CURRENT_DEVICE'
 export const REFRESH_DEVICES = 'REFRESH_DEVICES'
 
 export const START_CONTROLLER = 'START_CONTROLLER'
+export const START_LISTENER = 'START_LISTENER'
 
 function checkLoggedIn() {
   return async (dispatch, getState) => {
@@ -13,8 +14,9 @@ function checkLoggedIn() {
     const action = {
       type:CHECK_LOGGED_IN,
       user: {
-        isLoggedIn: user.isLoggedIn,
-        isController: false,
+        isLoggedIn: user.is_logged_in,
+        isController: user.is_controller,
+        isListener: user.is_listener,
         username: user.username,
         sp_username: user.sp_username,
         devices: user.devices || [],
@@ -69,7 +71,7 @@ function startController( ) {
     const actionController = {
       type: START_CONTROLLER,
       controller: {
-        group: 'default',
+        group: controller.group,
         queue: []
       }
     };
@@ -83,9 +85,35 @@ function startController( ) {
     dispatch(actionUser)
   }
 }
+
+function startListener(group, songs) {
+  console.log('start listener called');
+  return async (dispatch, getState) => {
+    console.log('start listener action called')
+    const actionUser = {
+      type: START_LISTENER,
+      user: {
+        isLoggedIn: true,
+        isListener: true,
+        isController: false
+      }
+    }
+    const actionListener = {
+      type: START_LISTENER,
+      listener: {
+        group: group,
+        queue: songs
+      }
+    }
+    dispatch(actionListener)
+    dispatch(actionUser)
+  }
+}
+
 export {
     checkLoggedIn,
     setDevice,
     refreshDevices,
-    startController
+    startController,
+    startListener
 }

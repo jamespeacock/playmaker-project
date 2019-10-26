@@ -17,15 +17,15 @@ class App extends React.Component {
 
   constructor(props) {
     super(props)
-  }
-
-  componentWillMount () {
-    console.log('app will mount')
-    this.props.dispatch(checkLoggedIn())
+    console.log('app props', this.props)
   }
 
   logout = async () => {
     await new ApiInterface().logout()
+    this.props.dispatch(checkLoggedIn())
+  }
+
+  componentWillMount() {
     this.props.dispatch(checkLoggedIn())
   }
 
@@ -43,11 +43,16 @@ class App extends React.Component {
           </Route>
           <Route
               path='/play'
-              render={() => <Controller user={this.props.user} />}>
+              render={() => <Controller
+                  user={this.props.user}
+                  controller={this.props.controller}
+              />}>
           </Route>
           <Route
               path='/listen'
-              render={() => <Listener user={this.props.user} />}>
+              render={() => <Listener
+                  user={this.props.user}
+                  listener={this.props.listener}/>}>
           </Route>
           <Route
               path='/login'
@@ -66,20 +71,22 @@ class App extends React.Component {
 
 App.propTypes = {
   user: PropTypes.object.isRequired,
+  controller: PropTypes.object,
+  listener: PropTypes.object,
   dispatch: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
-  const { user } = state
+  console.log('initial state', state)
+  //what the fuck should i be doing here???
+  const { user, listener, controller } = state
   // const { isFetching, lastUpdated, items: posts } = postsBySubreddit[
   //   selectedSubreddit
   // ] || {
   //   isFetching: true,
   //   items: []
   // }
-  return {
-    user
-  }
+  return state
 }
 
 export default connect(mapStateToProps)(App)

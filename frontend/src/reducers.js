@@ -1,31 +1,32 @@
 import { combineReducers } from 'redux'
-import {CHECK_LOGGED_IN, SET_CURRENT_DEVICE, REFRESH_DEVICES, START_CONTROLLER} from './actions/actions'
+import {CHECK_LOGGED_IN, SET_CURRENT_DEVICE, REFRESH_DEVICES, START_CONTROLLER, START_LISTENER} from './actions/actions'
 
 const defaultUser = {
     isLoggedIn: false,
-    isController: false
+    isController: false,
+    isListener: false
 }
 
 //Define reducers here
-function user(state = defaultUser, action) {
+function user(state=defaultUser, action) {
   console.log('in user reducer: ' + action.type)
   console.log('state', state)
   console.log(action.user)
   switch (action.type) {
     case CHECK_LOGGED_IN:
-      return Object.assign({}, state, action.user)
     case SET_CURRENT_DEVICE:
-      return Object.assign({}, state, action.user)
     case REFRESH_DEVICES:
+    case START_LISTENER:
+    case START_CONTROLLER:
       return Object.assign({}, state, action.user)
     default:
-      return defaultUser
+      return state
   }
 }
 
 const defaultController = {
   queue: [],
-  group: [],
+  group: '',
   searchResult: [],
   listeners: []
 }
@@ -38,7 +39,24 @@ function controller(state=defaultController, action) {
     case START_CONTROLLER:
       return Object.assign({}, state, action.controller)
     default:
-      return defaultController
+      return state
+  }
+}
+
+const defaultListener = {
+  queue: [],
+  group: ''
+}
+
+function listener(state=defaultListener, action) {
+  console.log('in listener reducer: ' + action.type)
+  console.log('state', state)
+  console.log(action.listener)
+  switch (action.type) {
+    case START_LISTENER:
+      return Object.assign({}, state, action.controller)
+    default:
+      return state
   }
 }
 
@@ -61,7 +79,8 @@ function createReducer(initialState, handlers) {
 
 const playmakerApp = combineReducers({
   user,
-  controller
+  controller,
+  listener
 })
 
 export default playmakerApp

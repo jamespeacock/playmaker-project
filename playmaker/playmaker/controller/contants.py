@@ -1,3 +1,4 @@
+ACTOR = "actor"
 LISTENER = "listener"
 CONTROLLER = "controller"
 URI = "uri"

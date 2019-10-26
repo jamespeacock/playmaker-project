@@ -18,7 +18,7 @@ def find_group(group_identifier):
     # if group_indicator is spotify uri of friend
     if SP_USER in group_identifier:
         try:
-            Group.objects.get(controller = Controller.objects.filter(me__sp_id=group_identifier))
+            Group.objects.get(controller=Controller.objects.filter(me__sp_id=group_identifier))
         except ObjectDoesNotExist as e:
             pass
 
@@ -43,11 +43,13 @@ class StartListeningView(SecureAPIView):
         try:
             listener, created = Listener.objects.get_or_create(me=request.user, group=group)
             listener.refresh()
-            if request.user.controller:
+            if getattr(request.user, 'controller'):
                 request.user.controller.delete()
-        except IntegrityError:
+        except IntegrityError as e:
             logging.log(logging.INFO, "Mismatch for user/group/listener")
             return JsonResponse("Mismatch for user/group/listener", safe=False)
+        except Controller.DoesNotExist as e:
+            pass
 
         #TODO return group/session info
         #Send back current queue, other listeners, etc.

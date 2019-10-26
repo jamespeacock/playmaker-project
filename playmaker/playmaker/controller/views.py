@@ -1,8 +1,9 @@
+import logging
 from collections import defaultdict
 from django.http import JsonResponse
 from playmaker.controller import services
 from playmaker.controller.contants import URIS, CONTROLLER, ADD, REMOVE, URI
-from playmaker.controller.models import Controller, Group, Queue
+from playmaker.controller.models import Controller, Group, Queue, Listener
 from playmaker.controller.serializers import QueueActionSerializer
 from playmaker.controller.services import next_in_queue
 from playmaker.shared.utils import make_iterable
@@ -22,14 +23,18 @@ class ControllerView(SecureAPIView):
 
 # Create a group
 
-class StartListeningView(SecureAPIView):
+class StartGroupView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
-        super(StartListeningView, self).get(request)
+        super(StartGroupView, self).get(request)
+        if request.user.actor and isinstance(request.user.actor, Listener):
+            logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
+            Listener.objects.get(me=request.user).delete()
         controller, created = Controller.objects.get_or_create(me=request.user)
         Queue.objects.get_or_create(controller=controller)
         group, created = Group.objects.get_or_create(controller=controller)
-
+        if not created:
+            logging.log(logging.INFO, "Group was not created for some reason!")
         # TODO start a poller every 60s after song starts and then every 15s for current song
         # If it is different from queue current song, update it and send it out to listeners.
         return JsonResponse({"group": group.id, "controller": controller.id})

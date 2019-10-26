@@ -46,7 +46,7 @@ def perform_action(user, action, *args, **kwargs):
     listeners = [listener for listener in user.actor.listeners if can_perform_action(user, listener, str(action))]
 
     # Filter out listeners without active devices
-    # Not sure i want to do this. Just verify all listeners ahve a selected device. Notify those who dont?
+    # Not sure i want to do this. Just verify all listeners have a selected device. Notify those who dont?
     listeners = [l for l in listeners if l.refresh()]
 
     # Time how long this takes - are either Spotipy and ActionVisitor being instanced?
@@ -120,3 +120,27 @@ def remove_from_queue(uuid, uris, positions):
     songs = Song.objects.filter(uri__in=uris).all()
     [SongInQueue.objects.get(song=s, queue=actor.queue, position=positions[i]).delete() for i, s in enumerate(songs)]
     return True
+
+
+def start_polling(user, current_song_id):
+    check_current_song = user.sp.currently_playing
+    song_changed = polling.poll(
+        lambda: check_current_song(),
+        check_success=lambda response: response['track']['id'] == current_song_id,
+        step=10,
+        # ignore_exceptions=(requests.exceptions.ConnectionError,),
+        poll_forever=True)
+
+    if song_changed:
+        song_changed.close()
+
+    # Set current song and push out to all listeners. Do I have access to response
+    next_song = check_current_song()['track']['id']
+    if next_song:
+        failed_results = [r for r in perform_action(
+            user,
+            Action.PLAY,
+            uris=[next_song.uri]) if r]
+
+    # Handle failures here
+    # Handle kickoff of start polling again -> wait 90s min then poll every 10s

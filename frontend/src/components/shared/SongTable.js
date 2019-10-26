@@ -39,7 +39,7 @@ export default class SongTable extends React.Component {
         dataField: 'name',
         text: 'Song Title'
       }, {
-        dataField: 'artist',
+        dataField: 'artists',
         text: 'Artist'
       },{
         dataField: '',

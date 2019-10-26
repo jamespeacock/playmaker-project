@@ -1,4 +1,3 @@
-import logging
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -6,12 +5,15 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
-from rest_framework.response import Response
 
 from api.settings import FRONTEND
+from playmaker.controller.contants import ACTOR
+from playmaker.controller.models import Listener, Controller
+from playmaker.controller.serializers import ActorSerializer
 from playmaker.login import services
 from playmaker.login.services import get_redirect
 from playmaker.models import User
+from playmaker.serializers import UserSerializer
 from playmaker.shared.views import SecureAPIView
 
 
@@ -28,8 +30,7 @@ class SpotifyRegisterView(RegisterView):
         frontend_redirect = body.get('redirect', 'login')
         signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
         if signup.status_code != 201:
-            return JsonResponse(signup, safe=False, status=400)
-        logging.log(logging.INFO, frontend_redirect)
+            return JsonResponse(signup, safe=False, status=signup.status_code)
         return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
 
@@ -74,16 +75,27 @@ class SpotifyCallbackView(LoginView):
 
 class IsLoggedInView(SecureAPIView):
 
+
+    def get_serializer_class(self):
+        return UserSerializer
+
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         super(IsLoggedInView, self).get(request)
         #replace this with user serializer
-        return Response({'user': {
-            'username': request.user.username,
-            'sp_username': request.user.sp_username,
-            'sp_id': request.user.sp_id,
-            'isLoggedIn': True}
-        })
+        actor = {}
+        try:
+            ActorSerializer.Meta.model = type(request.user.actor)
+            actor[ACTOR] = ActorSerializer(request.user.actor).data
+        except (Listener.DoesNotExist, Controller.DoesNotExist):
+            pass
+
+        ser = self.get_serializer_class()
+        return JsonResponse({'user':
+                                 {**ser(request.user).data,
+                                  'actor': actor,
+                                  'is_logged_in': True}
+                             })
 
 
 class LogoutView(LogoutView):
@@ -91,6 +103,9 @@ class LogoutView(LogoutView):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
         super(LogoutView, self).post(request, *args, **kwargs)
+        #TODO request.user.listener.delete()
+        # TODO request.user.controller.delete()
+        # TODO request.user.save()
         # Not used, but example for how to fix CORS null Origin on redirect
         response = redirect(FRONTEND + "/login")
         response['Origin'] = FRONTEND #TODO do i need this?

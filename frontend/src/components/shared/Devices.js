@@ -42,6 +42,8 @@ class DevicesModal extends React.Component {
                   <Modal.Title style={{color:'black'}}>Your Listening Devices</Modal.Title>
               </Modal.Header>
 
+              {this.props.user.current_device && <p>Currently listening on props.user.current_device.name</p>}
+
               <Modal.Body>
                   <p style={{color:'black'}}>Please select your listening device.</p>
                   <Button md={3} onClick={() => this.props.dispatch(refreshDevices())}>Refresh Devices</Button>
@@ -63,27 +65,16 @@ DevicesModal.propTypes = {
     dispatch: PropTypes.func.isRequired
 }
 
-function mapStateToProps(state) {
-    const { user } = state
-    return {
-        user
-    }
-}
-
-const ConnectedDevicesModal = connect(mapStateToProps)(DevicesModal)
+const ConnectedDevicesModal = connect()(DevicesModal)
 
 function ShowDevicesModal(props) {
     const [modalShow, setModalShow] = React.useState(props.initialShow);
-    if (false) {
-        {/*<p>Listening on {this.props.user.selectedDevice.name}</p>*/}
-        return (<p>Listening on Selected Device</p>)
-    } else {
-        return(<ConnectedDevicesModal
-            user={props.user}
-            show={modalShow}
-            onHide={() => setModalShow(false)}
-        />)
-    }
+
+    return(<ConnectedDevicesModal
+        user={props.user}
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+    />)
 };
 
 export default ShowDevicesModal
