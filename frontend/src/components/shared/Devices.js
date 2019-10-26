@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import BootstrapTable from 'react-bootstrap-table-next';
 import {refreshDevices, setDevice} from "../../actions/actions";
@@ -8,6 +8,7 @@ import PropTypes from "prop-types";
 class DevicesModal extends React.Component {
   
     constructor( props ) {
+        console.log('props', props)
       super(props)
       this.columns = [{
         dataField: 'uri',
@@ -36,6 +37,7 @@ class DevicesModal extends React.Component {
 
 
     render() {
+        console.log("redner ShoDevicesModeal: ",this.props.show)
       return (
           <Modal show={this.props.show} onHide={this.props.onHide}>
               <Modal.Header>
@@ -69,6 +71,9 @@ const ConnectedDevicesModal = connect()(DevicesModal)
 
 function ShowDevicesModal(props) {
     const [modalShow, setModalShow] = React.useState(props.initialShow);
+    useEffect(() => {
+        setModalShow(props.initialShow);
+    }, [props])
 
     return(<ConnectedDevicesModal
         user={props.user}

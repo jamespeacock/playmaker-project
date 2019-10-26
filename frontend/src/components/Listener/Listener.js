@@ -50,6 +50,9 @@ class Listener extends React.Component {
                 redirect: 'listen'
             })
         }
+        if (this.props.listener) {
+            console.log(this.props.listener)
+        }
         return (
             <AppContext.Consumer>
                 {() =>
@@ -63,8 +66,8 @@ class Listener extends React.Component {
                                     withButtons={false}/>
                             </section>
                         </main>
-                        {showJoinGroupModal(this.findGroup, !(this.props.user.isListener && this.props.listener.group))}
-                        {showDevicesModal(this.props.user, this.props.user.isLoggedIn && this.props.user.isListener ? this.props.user.devices.length === 0 : false)}
+                        {showJoinGroupModal(this.findGroup, !(this.props.listener.group != '' && this.props.user.isListener))}
+                        {showDevicesModal(this.props.user, this.props.user.isLoggedIn && !this.props.user.current_device && this.props.user.isListener )}
                     </React.Fragment>
                 }
             </AppContext.Consumer>

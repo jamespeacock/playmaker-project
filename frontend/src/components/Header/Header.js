@@ -7,10 +7,14 @@ import { showSubmitReportProblem, showDevicesModal } from '../shared/utils.js'
 export default class Header extends React.Component {
 
     constructor (props) {
+
+        // props.setShowDevices = setShowDevices
         super(props)
         this.state = {
             showDevices: false
         }
+
+
     }
 
     render() {
@@ -38,9 +42,7 @@ export default class Header extends React.Component {
                                 <NavDropdown.Item href="#action/3.2">Go Curate</NavDropdown.Item>
                                 <NavDropdown.Item href="#action/3.3">Settings</NavDropdown.Item>
                                 <NavDropdown.Item onClick={() => {
-                                    console.log('clicked')
-                                    this.setState({showDevices:true})
-                                    console.log(this.state)
+                                    this.setState({showDevices: true})
                                 }}>Devices</NavDropdown.Item>
                                 <NavDropdown.Divider/>
                                 <NavDropdown.Item onClick={showSubmitReportProblem}>Report a Problem</NavDropdown.Item>

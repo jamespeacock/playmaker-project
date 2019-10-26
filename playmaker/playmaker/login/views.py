@@ -7,9 +7,8 @@ from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
 
 from api.settings import FRONTEND
-from playmaker.controller.contants import ACTOR
 from playmaker.controller.models import Listener, Controller
-from playmaker.controller.serializers import ActorSerializer
+from playmaker.controller.serializers import ControllerSerializer, ListenerSerializer
 from playmaker.login import services
 from playmaker.login.services import get_redirect
 from playmaker.models import User
@@ -85,8 +84,11 @@ class IsLoggedInView(SecureAPIView):
         #replace this with user serializer
         actor = {}
         try:
-            ActorSerializer.Meta.model = type(request.user.actor)
-            actor[ACTOR] = ActorSerializer(request.user.actor).data
+            if type(request.user.actor) == Listener:
+                ser = ListenerSerializer
+            elif type(request.user.actor) == Controller:
+                ser = ControllerSerializer
+            actor = ser(request.user.actor).data
         except (Listener.DoesNotExist, Controller.DoesNotExist):
             pass
 

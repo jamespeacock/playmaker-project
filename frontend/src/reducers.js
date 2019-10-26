@@ -53,8 +53,9 @@ function listener(state=defaultListener, action) {
   console.log('state', state)
   console.log(action.listener)
   switch (action.type) {
+    case CHECK_LOGGED_IN:
     case START_LISTENER:
-      return Object.assign({}, state, action.controller)
+      return Object.assign({}, state, action.listener)
     default:
       return state
   }

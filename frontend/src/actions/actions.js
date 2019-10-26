@@ -11,6 +11,14 @@ function checkLoggedIn() {
   return async (dispatch, getState) => {
     console.log('check logged in action called.')
     const user = await new ApiInterface( {} ).isLoggedIn()
+    let devices = []
+    let active_device = {};
+    let group = '';
+    if (user.actor) {
+      devices = user.actor.devices || [];
+      active_device = user.actor.active_device;
+      group = user.actor.group;
+    }
     const action = {
       type:CHECK_LOGGED_IN,
       user: {
@@ -19,12 +27,16 @@ function checkLoggedIn() {
         isListener: user.is_listener,
         username: user.username,
         sp_username: user.sp_username,
-        devices: user.devices || [],
-        current_device: user.current_device
+        devices: devices,
+        current_device: active_device
+      },
+      listener: {
+        group: group
       }
     }
+    console.log('actor', user.actor)
     dispatch(action)
-   
+
   }
 }
 

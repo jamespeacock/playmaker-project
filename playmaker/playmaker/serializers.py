@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from playmaker.controller.serializers import ActorSerializer
 from playmaker.models import User
 
 

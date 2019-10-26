@@ -1,5 +1,5 @@
 import ShowDevicesModal from "./Devices";
-import React from "react";
+import React, {useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 
 const showSubmitReportProblem = () => {
@@ -20,7 +20,11 @@ const showJoinGroupModal = (findGroup, show) => {
 
 function ShowJoinGroupModal(props) {
     const [modalShow, setModalShow] = React.useState(props.show);
-    //TODO figure out proper setGroup or whatever passer. bc these two don't work !
+    useEffect(() => {
+        setModalShow(props.show);
+    }, [props])
+
+    //Do I need use effect down here?
     const [group, setGroup] = React.useState('');
     const [error, setError] = React.useState('');
 
