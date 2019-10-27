@@ -133,7 +133,8 @@ class Controller extends React.Component {
                             <SongTable 
                               songs={this.state.searchResults.tracks}
                               withButtons={true}
-                              handleAdd={this.addToQueueHandler}/>
+                              handleAdd={this.addToQueueHandler}
+                              handlePlay={this.handlePlay}/>
                         </section>
 
                     </div>

@@ -1,6 +1,7 @@
 import logging
 
 from django.db import models
+from django.db.models import CASCADE
 
 from playmaker.controller.contants import ID, SP_ID, URI, NAME
 from playmaker.shared.models import SPModel
@@ -11,6 +12,9 @@ class Image(models.Model):
     height = models.IntegerField()
     width = models.IntegerField()
     url = models.CharField(max_length=255)
+
+    def view(self):
+        return serializers.serialize('json', self, fields=('height', 'width', 'album'))
 
 
 class Genre(models.Model):
@@ -26,7 +30,7 @@ class Artist(SPModel):
     uri = models.CharField(max_length=255, null=True)
     genres = models.ManyToManyField(Genre, related_name="artists", blank=True)
     num_followers = models.IntegerField(null=True)
-    images = models.ManyToManyField(Image, related_name="artist_images", blank=True)
+    images = models.ManyToManyField(Image, related_name="artist", blank=True)
 
     def view(self):
         return serializers.serialize('json', self, fields=('name',))
@@ -44,13 +48,15 @@ class Album(SPModel):
     name = models.CharField(max_length=255, null=True, blank=True)
     artists = models.ManyToManyField(Artist, blank=True)
     uri = models.CharField(max_length=255, null=True)
+    images = models.ManyToManyField(Image, related_name="album", blank=True)
 
     def view(self):
-        return serializers.serialize('json', self, fields=('name', 'uri'))
+        return serializers.serialize('json', self, fields=('name', 'uri', 'images'))
 
     @staticmethod
     def get_key():
         return "albums"
+
 
 
 class Song(SPModel):

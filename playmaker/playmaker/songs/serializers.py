@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from playmaker.playlists.models import Playlist
-from playmaker.songs.models import Song, Artist, Album
+from playmaker.songs.models import Song, Artist, Album, Image
 
 
 class ArtistSerializer(serializers.ModelSerializer):
@@ -11,12 +11,32 @@ class ArtistSerializer(serializers.ModelSerializer):
         fields = ['name', 'uri']
 
 
+class ImageSerializer(serializers.ModelSerializer):
+    height = serializers.IntegerField()
+    width = serializers.IntegerField()
+    url = serializers.CharField(max_length=512)
+
+    class Meta:
+        model = Image
+        fields = ['height', 'width', 'url']
+
+
+class AlbumSerializer(serializers.ModelSerializer):
+    artists = ArtistSerializer(many=True)
+    images = ImageSerializer(many=True)
+
+    class Meta:
+        model = Album
+        fields = ['name', 'artists', 'uri', 'images']
+
+
 class SongSerializer(serializers.ModelSerializer):
     artists = ArtistSerializer(many=True)
+    album = AlbumSerializer()
 
     class Meta:
         model = Song
-        fields = ['name', 'artists', 'uri']
+        fields = ['name', 'artists', 'uri', 'album']
 
 
 class QueuedSongSerializer(SongSerializer):
@@ -29,15 +49,6 @@ class QueuedSongSerializer(SongSerializer):
     class Meta:
         model = Song
         fields = ['name', 'artists', 'uri', 'in_q']
-
-
-class AlbumSerializer(serializers.ModelSerializer):
-    artists = ArtistSerializer(many=True)
-    tracks = SongSerializer(many=True)
-
-    class Meta:
-        model = Album
-        fields = ['name', 'artists', 'tracks', 'uri']
 
 
 class PlaylistSerializer(serializers.ModelSerializer):

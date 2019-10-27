@@ -45,18 +45,28 @@ export default class SongTable extends React.Component {
         dataField: '',
         text: 'Add',
         id: 'add-button',
-        formatter: this.buttonFormatter
+        formatter: this.addFormatter
+      },{
+        dataField: 'uri',
+        text: 'Play',
+        id: 'play-button',
+        formatter: this.playFormatter
       }];
     }
 
     componentDidMount() {}
 
-    buttonFormatter = (cell, row) => {
-      return (<Button onClick={ () => this.props.handleAdd(row) }>Add</Button>);
+    addFormatter = (cell, row) => {
+      return (<Button onClick={ () => this.props.handleAdd(row) }>{cell.text}</Button>);
+    }
+
+    playFormatter = (cell, row) => {
+      return (<Button onClick={ () => this.props.handlePlay(row.uri) }>{cell.text}</Button>);
     }
 
 
     render() {
+      //TODO get rid of bootstrap table it sucks. @Steven what are good tables
       return (
           <div>
               <BootstrapTable
