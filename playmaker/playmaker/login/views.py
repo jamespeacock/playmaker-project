@@ -43,7 +43,6 @@ class SpotifyLoginView(LoginView):
         if is_logged_in(request):
             # User is already logged in --> send to dashboard.
             user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
-            user_redirect['Access-Control-Allow-Origin'] = "*"
             return user_redirect
         try:
             login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
@@ -119,4 +118,4 @@ class LogoutView(LogoutView):
         request.user.save()
         super(LogoutView, self).post(request, *args, **kwargs)
 
-        return {"success": True}
+        return JsonResponse({"success": True})
