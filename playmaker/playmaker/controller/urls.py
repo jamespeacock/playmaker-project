@@ -1,7 +1,7 @@
 from django.urls import path, include
 
 from playmaker.controller.views import PlaySongView, QueueActionView, PauseSongView, NextSongView, SeekSongView, \
-    StartGroupView
+    StartGroupView, PollView
 
 urlpatterns = [
     path('next', NextSongView.as_view()),
@@ -11,4 +11,5 @@ urlpatterns = [
     path('queue', QueueActionView.as_view()),
     path('seek', SeekSongView.as_view()),
     path('start', StartGroupView.as_view()),
+    path('poll/<str:action>', PollView.as_view()),
 ]

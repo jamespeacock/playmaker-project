@@ -1,5 +1,7 @@
 import logging
+import threading
 
+import polling
 from django.core.exceptions import ObjectDoesNotExist
 
 from playmaker.controller.models import SongInQueue
@@ -122,25 +124,76 @@ def remove_from_queue(uuid, uris, positions):
     return True
 
 
-def start_polling(user, current_song_id):
-    check_current_song = user.sp.currently_playing
-    song_changed = polling.poll(
-        lambda: check_current_song(),
-        check_success=lambda response: response['track']['id'] == current_song_id,
-        step=10,
-        # ignore_exceptions=(requests.exceptions.ConnectionError,),
-        poll_forever=True)
+"""
+Polling for Song changes object
+"""
 
-    if song_changed:
-        song_changed.close()
 
-    # Set current song and push out to all listeners. Do I have access to response
-    next_song = check_current_song()['track']['id']
-    if next_song:
-        failed_results = [r for r in perform_action(
-            user,
-            Action.PLAY,
-            uris=[next_song.uri]) if r]
+class PollingThread(object):
+    """ Threading example class
+    The run() method will be started and it will run in the background
+    until the application exits.
+    """
 
+    def __init__(self, user, check_current_song, current_song_id=None, current_pos=0):
+        """ Constructor
+        :type interval: int
+        :param interval: Check interval, in seconds
+        """
+        thread = threading.Thread(target=self.run, args=(user, check_current_song, current_song_id, current_pos))
+        thread.daemon = True                            # Daemonize thread
+        self.thread = thread                                # Start the execution
+
+    def check_changed(self, response, current_song_id):
+        print("Checking if song changed.")
+        return response and response['item']['id'] != current_song_id
+
+    def start(self):
+        self.thread.start()
+
+    def run(self, user, check_current_song, current_song_id, current_song_pos):
+        #TODO smart polling idea. Wait until halfway between current pos and end of song all the way down to Xs (5 or 10s)
+        logging.log(logging.INFO, "Start polling")
+
+        song_changed = polling.poll(
+            lambda: check_current_song(),
+            check_success=lambda response: self.check_changed(response, current_song_id),
+            step=10,
+            # ignore_exceptions=(requests.exceptions.ConnectionError,),
+            poll_forever=True)
+
+        if song_changed:
+            logging.log(logging.INFO, "Song has changed.")
+
+        # Set current song and push out to all listeners. Do I have access to response
+        next_song = song_changed['item']
+        if next_song:
+            failed_results = [r for r in perform_action(
+                user,
+                Action.PLAY,
+                uris=[next_song['uri']]) if r]
+
+        if failed_results:
+            logging.log(logging.ERROR, "Failed PLAY results: " + str(failed_results))
+        else:
+            print("Successfully updated song for listeners.")
+            logging.log(logging.INFO, "Successfully updated song for listeners.")
     # Handle failures here
-    # Handle kickoff of start polling again -> wait 90s min then poll every 10s
+    # Handle kickoff of start polling again -> wait 90s minimum then poll every 10s
+
+
+def start_polling(user):
+    check_current_song = user.sp.currently_playing
+    curr_song = check_current_song()
+    #check in future if "currently_playing_type" is different from track. If so grab tracks not direct ID
+    current_song_id = curr_song['item']['id'] if curr_song else None
+    current_pos = curr_song['progress_ms'] if curr_song else 0
+    # total_duration = curr_song['item']['duration_ms']
+    logging.log(logging.INFO, "Current song before polling: " + str(current_song_id))
+    song_poller = PollingThread(user, check_current_song, current_song_id, current_pos)
+    song_poller.start()
+
+
+def stop_polling(user):
+    logging.log(logging.INFO, "Stop polling")
+    pass

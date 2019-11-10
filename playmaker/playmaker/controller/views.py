@@ -2,10 +2,10 @@ import logging
 from collections import defaultdict
 from django.http import JsonResponse
 from playmaker.controller import services
-from playmaker.controller.contants import URIS, CONTROLLER, ADD, REMOVE, URI
+from playmaker.controller.contants import URIS, CONTROLLER, ADD, REMOVE, URI, START, STOP
 from playmaker.controller.models import Controller, Group, Queue, Listener
 from playmaker.controller.serializers import QueueActionSerializer
-from playmaker.controller.services import next_in_queue
+from playmaker.controller.services import next_in_queue, start_polling, stop_polling
 from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
 from playmaker.shared.views import SecureAPIView
@@ -109,7 +109,7 @@ class SeekSongView(ControllerView):
                 position_ms=pos) if r]
 
             if failed_results:
-                return JsonResponse({"status": "Meh."})
+                return JsonResponse({"status": failed_results})
 
         return JsonResponse({"status": "Success."})
 
@@ -151,6 +151,20 @@ class QueueActionView(ControllerView):
             JsonResponse("That action could not be completed.", status=500, safe=False)
 
 
+class PollView(ControllerView):
+
+    def get(self, request, action=None, *args, **kwargs):
+        super(PollView, self).get(request)
+        try:
+            if action == START:
+                #kicks off thread that will poll until song changes and then
+                start_polling(request.user)
+                return JsonResponse("Started polling.", safe=False)
+            elif action == STOP:
+                stop_polling()
+        except Exception as e:
+            print(e)
+            return JsonResponse(str(e), status=500, safe=False)
 # Fetch Playlists
 
 # Fetch Recommendations

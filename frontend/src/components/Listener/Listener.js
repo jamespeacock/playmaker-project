@@ -53,6 +53,7 @@ class Listener extends React.Component {
         if (this.props.listener) {
             console.log(this.props.listener)
         }
+        const willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && this.props.listener.group != '')
         return (
             <AppContext.Consumer>
                 {() =>
@@ -66,8 +67,8 @@ class Listener extends React.Component {
                                     withButtons={false}/>
                             </section>
                         </main>
-                        {showJoinGroupModal(this.findGroup, !(this.props.listener.group != '' && this.props.user.isListener))}
-                        {showDevicesModal(this.props.user, this.props.user.isLoggedIn && !this.props.user.current_device && this.props.user.isListener )}
+                        {showDevicesModal(this.props.user, !willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.current_device && this.props.user.isListener )}
+                        {showJoinGroupModal(this.findGroup, willOpenGroupModal)}
                     </React.Fragment>
                 }
             </AppContext.Consumer>

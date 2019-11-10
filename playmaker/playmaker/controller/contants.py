@@ -16,6 +16,10 @@ ACTION = "action"
 ADD = "add"
 REMOVE = "remove"
 
+#Polling actions
+START = "start"
+STOP = "stop"
+
 # Spotify constants
 ARTIST = 'artist'
 ALBUM = 'album'
