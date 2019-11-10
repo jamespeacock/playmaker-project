@@ -80,7 +80,7 @@ After making changes: `./refresh.sh && docker-compose logs -f interface`
 ## API Usage
 
 #### Play a song for a listener
-`http://localhost:8000/controller/playsong?listener=1&song_uris=spotify:track:5ewqsgAusPBCyYn2zmMt7k`
+`http://localhost:5000/controller/playsong?listener=1&song_uris=spotify:track:5ewqsgAusPBCyYn2zmMt7k`
 
 ## Troubleshooting
 
