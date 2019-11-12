@@ -17,21 +17,15 @@ RUN apk add netcat-openbsd bc curl wget git bash
 RUN apk add libressl
 RUN cd /tmp/ && git clone https://github.com/Neilpang/acme.sh.git
 RUN cd /tmp/acme.sh/ && ./acme.sh --install
-RUN export D=/usr/share/nginx/html
+ENV D=/usr/share/nginx/html
 #Inject this in the future as a build arg.
-RUN export SITE=test.myplaymkr.co
+ENV SITE=test.myplaymkr.co
 RUN mkdir -vp ${D}/.well-known/acme-challenge/
-RUN apk install libressl
 RUN mkdir -p /etc/nginx/ssl/letsencrypt/${SITE}/
 RUN cd /etc/nginx/ssl/letsencrypt/${SITE}/
-RUN openssl dhparam -dsaparam -out dhparams.pem 4096
-RUN cd /root/.acme.sh && ./acme.sh --issue -w $D -d ${SITE} -k 4096
 
 ADD nginx.conf /etc/nginx/conf.d/default.conf
-
-RUN cd /root/.acme.sh && ./acme.sh --installcert -d ${SITE} \
---keypath /etc/nginx/ssl/letsencrypt/${SITE}/${SITE}.key \
---fullchainpath /etc/nginx/ssl/letsencrypt/${SITE}/${SITE}.crt
+COPY install_certs.sh /root/install_certs.sh
 
 EXPOSE 80
 EXPOSE 443
