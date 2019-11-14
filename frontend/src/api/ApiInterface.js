@@ -18,7 +18,7 @@ export default class ApiInterface  {
 
     this.axios = axios.create({
       baseURL: `${this.API_BASE}`,
-      timeout: 15000,
+      timeout: 150000,
       headers: {'Content-Type': 'application/json'}
     });
 
@@ -60,10 +60,8 @@ export default class ApiInterface  {
   }
 
   fetchLoginRedirect (url, body) {
-      console.log('fetching', url)
     return this.axios.post( url, body)
       .then((res) => {
-          console.log(res)
           if (!res) {
             return {error: 'No data. Server Error'}
           }
@@ -87,10 +85,8 @@ export default class ApiInterface  {
   }
 
   logout = async () => {
-      //was 'rest-auth/logout/' before
     await this.axios.post('login/logout').catch(e => {
-        console.log("could not log out.")
-        console.log(e.response.data)
+        return {error: e.response.data}
     })
   }
 }

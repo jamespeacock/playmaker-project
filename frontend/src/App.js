@@ -8,6 +8,7 @@ import Login from './components/Login/Login'
 import Signup from './components/Login/Signup'
 import Dashboard from './components/Login/Dashboard'
 import Listener from './components/Listener/Listener'
+import Header from './components/Header/Header'
 import {checkLoggedIn} from './actions/actions'
 import './App.css'
 import ApiInterface from "./api/ApiInterface";
@@ -17,7 +18,6 @@ class App extends React.Component {
 
   constructor(props) {
     super(props)
-    console.log('app props', this.props)
   }
 
   logout = async () => {
@@ -32,6 +32,7 @@ class App extends React.Component {
   render() {
     return (
     <AppContext.Provider value={{user:this.props.user, logout:this.logout}}>
+      <Header/>
       <BrowserRouter>
         <Switch>
           <Route exact path='/'
@@ -77,7 +78,6 @@ App.propTypes = {
 }
 
 function mapStateToProps(state) {
-  console.log('initial state', state)
   //what the fuck should i be doing here???
   const { user, listener, controller } = state
   // const { isFetching, lastUpdated, items: posts } = postsBySubreddit[

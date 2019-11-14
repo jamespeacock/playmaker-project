@@ -27,7 +27,7 @@ class StartGroupView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
         super(StartGroupView, self).get(request)
-        if request.user.actor and isinstance(request.user.actor, Listener):
+        if getattr(request.user, 'listener', None):
             logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
             Listener.objects.get(me=request.user).delete()
         controller, created = Controller.objects.get_or_create(me=request.user)
@@ -35,9 +35,9 @@ class StartGroupView(SecureAPIView):
         group, created = Group.objects.get_or_create(controller=controller)
         if not created:
             logging.log(logging.INFO, "Group was not created for some reason!")
-        # TODO start a poller every 60s after song starts and then every 15s for current song
-        # If it is different from queue current song, update it and send it out to listeners.
-        return JsonResponse({"group": group.id, "controller": controller.id})
+
+        started = start_polling(request.user)
+        return JsonResponse({"group": group.id, "controller": controller.id, "started": started})
 
 
 # Play song for current listeners
@@ -157,26 +157,25 @@ class PollView(ControllerView):
         super(PollView, self).get(request)
         try:
             if action == START:
-                #kicks off thread that will poll until song changes and then
-                start_polling(request.user)
-                return JsonResponse("Started polling.", safe=False)
+                # kicks off thread that will poll until song changes and then
+                started = start_polling(request.user)
+                return JsonResponse({"started": started})
             elif action == STOP:
-                stop_polling()
+                stopped = stop_polling()
+                return JsonResponse({"stopped": stopped})
         except Exception as e:
-            print(e)
+            logging.log(logging.ERROR, e)
             return JsonResponse(str(e), status=500, safe=False)
-# Fetch Playlists
 
-# Fetch Recommendations
-#  - filter recs
+# Listener/Group Data Section
 
-# Add Song to Playlist
-
-# Transfer playback
-
-### Listener/Group Data Section
 
 class GroupTastesView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
         pass
+# Fetch Playlists
+
+# Fetch Recommendations
+
+#  - filter recs

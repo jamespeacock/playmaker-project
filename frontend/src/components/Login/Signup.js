@@ -3,20 +3,10 @@ import ApiInterface from '../../api/ApiInterface'
 import Header from '../Header/Header'
 import {Button, Container, Form} from "react-bootstrap";
 import {checkLoggedIn} from "../../actions/actions";
+import {Redirect, withRouter} from 'react-router-dom'
+import {connect} from "react-redux"
 
-// const { Formik } = formik;
-
-// const schema = yup.object({
-//     firstName: yup.string().required(),
-//     lastName: yup.string().required(),
-//     username: yup.string().required(),
-//     city: yup.string().required(),
-//     state: yup.string().required(),
-//     zip: yup.string().required(),
-//     terms: yup.bool().required(),
-// });
-
-export default class Signup extends React.Component {
+class Signup extends React.Component {
 
     constructor( props ) {
         super( props )
@@ -30,25 +20,23 @@ export default class Signup extends React.Component {
         }
     }
 
-    signupHandler = async ( ) => {
-        console.log('starting signupHandler')
-        // evt.preventDefault()
+    signupHandler = async ( evt ) => {
+        evt.preventDefault()
         const { name, username, email, password1, password2 } = this.state;
 
         this.loginInterface = new ApiInterface();
 
-        console.log('calling login redirect')
         const resp = await this.loginInterface.fetchLoginRedirect(
           'signup/',
-          { name, email, username, password1, password2, redirect: 'dashboard'} //replace with this.props.redirect
+          { name, email, username, password1, password2, redirect: this.props.location.redirect || 'dashboard'} //replace with this.props.redirect
         )
         if (resp.url) {
+            console.log('resp had url')
             this.props.dispatch(checkLoggedIn())
             window.location.href = resp.url
         } else {
-            console.log('Failed to login. Please try again.')
-            console.log(resp)
-            this.setState({error: 'Invalid credentials.'})
+            console.log('resp did not have url, error: ', resp.error)
+            this.setState({error: resp.error})
         }
     }
 
@@ -73,12 +61,13 @@ export default class Signup extends React.Component {
     }
 
     render() {
-        console.log('rendering login')
+        if (this.props.user.isLoggedIn) {
+            return (<Redirect to={this.props.location.redirect || '/dashboard'}/>)
+        }
         return (
             <React.Fragment>
-                <Header isLoggedIn={this.props.isLoggedIn} ></Header>
                 <Container>
-                    Sign Up
+                    <h2>Sign Up </h2>
                     <Form>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Label >Name</Form.Label>
@@ -109,9 +98,12 @@ export default class Signup extends React.Component {
                         <Button variant="primary" type="submit" onClick={this.signupHandler}>
                             Create Account
                         </Button>
+                        <Form.Text onClick={() => this.props.history.push('/login')} >Have an account? Log In</Form.Text>
                     </Form>
                 </Container>
             </React.Fragment>
         )
     }
 }
+
+export default withRouter(connect()(Signup))

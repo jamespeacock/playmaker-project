@@ -31,8 +31,6 @@ class Login extends React.Component {
           this.props.dispatch(checkLoggedIn())
           window.location.href = resp.url
         } else {
-          console.log('Failed to login. Please try again.')
-          console.log(resp)
           this.setState({error: 'Invalid credentials.'})
         }
     }
@@ -47,19 +45,14 @@ class Login extends React.Component {
         this.setState( { password } )
     }
 
-    // componentWillMount() {
-    //     this.props.dispatch(checkLoggedIn())
-    // }
-
     render() {
-        console.log('rendering', this.state.error)
         if (this.props.user.isLoggedIn) {
             return (<Redirect to={this.props.location.redirect || '/dashboard'}/>)
         }
         return (
             <React.Fragment>
-                <Header user={this.props.user}></Header>
                 <Container>
+                    <h2>Log In</h2>
                     <Form>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Label>Username</Form.Label>
@@ -80,6 +73,7 @@ class Login extends React.Component {
                         <Button variant="primary" type="submit" onClick={this.loginInterfaceHandler }>
                             Login
                         </Button>
+                        <Form.Text onClick={() => this.props.history.push('/signup')} >Need an account? Sign Up</Form.Text>
                     </Form>
                 </Container>
             </React.Fragment>
