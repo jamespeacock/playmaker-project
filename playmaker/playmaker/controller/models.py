@@ -126,6 +126,9 @@ class Listener(models.Model):
             return True
         else:
             return False
+        self.refresh()  # TODO test if this is necessary
+
+
 
     def current_song(self):
         return self.sp.currently_playing()['uri']
