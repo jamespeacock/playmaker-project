@@ -10,7 +10,7 @@ class DevicesModal extends React.Component {
     constructor( props ) {
       super(props)
       this.columns = [{
-        dataField: 'uri',
+        dataField: 'sp_id',
         text: '',
         hidden: true
       },{
@@ -51,7 +51,7 @@ class DevicesModal extends React.Component {
 
               <div>
                   <BootstrapTable
-                      keyField="uri"
+                      keyField="sp_id"
                       data={this.props.user.devices}
                       columns={this.columns}/>
               </div>

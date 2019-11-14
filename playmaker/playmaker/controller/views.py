@@ -2,7 +2,7 @@ import logging
 from collections import defaultdict
 from django.http import JsonResponse
 from playmaker.controller import services
-from playmaker.controller.contants import URIS, CONTROLLER, ADD, REMOVE, URI, START, STOP
+from playmaker.controller.contants import URIS, ADD, REMOVE, URI, START, STOP
 from playmaker.controller.models import Controller, Group, Queue, Listener
 from playmaker.controller.serializers import QueueActionSerializer
 from playmaker.controller.services import next_in_queue, start_polling, stop_polling
