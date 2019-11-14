@@ -12,7 +12,7 @@ services:
       args:
         - TAG=${TAG}
     volumes:
-      - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw
+      - /root/certs/test.myplaymkr.co:/etc/nginx/ssl/letsencrypt/test.myplaymkr.co/:rw
     ports:
           - "80:80"
           - "443:443"
