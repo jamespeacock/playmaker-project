@@ -30,9 +30,10 @@ class Queue(models.Model):
 
     def currently_playing(self):
         # TODO need to lock around this to prevent multiple updates
-        sp_current_song = self.controller.me.sp.currently_playing()['uri']
-        if not self.current_song or self.current_song != sp_current_song:
-            self.current_song = sp_current_song # from _obj or whatever
+        controller_current_song = self.controller.me.sp.currently_playing()
+        controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
+        if not self.current_song or self.current_song != controller_song_uri:
+            self.current_song = controller_song_uri # from _obj or whatever
             self.save()
 
         return self.current_song
@@ -112,8 +113,8 @@ class Listener(models.Model):
         logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active or selected devices.")
         return None
 
-    def set_device(self, device_uri):
-        device = self.devices.get(uri=device_uri)
+    def set_device(self, device_id):
+        device = self.devices.get(sp_id=device_id)
         if device:
             # Set all other devices for this user to is_selected=False
             for d in self.devices.filter(is_selected=True).all():
@@ -132,20 +133,23 @@ class Listener(models.Model):
 
 class Device(SPModel):
     listener = models.ForeignKey(Listener, related_name='devices', on_delete=models.CASCADE)
-    is_selected = models.BooleanField()
-    is_active = models.BooleanField()
-    is_private_session = models.BooleanField()
-    is_restricted = models.BooleanField()
+    is_selected = models.BooleanField(null=True)
+    is_active = models.BooleanField(null=True)
+    is_private_session = models.BooleanField(null=True)
+    is_restricted = models.BooleanField(null=True)
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=64)
-    volume_percent = models.IntegerField()
-    uri = models.CharField(max_length=255, null=False, unique=True)
+    volume_percent = models.IntegerField(null=True)
 
     @staticmethod
     def from_sp(save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         kwargs['is_selected'] = False
-        d,_ = Device.objects.get_or_create(uri=kwargs.pop('id'))
+        d,_ = Device.objects.get_or_create(
+            listener_id=kwargs.pop('listener_id'),
+            sp_id=kwargs.pop('sp_id'),
+            name=kwargs.pop('name'),
+            type=kwargs.pop('type'))
         d.update(**kwargs)
         if save:
             d.save()

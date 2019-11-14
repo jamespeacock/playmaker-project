@@ -39,10 +39,12 @@ class User(auth_models.AbstractUser):
                 self.listener.delete()
                 self.save()
             self.is_controller = True
+            self.is_listener = False
             self.save()
             return self.controller
         elif hasattr(self, 'listener') and self.listener:
             self.is_listener = True
+            self.is_controller = False
             self.save()
             return self.listener
         logging.log(logging.ERROR, "User %s does not have a listener or a controller!" % self.username)

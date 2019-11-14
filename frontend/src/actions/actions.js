@@ -40,7 +40,7 @@ function checkLoggedIn() {
 
 function setDevice( deviceRow ) {
   return async (dispatch, getState) => {
-    const resp = await new ListenerInterface().setDevice(deviceRow.uri)
+    const resp = await new ListenerInterface().setDevice(deviceRow.sp_id)
     if (resp.current_device) {
       const action = {
         type: SET_CURRENT_DEVICE,

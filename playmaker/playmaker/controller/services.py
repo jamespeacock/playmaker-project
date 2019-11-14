@@ -2,8 +2,10 @@ import logging
 import threading
 
 import polling
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 
+from api.settings import HOSTNAME
 from playmaker.controller.models import SongInQueue
 from playmaker.controller.visitors import Action
 from playmaker.models import User
@@ -148,7 +150,7 @@ class PollingThread(object):
 
     def check_changed(self, response, current_song_id):
         print("Checking if song changed.")
-        return response and response['item']['id'] != current_song_id
+        return response['item']['id'] != current_song_id if (response and response['item']) else False
 
     def start(self):
         self.thread.start()
@@ -182,6 +184,7 @@ class PollingThread(object):
             logging.log(logging.INFO, "Successfully updated song for listeners.")
 
         self.callback(*self.args)
+        return True
     # Handle failures here
     # Handle kickoff of start polling again -> wait 90s minimum then poll every 10s
 
@@ -190,12 +193,12 @@ def start_polling(user):
     check_current_song = user.sp.currently_playing
     curr_song = check_current_song()
     # TODO check in future if "currently_playing_type" is different from track. If so grab tracks not direct ID
-    current_song_id = curr_song['item']['id'] if curr_song else None
+    current_song_id = curr_song['item']['id'] if (curr_song and curr_song['item']) else None
     current_pos = curr_song['progress_ms'] if curr_song else 0
     # total_duration = curr_song['item']['duration_ms']
     if current_song_id:
         logging.log(logging.INFO, "Current song before polling: " + str(current_song_id))
-        song_poller = PollingThread(user, start_polling, check_current_song, current_song_id, current_pos, user)
+        song_poller = PollingThread(user, check_current_song, start_polling, current_song_id, current_pos, user)
         song_poller.start()
         return True
     else:

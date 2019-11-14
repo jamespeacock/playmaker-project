@@ -21,7 +21,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ['name', 'type', 'is_active', 'uri']
+        fields = ['name', 'type', 'is_active', 'sp_id']
 
 
 class ListenerSerializer(serializers.ModelSerializer):
@@ -38,14 +38,3 @@ class ControllerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Controller
         fields = ['group']
-
-    # def create(self, validated_data):
-    #     devices = validated_data.devices
-    #     listener = validated_data.pop('listener')
-    #     if listener:
-    #         devices = [validated_data.active_device]
-    #         return {'group': listener.group, 'devices': devices}
-    #     controller = validated_data.pop('controller')
-    #     if controller:
-    #         return {'group': controller.group}
-    #     return {}
