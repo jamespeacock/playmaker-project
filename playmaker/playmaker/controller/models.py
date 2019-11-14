@@ -150,7 +150,7 @@ class Device(SPModel):
         kwargs['is_selected'] = False
         logging.log(logging.ERROR, str(kwargs))
         d,_ = Device.objects.get_or_create(
-            listener_id=kwargs.pop('listener'),
+            listener=kwargs.pop('listener'),
             sp_id=kwargs.pop('sp_id'),
             name=kwargs.pop('name'),
             type=kwargs.pop('type'))
