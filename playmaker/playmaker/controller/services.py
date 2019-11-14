@@ -180,7 +180,6 @@ class PollingThread(object):
         if failed_results:
             logging.log(logging.ERROR, "Failed PLAY results: " + str(failed_results))
         else:
-            print("Successfully updated song for listeners.")
             logging.log(logging.INFO, "Successfully updated song for listeners.")
 
         self.callback(*self.args)
