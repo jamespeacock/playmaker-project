@@ -35,7 +35,7 @@ export default class ApiInterface  {
       })
       .then((res) => res.data)
         .catch(e => {
-            console.log(e.response)
+            console.log("errored", e.response)
             if (e.response.status != 500) {
                 return e.response.data
             }

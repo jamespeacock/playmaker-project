@@ -23,6 +23,7 @@ class Signup extends React.Component {
     signupHandler = async ( evt ) => {
         evt.preventDefault()
         const { name, username, email, password1, password2 } = this.state;
+        // TODO validate all are non-empty
 
         this.loginInterface = new ApiInterface();
 

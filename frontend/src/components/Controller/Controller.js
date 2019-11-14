@@ -108,7 +108,7 @@ class Controller extends React.Component {
                 <Card style={{ width: '18rem' }}>
                     <Card.Body>
                         <Card.Text style={{color: 'black'}}>
-                            {this.props.controller.group}
+                            Group: {this.props.controller.group}
                         </Card.Text>
                     </Card.Body>
                 </Card>
