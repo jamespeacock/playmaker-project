@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('has_user', IsLoggedInView.as_view(), name="is-logged-in-view"),
+    path('feedback', include('feedback.urls')),
     path('listener/', include('playmaker.listener.urls')),
     path('login/', include('playmaker.login.urls')),
     path('rest-auth/', include('rest_auth.urls')),
