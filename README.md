@@ -24,7 +24,7 @@ pip install pipenv
 
 # in ../code_dir/playmaker-project/playmaker
 pyenv local 3.6.6
-mkirtualenv -a . playmaker
+mkvirtualenv -a . playmaker
 workon playmaker
 
 pipenv install --dev
