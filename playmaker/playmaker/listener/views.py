@@ -51,6 +51,8 @@ class StartListeningView(SecureAPIView):
             logging.log(logging.INFO, "Mismatch for user/group/listener")
             return JsonResponse("Mismatch for user/group/listener", safe=False)
 
+        if listener.group.current_song() != listener.current_song():
+            listener.sp.play_song()
         # TODO return group/session info
         # Send back current queue, other listeners, etc.
         return JsonResponse({"group": group_id, "songs": []})

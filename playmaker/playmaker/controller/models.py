@@ -24,18 +24,18 @@ class Controller(models.Model):
 
 class Queue(models.Model):
     songs = models.ManyToManyField(Song, through='SongInQueue')
-    current_song = models.ForeignKey(Song, related_name='in_groups', on_delete=models.DO_NOTHING, null=True)
+    current_song = models.CharField(max_length=256, null=True)
     next_pos = models.IntegerField(default=0, blank=False, null=False)
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
     def currently_playing(self):
         # TODO need to lock around this to prevent multiple updates
-        sp_current_song = self.controller.me.sp.current_user_playing_track()
-        if not self.current_song or self.current_song.uri != sp_current_song:
+        sp_current_song = self.controller.me.sp.currently_playing()['uri']
+        if not self.current_song or self.current_song != sp_current_song:
             self.current_song = sp_current_song # from _obj or whatever
             self.save()
 
-        return self.current_song()
+        return self.current_song
 
     def contents(self):
         return self.songs.order_by('in_q__position').all()
@@ -56,6 +56,9 @@ class Group(models.Model):
     @property
     def queue(self):
         return self.controller.queue
+
+    def current_song(self):
+        return self.queue.currently_playing()
 
 
 class Listener(models.Model):
@@ -123,6 +126,9 @@ class Listener(models.Model):
         else:
             return False
 
+    def current_song(self):
+        return self.sp.currently_playing()['uri']
+
 
 class Device(SPModel):
     listener = models.ForeignKey(Listener, related_name='devices', on_delete=models.CASCADE)
@@ -133,13 +139,14 @@ class Device(SPModel):
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=64)
     volume_percent = models.IntegerField()
-    uri = models.CharField(max_length=255, null=True)
+    uri = models.CharField(max_length=255, null=False, unique=True)
 
     @staticmethod
     def from_sp(save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         kwargs['is_selected'] = False
-        d,_ = Device.objects.get_or_create(**kwargs)
+        d,_ = Device.objects.get_or_create(uri=kwargs.pop('uri'))
+        d.update(**kwargs)
         if save:
             d.save()
         return d
