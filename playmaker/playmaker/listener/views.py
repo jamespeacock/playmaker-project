@@ -41,8 +41,7 @@ class StartListeningView(SecureAPIView):
             return JsonResponse("Group with indicator %s does not exist" % str(group_id), status=404, safe=False)
 
         try:
-            listener, created = Listener.objects.get_or_create(me=request.user, group=group)
-            listener.refresh()
+            Listener.objects.get_or_create(me=request.user, group=group)
             if getattr(request.user, 'controller', None):
                 logging.log(logging.INFO, "Removing controller now that user wants to be a listener.")
                 Controller.objects.get(me=request.user).delete()
