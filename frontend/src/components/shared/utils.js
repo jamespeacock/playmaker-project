@@ -46,7 +46,6 @@ class JoinGroupModal extends React.Component {
     }
 
     handleJoin = async () => {
-        console.log("handle join: ", this.props)
         const success = await this.props.findGroup(this.props.group);
         if (success) {
             this.props.onHide()
@@ -66,7 +65,11 @@ class JoinGroupModal extends React.Component {
                         <Form.Control
                             type="text"
                             placeholder="shared room code"
-                            onChange={(e) => this.props.setGroup(e.target.value)}
+                            onChange={(e) => {
+                                this.props.setError('')
+                                this.props.setGroup(e.target.value)
+                              }
+                            }
                             isInvalid={this.props.error}
                         />
                         <Form.Control.Feedback type='invalid'>{this.props.error}</Form.Control.Feedback>

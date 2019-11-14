@@ -5,6 +5,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
+from rest_framework.exceptions import ValidationError
 
 from api.settings import FRONTEND
 from playmaker.controller.models import Listener, Controller
@@ -27,10 +28,24 @@ class SpotifyRegisterView(RegisterView):
         body = request.data
         username = body.get('username')
         frontend_redirect = body.get('redirect', 'login')
-        signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
-        if signup.status_code != 201:
-            return JsonResponse(signup, safe=False, status=signup.status_code)
-        return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
+        try:
+            signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
+            if signup.status_code != 201:
+                return JsonResponse(signup, safe=False, status=signup.status_code)
+            return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
+        except Exception as e:
+            return JsonResponse({"error": self.format_exc(e)}, status=403)
+
+    def format_exc(self, e):
+        exc_str = ""
+        if isinstance(e, ValidationError):
+            for field, detail in e.detail.items():
+                exc_str += "%s: " % field
+                exc_str += "\n".join([str(err) for err in detail])
+                exc_str += "\n"
+        else:
+            exc_str += str(e)
+        return exc_str
 
 
 class SpotifyLoginView(LoginView):

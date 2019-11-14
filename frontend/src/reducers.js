@@ -9,9 +9,9 @@ const defaultUser = {
 
 //Define reducers here
 function user(state=defaultUser, action) {
-  console.log('in user reducer: ' + action.type)
-  console.log('state', state)
-  console.log(action.user)
+//  console.log('in user reducer: ' + action.type)
+//  console.log('state', state)
+//  console.log(action.user)
   switch (action.type) {
     case CHECK_LOGGED_IN:
     case SET_CURRENT_DEVICE:
@@ -32,9 +32,9 @@ const defaultController = {
 }
 
 function controller(state=defaultController, action) {
-  console.log('in controller reducer: ' + action.type)
-  console.log('state', state)
-  console.log(action.controller)
+//  console.log('in controller reducer: ' + action.type)
+//  console.log('state', state)
+//  console.log(action.controller)
   switch (action.type) {
     case START_CONTROLLER:
       return Object.assign({}, state, action.controller)
@@ -49,9 +49,9 @@ const defaultListener = {
 }
 
 function listener(state=defaultListener, action) {
-  console.log('in listener reducer: ' + action.type)
-  console.log('state', state)
-  console.log(action.listener)
+//  console.log('in listener reducer: ' + action.type)
+//  console.log('state', state)
+//  console.log(action.listener)
   switch (action.type) {
     case CHECK_LOGGED_IN:
     case START_LISTENER:

@@ -36,19 +36,21 @@ export default class Header extends React.Component {
                             <Navbar.Text>{user.username}</Navbar.Text>
                         </Col>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
-                        <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                            <NavDropdown title="Account" id="basic-nav-dropdown">
-                                <NavDropdown.Item href="#action/3.1">Go Listen</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.2">Go Curate</NavDropdown.Item>
-                                <NavDropdown.Item href="#action/3.3">Settings</NavDropdown.Item>
-                                <NavDropdown.Item onClick={() => {
-                                    this.setState({showDevices: true})
-                                }}>Devices</NavDropdown.Item>
-                                <NavDropdown.Divider/>
-                                <NavDropdown.Item onClick={showSubmitReportProblem}>Report a Problem</NavDropdown.Item>
-                                <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>
-                            </NavDropdown>
-                        </Navbar.Collapse>
+                        {user.isLoggedIn &&
+                            <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
+                                <NavDropdown title="Account" id="basic-nav-dropdown">
+                                    <NavDropdown.Item href="#action/3.1">Go Listen</NavDropdown.Item>
+                                    <NavDropdown.Item href="#action/3.2">Go Curate</NavDropdown.Item>
+                                    <NavDropdown.Item href="#action/3.3">Settings</NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => {
+                                        this.setState({showDevices: true})
+                                    }}>Devices</NavDropdown.Item>
+                                    <NavDropdown.Divider/>
+                                    <NavDropdown.Item onClick={showSubmitReportProblem}>Report a Problem</NavDropdown.Item>
+                                    <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>
+                                </NavDropdown>
+                            </Navbar.Collapse>
+                        }
                     </Navbar>
                 {/*modals here*/}
                 {showDevicesModal(user, this.state.showDevices)}

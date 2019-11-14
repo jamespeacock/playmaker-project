@@ -8,7 +8,6 @@ import PropTypes from "prop-types";
 class DevicesModal extends React.Component {
   
     constructor( props ) {
-        console.log('props', props)
       super(props)
       this.columns = [{
         dataField: 'uri',
@@ -37,7 +36,6 @@ class DevicesModal extends React.Component {
 
 
     render() {
-        console.log("redner ShoDevicesModeal: ",this.props.show)
       return (
           <Modal show={this.props.show} onHide={this.props.onHide}>
               <Modal.Header>

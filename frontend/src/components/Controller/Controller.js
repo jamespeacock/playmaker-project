@@ -58,10 +58,6 @@ class Controller extends React.Component {
         this.controller.seek(position)
     }
 
-    // componentWillMount() {
-    //     this.props.dispatch(checkLoggedIn())
-    // }
-
     componentDidMount() {
         if (this.props.user.isLoggedIn) {
             this.createGroup()
@@ -109,11 +105,10 @@ class Controller extends React.Component {
         }
         return (
             <React.Fragment>
-                <Header></Header>
                 <Card style={{ width: '18rem' }}>
                     <Card.Body>
                         <Card.Text style={{color: 'black'}}>
-                            {this.state.group}
+                            Group: {this.props.controller.group}
                         </Card.Text>
                     </Card.Body>
                 </Card>

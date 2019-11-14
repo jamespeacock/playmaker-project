@@ -185,13 +185,18 @@ class PollingThread(object):
 def start_polling(user):
     check_current_song = user.sp.currently_playing
     curr_song = check_current_song()
-    #check in future if "currently_playing_type" is different from track. If so grab tracks not direct ID
+    # TODO check in future if "currently_playing_type" is different from track. If so grab tracks not direct ID
     current_song_id = curr_song['item']['id'] if curr_song else None
     current_pos = curr_song['progress_ms'] if curr_song else 0
     # total_duration = curr_song['item']['duration_ms']
-    logging.log(logging.INFO, "Current song before polling: " + str(current_song_id))
-    song_poller = PollingThread(user, check_current_song, current_song_id, current_pos)
-    song_poller.start()
+    if current_song_id:
+        logging.log(logging.INFO, "Current song before polling: " + str(current_song_id))
+        song_poller = PollingThread(user, check_current_song, current_song_id, current_pos)
+        song_poller.start()
+        return True
+    else:
+        logging.log(logging.ERROR, "Cannot get controller's current song. Cannot begin polling.")
+        return False
 
 
 def stop_polling(user):

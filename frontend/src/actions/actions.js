@@ -9,7 +9,6 @@ export const START_LISTENER = 'START_LISTENER'
 
 function checkLoggedIn() {
   return async (dispatch, getState) => {
-    console.log('check logged in action called.')
     const user = await new ApiInterface( {} ).isLoggedIn()
     let devices = []
     let active_device = {};
@@ -34,7 +33,6 @@ function checkLoggedIn() {
         group: group
       }
     }
-    console.log('actor', user.actor)
     dispatch(action)
 
   }
@@ -42,7 +40,6 @@ function checkLoggedIn() {
 
 function setDevice( deviceRow ) {
   return async (dispatch, getState) => {
-    console.log('set device action called.')
     const resp = await new ListenerInterface().setDevice(deviceRow.uri)
     if (resp.current_device) {
       const action = {
@@ -58,9 +55,7 @@ function setDevice( deviceRow ) {
 }
 
 function refreshDevices( ) {
-  console.log('refreshDevices called')
   return async (dispatch, getState) => {
-    console.log('refresh devices action called.')
     const devices = await new ListenerInterface().devices()
     if (devices) {
       const action = {
@@ -75,10 +70,9 @@ function refreshDevices( ) {
 }
 
 function startController( ) {
-  console.log('start controller called');
   return async (dispatch, getState) => {
-    console.log('start controller action called');
     const controller = await new ApiInterface({}).get('controller/start');
+    console.log('start controller: ', controller)
     // const controller = await new ControllerInterface().start() //TODO replace w/ this
     const actionController = {
       type: START_CONTROLLER,
@@ -99,9 +93,7 @@ function startController( ) {
 }
 
 function startListener(group, songs) {
-  console.log('start listener called');
   return async (dispatch, getState) => {
-    console.log('start listener action called')
     const actionUser = {
       type: START_LISTENER,
       user: {

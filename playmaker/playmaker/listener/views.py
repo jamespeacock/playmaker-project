@@ -43,16 +43,16 @@ class StartListeningView(SecureAPIView):
         try:
             listener, created = Listener.objects.get_or_create(me=request.user, group=group)
             listener.refresh()
-            if getattr(request.user, 'controller'):
-                request.user.controller.delete()
+            if getattr(request.user, 'controller', None):
+                logging.log(logging.INFO, "Removing controller now that user wants to be a listener.")
+                Controller.objects.get(me=request.user).delete()
+                # TODO how to notify listeners. Text message?
         except IntegrityError as e:
             logging.log(logging.INFO, "Mismatch for user/group/listener")
             return JsonResponse("Mismatch for user/group/listener", safe=False)
-        except Controller.DoesNotExist as e:
-            pass
 
-        #TODO return group/session info
-        #Send back current queue, other listeners, etc.
+        # TODO return group/session info
+        # Send back current queue, other listeners, etc.
         return JsonResponse({"group": group_id, "songs": []})
 
 

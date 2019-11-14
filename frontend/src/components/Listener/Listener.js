@@ -58,7 +58,6 @@ class Listener extends React.Component {
             <AppContext.Consumer>
                 {() =>
                     <React.Fragment>
-                        <Header></Header>
                         <main className="listener-area">
                             <section className="listener-queue-container">
                                 <h2 className="listener-queue-title">Listening Queue</h2>
