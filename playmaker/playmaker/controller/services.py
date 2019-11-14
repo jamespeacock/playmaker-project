@@ -135,14 +135,16 @@ class PollingThread(object):
     until the application exits.
     """
 
-    def __init__(self, user, check_current_song, current_song_id=None, current_pos=0):
+    def __init__(self, user, check_current_song, callback, current_song_id=None, current_pos=0, *args):
         """ Constructor
         :type interval: int
         :param interval: Check interval, in seconds
         """
         thread = threading.Thread(target=self.run, args=(user, check_current_song, current_song_id, current_pos))
         thread.daemon = True                            # Daemonize thread
-        self.thread = thread                                # Start the execution
+        self.thread = thread
+        self.callback = callback# Start the execution
+        self.args = args
 
     def check_changed(self, response, current_song_id):
         print("Checking if song changed.")
@@ -178,6 +180,8 @@ class PollingThread(object):
         else:
             print("Successfully updated song for listeners.")
             logging.log(logging.INFO, "Successfully updated song for listeners.")
+
+        self.callback(*self.args)
     # Handle failures here
     # Handle kickoff of start polling again -> wait 90s minimum then poll every 10s
 
@@ -191,7 +195,7 @@ def start_polling(user):
     # total_duration = curr_song['item']['duration_ms']
     if current_song_id:
         logging.log(logging.INFO, "Current song before polling: " + str(current_song_id))
-        song_poller = PollingThread(user, check_current_song, current_song_id, current_pos)
+        song_poller = PollingThread(user, start_polling, check_current_song, current_song_id, current_pos, user)
         song_poller.start()
         return True
     else:
