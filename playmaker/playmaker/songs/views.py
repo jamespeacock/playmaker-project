@@ -3,7 +3,6 @@ from rest_framework import generics
 
 from playmaker.controller import services
 from playmaker.controller.contants import URIS, Q, SEARCH_TYPES, LIMIT, DEFAULT_Q_LIMIT, ALBUM
-from playmaker.controller.models import Controller
 from playmaker.shared.models import SPModel
 from playmaker.shared.serializers import SearchSerializer, ParamSerializer
 from playmaker.shared.utils import make_iterable
