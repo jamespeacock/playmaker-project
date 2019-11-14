@@ -145,7 +145,7 @@ class Device(SPModel):
     def from_sp(save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         kwargs['is_selected'] = False
-        d,_ = Device.objects.get_or_create(uri=kwargs.pop('uri'))
+        d,_ = Device.objects.get_or_create(uri=kwargs.pop('id'))
         d.update(**kwargs)
         if save:
             d.save()
