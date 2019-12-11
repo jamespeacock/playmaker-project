@@ -90,9 +90,11 @@ class Listener(models.Model):
                 current_device[LISTENER] = self
                 Device.from_sp(save=True, **current_device)
 
-            for d in self.me.sp.devices()[Device.get_key()]:
-                d[LISTENER] = self
-                Device.from_sp(save=True, **d) # TODO determine if i really want to be saving all the devices even unused.
+            # TODO determine if i really want to be saving all the devices even unused.
+            # for d in self.me.sp.devices()[Device.get_key()]:
+            #     d[LISTENER] = self
+            #     Device.from_sp(save=True, **d)
+            
         return True
 
     def refresh(self):
@@ -148,13 +150,14 @@ class Device(SPModel):
     def from_sp(save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         kwargs['is_selected'] = False
-        logging.log(logging.ERROR, str(kwargs))
-        d,_ = Device.objects.get_or_create(
-            listener_id=kwargs.pop('listener'),
+        d, _ = Device.objects.get_or_create(
+            listener=kwargs.pop('listener'),
             sp_id=kwargs.pop('sp_id'),
             name=kwargs.pop('name'),
             type=kwargs.pop('type'))
-        d.update(**kwargs)
+        for k, v in kwargs.items():
+            d.__setattr__(k, v)
+
         if save:
             d.save()
         return d
