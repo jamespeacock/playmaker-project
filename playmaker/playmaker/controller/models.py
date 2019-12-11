@@ -2,6 +2,7 @@ import logging
 
 from django.db import models
 
+from api.settings import DEFAULT_MS_ADDITION
 from playmaker.controller.contants import LISTENER, DEVICE
 from playmaker.controller.visitors import ActionVisitor
 from playmaker.shared.models import SPModel
@@ -36,10 +37,10 @@ class Queue(models.Model):
             self.current_song = controller_song_uri # from _obj or whatever
             self.save()
 
-        return self.current_song
+        return self.current_song 
 
     def current_offset(self):
-        return self.controller.me.sp.currently_playing()['item']['position']
+        return self.controller.me.sp.currently_playing()['progress_ms'] + DEFAULT_MS_ADDITION
 
     def contents(self):
         return self.songs.order_by('in_q__position').all()

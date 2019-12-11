@@ -76,7 +76,8 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         device_id = request.data.get(DEVICE)
         if actor.set_device(device_id):
             if actor.group.current_song() != actor.current_song():
-                actor.me.sp.start_playback(actor.active_device.sp_id, context_uri=actor.group.current_song(), offset=actor.group.current_offset())
+                actor.me.sp.start_playback(actor.active_device.sp_id, uris=[actor.group.current_song()])
+                actor.me.sp.seek_track(actor.group.current_offset())
             return JsonResponse("Success", safe=False)
         return JsonResponse("Failed", safe=False, status=500)
 
