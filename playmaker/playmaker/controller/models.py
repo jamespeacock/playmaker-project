@@ -94,7 +94,7 @@ class Listener(models.Model):
             # for d in self.me.sp.devices()[Device.get_key()]:
             #     d[LISTENER] = self
             #     Device.from_sp(save=True, **d)
-            
+
         return True
 
     def refresh(self):
@@ -128,9 +128,7 @@ class Listener(models.Model):
             return True
         else:
             return False
-        self.refresh()  # TODO test if this is necessary
-
-
+        # self.refresh()  # TODO test if this is necessary
 
     def current_song(self):
         return self.sp.currently_playing()['uri']
