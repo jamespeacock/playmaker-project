@@ -131,7 +131,7 @@ class Listener(models.Model):
         # self.refresh()  # TODO test if this is necessary
 
     def current_song(self):
-        return self.sp.currently_playing()['uri']
+        return self.me.sp.currently_playing()['item']['uri']
 
 
 class Device(SPModel):

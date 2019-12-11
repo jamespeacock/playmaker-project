@@ -153,6 +153,7 @@ class QueueActionView(ControllerView):
 
 class PollView(ControllerView):
 
+    #TODO have frontend periodically ensure this is still running
     def get(self, request, action=None, *args, **kwargs):
         super(PollView, self).get(request)
         try:
