@@ -38,6 +38,9 @@ class Queue(models.Model):
 
         return self.current_song
 
+    def current_offset(self):
+        return self.controller.me.sp.currently_playing()['item']['position']
+
     def contents(self):
         return self.songs.order_by('in_q__position').all()
 
@@ -60,6 +63,9 @@ class Group(models.Model):
 
     def current_song(self):
         return self.queue.currently_playing()
+
+    def current_offset(self):
+        return self.queue.current_offset()
 
 
 class Listener(models.Model):
