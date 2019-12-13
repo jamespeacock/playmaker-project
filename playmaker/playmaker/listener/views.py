@@ -72,7 +72,11 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         assert isinstance(actor, Listener)
         device_id = request.data.get(DEVICE)
         if actor.set_device(device_id):
-            if actor.group.current_song() != actor.current_song():
+            current_group_song = actor.group.current_song()
+            if not current_group_song:
+                logging.log("Group %s does not have a current song." % str(actor.group.id))
+                #TODO pick random song out of group's listening habits!
+            elif current_group_song != actor.current_song():
                 actor.me.sp.start_playback(actor.active_device.sp_id, uris=[actor.group.current_song()])
                 actor.me.sp.seek_track(actor.group.current_offset())
             return JsonResponse("Success", safe=False)
