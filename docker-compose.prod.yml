@@ -5,6 +5,8 @@ services:
       - MY_HOST=https://test.myplaymkr.co
     env_file:
       - production.env
+    volumes:
+      - './playmaker:/app:rw'
   frontend:
     build:
       context: ./frontend

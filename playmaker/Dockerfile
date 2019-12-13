@@ -33,7 +33,7 @@ ADD Pipfile Pipfile
 
 RUN pip install --upgrade pip
 RUN pip install pipenv
-RUN pipenv install --system 
+RUN pipenv install --system
 RUN pip3 freeze
 
 # COPY startup script into known file location in container

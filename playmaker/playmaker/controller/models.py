@@ -144,7 +144,8 @@ class Listener(models.Model):
         return False
 
     def current_song(self):
-        return self.me.sp.currently_playing()['item']['uri']
+        cp = self.me.sp.currently_playing()
+        return cp['item']['uri'] if cp else None
 
 
 class Device(SPModel):
