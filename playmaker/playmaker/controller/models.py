@@ -37,7 +37,7 @@ class Queue(models.Model):
             self.current_song = controller_song_uri # from _obj or whatever
             self.save()
 
-        return self.current_song 
+        return self.current_song
 
     def current_offset(self):
         return self.controller.me.sp.currently_playing()['progress_ms'] + DEFAULT_MS_ADDITION
@@ -88,36 +88,35 @@ class Listener(models.Model):
     def queue(self):
         return self.group.queue
 
-    def _refresh_devices(self):
-        if self.devices is None or self.devices.filter(is_selected=True).first() is None:
+    def get_devices(self):
+        all_ds = []
+        for d in self.me.sp.devices()[Device.get_key()]:
+            d[LISTENER] = self
+            all_ds.append(Device.from_sp(save=False, **d))
+        return all_ds
 
-            current_playback = self.me.sp.current_playback()
-            if current_playback:
-                current_device = current_playback[DEVICE]
-                current_device[LISTENER] = self
-                Device.from_sp(save=True, **current_device)
-
-            # TODO determine if i really want to be saving all the devices even unused.
-            # for d in self.me.sp.devices()[Device.get_key()]:
-            #     d[LISTENER] = self
-            #     Device.from_sp(save=True, **d)
-
-        return True
-
-    def refresh(self):
-        return self._refresh_devices()
 
     @property
     def active_device(self):
-        active = self.devices.filter(is_active=True).all()
-        ad = active.first()
+        if self.me.token is None:
+            logging.log(logging.INFO, "Lost token for " + self.me.username)
+            return None
+
+        ad = self.devices.filter(is_active=True).first()
         if ad:
             return ad
 
-        selected = self.devices.filter(is_selected=True).all()
-        sd = selected.first()
+        sd = self.devices.filter(is_selected=True).first()
         if sd:
             return sd
+
+        current_playback = self.me.sp.current_playback()
+        if current_playback:
+            current_device = current_playback[DEVICE]
+            current_device[LISTENER] = self
+            return Device.from_sp(save=True, **current_device)
+
+
 
         logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active or selected devices.")
         return None
@@ -134,8 +133,15 @@ class Listener(models.Model):
             device.save()
             return True
         else:
-            return False
-        # self.refresh()  # TODO test if this is necessary
+            #Fetch current playback and set is_selected device
+            logging.log("Selected device was not in databse")
+            for d in self.me.sp.devices()[Device.get_key()]:
+                if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
+                    d[LISTENER] = self
+                    Device.from_sp(save=True, **d)
+                    return True
+
+        return False
 
     def current_song(self):
         return self.me.sp.currently_playing()['item']['uri']

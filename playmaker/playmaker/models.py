@@ -47,7 +47,7 @@ class User(auth_models.AbstractUser):
             self.is_controller = False
             self.save()
             return self.listener
-        logging.log(logging.ERROR, "User %s does not have a listener or a controller!" % self.username)
+        # logging.log(logging.ERROR, "User %s does not have a listener or a controller!" % self.username) # This is printed out when user first logs in but hasn't selected a role yet, can be a red herring error
         return None
 
     @property

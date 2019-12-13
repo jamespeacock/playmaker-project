@@ -105,8 +105,6 @@ class IsLoggedInView(SecureAPIView):
                 ser = ControllerSerializer
             if ser:
                 actor = ser(request.user.actor).data
-            else:
-                actor = {}
         except (Listener.DoesNotExist, Controller.DoesNotExist):
             pass
 

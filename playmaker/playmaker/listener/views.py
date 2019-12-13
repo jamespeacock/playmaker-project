@@ -64,10 +64,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         super(DevicesView, self).get(request)
         actor = request.user.actor
         ser = self.get_serializer_class()
-        if not actor.devices.first():
-            actor.refresh()
-        print(len(actor.devices.all()))
-        return JsonResponse([ser(d).data for d in actor.devices.all()], safe=False)
+        return JsonResponse([ser(d).data for d in actor.get_devices()], safe=False)
 
     def post(self, request, *args, **kwargs):
         super(DevicesView, self).post(request)

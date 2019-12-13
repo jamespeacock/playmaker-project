@@ -1,3 +1,4 @@
+import logging
 import traceback
 from spotipy import SpotifyOAuth
 from spotipy.oauth2 import SpotifyOauthError
@@ -25,9 +26,7 @@ def authenticate(user, auth_code, save=True):
     try:
         token_info = sp_oauth.get_access_token(auth_code)
     except SpotifyOauthError:
-        print("Authentication exception")
-        traceback.print_stack()
-        # user.delete()
+        logging.log(logging.ERROR, "Authentication exception for %s: \n%s" % (user.username, traceback.format_exc()))
         return False
     # Get or create user based on username, save token info to User object, return success.
     if save:
@@ -40,7 +39,7 @@ def do_refresh_token(user):
 
     token_info = sp_oauth.refresh_access_token(user.refresh_token)
     if not token_info:
-        print("Refresh token failed.")
+        logging.log(logging.ERROR, "Refresh token failed for " + user.username)
         traceback.print_stack()
         return None
 

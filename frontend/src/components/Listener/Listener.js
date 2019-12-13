@@ -60,7 +60,7 @@ class Listener extends React.Component {
                     <React.Fragment>
                         <main className="listener-area">
                             <section className="listener-queue-container">
-                                <h2 className="listener-queue-title">Listening Queue</h2>
+                                <h2 className="listener-queue-title">Listening Queue - Not Currently Functional</h2>
                                 <SongTable
                                     songs={this.props.listener.queue}
                                     withButtons={false}/>

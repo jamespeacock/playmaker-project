@@ -50,12 +50,12 @@ def perform_action(user, action, *args, **kwargs):
     listeners = [listener for listener in user.actor.listeners if can_perform_action(user, listener, str(action))]
 
     # Filter out listeners without active devices
-    # Not sure i want to do this. Just verify all listeners have a selected device. Notify those who dont?
-    listeners = [l for l in listeners if l.refresh()]
+    # TODO Just verify all listeners have a selected device. Notify those who dont?
+    listeners = [l for l in listeners if l.active_device]
 
     # Time how long this takes - are either Spotipy and ActionVisitor being instanced?
     visitors = [l.v for l in listeners]
-    active_devices = [l.active_device.sp_id for l in listeners if l.active_device]
+    active_devices = [l.active_device.sp_id for l in listeners]
 
     # Kickoff loops with visitors,devices + action
     # loop = asyncio.get_event_loop()
