@@ -134,7 +134,7 @@ class Listener(models.Model):
             return True
         else:
             #Fetch current playback and set is_selected device
-            logging.log("Selected device was not in databse")
+            logging.log(logging.DEBUG, "Selected device was not in databse. Fetching and saving now.")
             for d in self.me.sp.devices()[Device.get_key()]:
                 if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
                     d[LISTENER] = self
