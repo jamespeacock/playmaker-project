@@ -58,8 +58,9 @@ class User(auth_models.AbstractUser):
 
     @property
     def token(self):
-        if self.token_expires is None or timesince.timesince(tz.now(), self.token_expires) == '0 minutes':
+        if self.token_expires is None or (tz.now() - self.token_expires).days < 0:
             self._sp_cached = None
+            logging.log(logging.INFO, "Refreshing token for: " + str(self.username))
             return logins.do_refresh_token(self)
 
         return self.access_token

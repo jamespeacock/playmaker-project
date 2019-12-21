@@ -30,9 +30,12 @@ class Queue(models.Model):
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
     def currently_playing(self):
+        logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
         # TODO need to lock around this to prevent multiple updates
         controller_current_song = self.controller.me.sp.currently_playing()
         controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
+        if not controller_song_uri:
+            return None
         if not self.current_song or self.current_song != controller_song_uri:
             self.current_song = controller_song_uri # from _obj or whatever
             self.save()
@@ -134,7 +137,7 @@ class Listener(models.Model):
             return True
         else:
             #Fetch current playback and set is_selected device
-            logging.log("Selected device was not in databse")
+            logging.log(logging.ERROR, "Selected device for %s was not in database" % self.me.username)
             for d in self.me.sp.devices()[Device.get_key()]:
                 if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
                     d[LISTENER] = self
