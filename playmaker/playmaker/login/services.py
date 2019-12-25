@@ -40,8 +40,7 @@ def do_refresh_token(user):
     token_info = sp_oauth.refresh_access_token(user.refresh_token)
     if not token_info:
         logging.log(logging.ERROR, "Refresh token failed for " + user.username)
-        traceback.print_stack()
-        return None
+        return ""
 
     user.save_token(token_info)
     return user.access_token

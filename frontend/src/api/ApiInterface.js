@@ -43,6 +43,7 @@ export default class ApiInterface  {
   }
   
   get ( url ) {
+    //TODO Make these errors throw toasts so I can see their errors
     return this.axios.get( url )
       .then( response => {
         // throw an error when the response is empty

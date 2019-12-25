@@ -13,9 +13,6 @@ class Image(models.Model):
     width = models.IntegerField()
     url = models.CharField(max_length=255)
 
-    def view(self):
-        return serializers.serialize('json', self, fields=('height', 'width', 'album'))
-
 
 class Genre(models.Model):
     name = models.CharField(max_length=255, null=False)
@@ -58,38 +55,30 @@ class Album(SPModel):
         return "albums"
 
 
-
 class Song(SPModel):
     # song title
     name = models.CharField(max_length=255, null=False)
     # name of artist or group/band
-    artists = models.ManyToManyField(Artist, related_name="songs", blank=True)
-    album = models.ManyToManyField(Album, related_name="songs", blank=True)
+    artists = models.ManyToManyField(Artist, related_name="songs_rel", blank=True)
+    on_album = models.ForeignKey(Album, related_name="songs_rel", on_delete=CASCADE)
     uri = models.CharField(max_length=255, null=False)
     duration_ms = models.IntegerField(null=True)
     popularity = models.IntegerField(null=True)
     preview_url = models.CharField(max_length=255, null=True)
     explicit = models.BooleanField(blank=True, default=False)
     track_number = models.IntegerField(null=True, blank=True)
+    position_ms = models.IntegerField(null=True)
 
     # Audio Features
-    # key = models.FloatField(null=False)
-    # energy = models.FloatField(null=False)
-    # tempo = models.FloatField(null=False)
-    # valence = models.FloatField(null=False)
-    # danceability = models.FloatField(null=False)
-    # acousticness = models.FloatField(null=False)
-    #
-    # # Less impt
-    # loudness = models.FloatField(null=False)
-    # mode = models.BooleanField(null=False)
-    # duration_ms = models.FloatField(null=False)
+    # key = models.IntegerField(null=True)
+    # energy = models.FloatField(null=True)
+    # tempo = models.FloatField(null=True)
+    # valence = models.FloatField(null=True)
+    # danceability = models.FloatField(null=True)
+    # mode = models.IntegerField(null=True)
+    # acousticness = models.FloatField(null=True)
 
     # Analysis features TODO
-
-    def view(self):
-        # Can update this as more info from song is incorporated into frontend
-        return serializers.serialize('json', [self], fields=('name', 'artist', 'uri'))
 
     @staticmethod
     def pop_kwargs(kwargs):
@@ -100,31 +89,38 @@ class Song(SPModel):
     def get_key():
         return "tracks"
 
-
     @staticmethod
-    def from_sp(save=False, **kwargs):
+    def from_sp(details=None, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         Song.pop_kwargs(kwargs)
-        artists = kwargs.pop('artists')
-        album = kwargs.pop('album')
-        song = Song.objects.filter(sp_id=kwargs[SP_ID]).first()
-        if song:
-            # TODO is this necessary - preview url only comes back from search
-            song = Song(pk=song.pk, **kwargs)
-            song.save()
-            created = False
-        else:
-            song = Song.objects.create(**kwargs)
-            created = True
-        # album['sp_id'] = album.pop('id')
-        # alb, alb_created = Album.objects.get_or_create(name=album['name'], uri=album['uri'], sp_id=album['sp_id'])
-        # obj.album = alb
+        return Song.create_song(details, **kwargs)
 
+    @staticmethod
+    def create_song(details, **song):
+        artists = song.pop('artists')
+        album = song.pop('album')
+
+        song_obj = Song.objects.filter(sp_id=song[SP_ID]).first()
+        if song_obj:
+            return song_obj
+        else:
+            song_obj = Song.objects.create(**song)
+
+        song_obj.save()
         for artist in artists:
             artist[SP_ID] = artist.pop(ID)
             a, a_created = Artist.objects.get_or_create(name=artist[NAME], uri=artist[URI], sp_id=artist[SP_ID])
-            song.artists.add(a)
+            song_obj.artists.add(a)
 
-        song.save()
-        logging.log(logging.INFO, "Song: " + song.name + " was " + "created." if created else "updated.")
-        return song
+        album['sp_id'] = album.pop('id')
+        alb, _ = Album.objects.get_or_create(name=album[NAME], uri=album[URI], sp_id=album[SP_ID])
+        alb.save()
+        for img in album['images']:
+            alb.images.add(Image.objects.get_or_create(**img))
+        song_obj.on_album = alb
+
+        if details:
+            pass
+
+        song_obj.save()
+        return song_obj

@@ -1,5 +1,8 @@
 import ApiInterface from '../api/ApiInterface'
 import ListenerInterface from "../api/ListenerInterface";
+// import {toastr} from "react-redux-toastr";
+
+export const CURRENT_SONG_SUCCESS = "CURRENT_SONG_SUCCESS";
 export const CHECK_LOGGED_IN = 'CHECK_LOGGED_IN'
 export const SET_CURRENT_DEVICE = 'SET_CURRENT_DEVICE'
 export const REFRESH_DEVICES = 'REFRESH_DEVICES'
@@ -92,7 +95,7 @@ function startController( ) {
   }
 }
 
-function startListener(group, songs) {
+function startListener(listener) {
   return async (dispatch, getState) => {
     const actionUser = {
       type: START_LISTENER,
@@ -104,14 +107,18 @@ function startListener(group, songs) {
     }
     const actionListener = {
       type: START_LISTENER,
-      listener: {
-        group: group,
-        queue: songs
-      }
+      listener
     }
     dispatch(actionListener)
     dispatch(actionUser)
   }
+}
+
+function getCurrentSong () {
+    return async (dispatch, getState) => {
+      const current =  await new ListenerInterface({}).current()
+      dispatch({type: CURRENT_SONG_SUCCESS, current})
+    };
 }
 
 export {
@@ -119,5 +126,6 @@ export {
     setDevice,
     refreshDevices,
     startController,
-    startListener
+    startListener,
+    getCurrentSong
 }

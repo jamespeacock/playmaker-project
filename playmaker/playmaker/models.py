@@ -4,7 +4,6 @@ import spotipy
 import uuid as uuid
 from django.db.models import DateTimeField
 from django.utils import timezone as tz
-from django.utils import timesince
 
 from django.contrib.auth import models as auth_models
 from django.db import models
@@ -30,7 +29,7 @@ class User(auth_models.AbstractUser):
     is_controller = models.BooleanField(default=False)
     _sp_cached = None
 
-    # @memoized
+    # make @memoized maybe
     @property
     def actor(self):
         if hasattr(self, 'controller') and self.controller:
@@ -58,12 +57,12 @@ class User(auth_models.AbstractUser):
 
     @property
     def token(self):
-        if self.token_expires is None or (tz.now() - self.token_expires).days < 0:
+        if self.token_expires is None or (self.token_expires - tz.now()).days < 0:
             self._sp_cached = None
             logging.log(logging.INFO, "Refreshing token for: " + str(self.username))
             return logins.do_refresh_token(self)
 
-        return self.access_token
+        return self.access_token or ""
 
     def save_token(self, token_info):
         self.access_token = token_info['access_token']

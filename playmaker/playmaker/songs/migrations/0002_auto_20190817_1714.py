@@ -27,11 +27,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='song',
-            name='album',
-            field=models.ManyToManyField(blank=True, related_name='songs', to='songs.Album'),
-        ),
-        migrations.AlterField(
-            model_name='song',
             name='artists',
             field=models.ManyToManyField(blank=True, related_name='songs', to='songs.Artist'),
         ),

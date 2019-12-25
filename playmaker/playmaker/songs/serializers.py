@@ -27,16 +27,16 @@ class AlbumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Album
-        fields = ['name', 'artists', 'uri', 'images']
+        fields = ['name', 'uri', 'images', 'artists']
 
 
 class SongSerializer(serializers.ModelSerializer):
     artists = ArtistSerializer(many=True)
-    album = AlbumSerializer()
+    on_album = AlbumSerializer(many=True)
 
     class Meta:
         model = Song
-        fields = ['name', 'artists', 'uri', 'album']
+        fields = ['name', 'artists', 'uri', 'on_album', 'position_ms', 'popularity', 'duration_ms']
 
 
 class QueuedSongSerializer(SongSerializer):

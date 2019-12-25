@@ -52,7 +52,10 @@ class StartListeningView(SecureAPIView):
 
         # TODO return group/session info
         # Send back current queue, other listeners, etc.
-        return JsonResponse({"group": group_id, "songs": []})
+        return JsonResponse({"group": group_id,
+                             "songs": [],
+                             "currentSong": group.current_song(detail=True)
+                             })
 
 
 class DevicesView(SecureAPIView, RetrieveAPIView):
@@ -79,14 +82,15 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
             elif current_group_song != actor.current_song():
                 actor.me.sp.start_playback(actor.active_device.sp_id, uris=[actor.group.current_song()])
                 actor.me.sp.seek_track(actor.group.current_offset())
-            return JsonResponse("Success", safe=False)
+            return JsonResponse({"currentSong": actor.group.current_song(detail=True)})
         return JsonResponse("Failed", safe=False, status=500)
 
 
 class ListenView(SecureAPIView, RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
-        return JsonResponse(request.user.listener.group.currently_playing())
+        currentSongView = request.user.listener.group.current_song(detail=True)
+        return JsonResponse({"currentSong": currentSongView})
 
 
 class GetQueueView(SecureAPIView, RetrieveAPIView):

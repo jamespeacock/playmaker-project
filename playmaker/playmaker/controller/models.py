@@ -8,10 +8,14 @@ from playmaker.controller.visitors import ActionVisitor
 from playmaker.shared.models import SPModel
 from playmaker.models import User
 from playmaker.songs.models import Song
+from playmaker.songs.serializers import SongSerializer
+from playmaker.songs.services import fetch_songs
 
 # TODO let Controller have two modes - control & follow
 # Control means playmaker queue is sent out to listeners and controller is free to listen to different tracks (to prepare)
 # Follow means controller does not have to mess with UI and just listens, the app will throw songs out to users upon changes
+
+
 class Controller(models.Model):
     me = models.OneToOneField(User, related_name='controller', on_delete=models.CASCADE)
 
@@ -29,7 +33,7 @@ class Queue(models.Model):
     next_pos = models.IntegerField(default=0, blank=False, null=False)
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
-    def currently_playing(self):
+    def currently_playing(self, detail=False):
         logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
         # TODO need to lock around this to prevent multiple updates
         controller_current_song = self.controller.me.sp.currently_playing()
@@ -38,8 +42,13 @@ class Queue(models.Model):
             return None
         if not self.current_song or self.current_song != controller_song_uri:
             self.current_song = controller_song_uri # from _obj or whatever
+            # self.current_song_detail = fetch_songs(self.controller, self.current_song, save=True)
             self.save()
-
+        if detail:
+            details = self.controller.me.sp.audio_features(tracks=[controller_current_song['item']['uri']])
+            song_detailed = Song.from_sp(details=details, **controller_current_song['item'])
+            song_detailed.position_ms = controller_current_song['progress_ms']
+            return SongSerializer(song_detailed).data
         return self.current_song
 
     def current_offset(self):
@@ -65,8 +74,8 @@ class Group(models.Model):
     def queue(self):
         return self.controller.queue
 
-    def current_song(self):
-        return self.queue.currently_playing()
+    def current_song(self, detail=False):
+        return self.queue.currently_playing(detail=detail)
 
     def current_offset(self):
         return self.queue.current_offset()

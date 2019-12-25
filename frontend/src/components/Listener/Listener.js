@@ -1,5 +1,6 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
+import CurrentSongCard from '../shared/SongCards'
 import SongTable from '../shared/SongTable'
 import Header from '../Header/Header'
 import {Redirect, withRouter} from "react-router-dom";
@@ -15,6 +16,13 @@ class Listener extends React.Component {
         super( props )
         this.listener = new ListenerInterface()
         console.log('listener props', this.props)
+        //Should props = listener aka this.props.listener -- this.props
+        // this.props.listener.currentSong = {
+        //   title: "Roses - Imanbek Remix",
+        //   artists: "SAINt JHN, Imanbek",
+        //   album: "album",
+        //   imageSrc: "https://i.scdn.co/image/4c875b4b6f8b9c9130f8e35e48342fc61a43ff59"
+        // }
     }
 
     // componentDidMount() {
@@ -27,10 +35,9 @@ class Listener extends React.Component {
     // }
 
     findGroup = async (group) => {
-        const path = 'listener/join?group=' + group
-        const resp = await new ApiInterface({}).get(path)
+        const resp = await new ListenerInterface({}).joinGroup(group)
         if (resp && resp.group) {
-            const action = startListener(resp.group, resp.songs)
+            const action = startListener(resp)
             this.props.dispatch(action)
             return true
         } else {
@@ -50,9 +57,6 @@ class Listener extends React.Component {
                 redirect: 'listen'
             })
         }
-        if (this.props.listener) {
-            console.log(this.props.listener)
-        }
         const willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && this.props.listener.group != '')
         return (
             <AppContext.Consumer>
@@ -60,7 +64,9 @@ class Listener extends React.Component {
                     <React.Fragment>
                         <main className="listener-area">
                             <section className="listener-queue-container">
-                                <h2 className="listener-queue-title">Listening Queue - Not Currently Functional</h2>
+                                <h2 className="listener-queue-title">Currently Playing</h2>
+                                <CurrentSongCard
+                                song={this.props.listener.currentSong}/>
                                 <SongTable
                                     songs={this.props.listener.queue}
                                     withButtons={false}/>
