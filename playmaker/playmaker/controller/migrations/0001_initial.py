@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                 ('is_restricted', models.BooleanField()),
                 ('name', models.CharField(max_length=255)),
                 ('type', models.CharField(max_length=64)),
-                ('volume_percent', models.IntegerField()),
+                ('volume_percent', models.IntegerField(null=True)),
                 ('listener', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='devices', to='controller.Listener')),
             ],
             bases=('playmaker.spmodel',),
