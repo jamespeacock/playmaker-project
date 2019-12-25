@@ -145,8 +145,8 @@ class Listener(models.Model):
             device.save()
             return True
         else:
-            #Fetch current playback and set is_selected device
-            logging.log(logging.ERROR, "Selected device for %s was not in database" % self.me.username)
+            # Fetch current playback and set is_selected device
+            logging.log(logging.ERROR, "Selected device for %s was not in database. Fetching now." % self.me.username)
             for d in self.me.sp.devices()[Device.get_key()]:
                 if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
                     d[LISTENER] = self
