@@ -109,10 +109,13 @@ class IsLoggedInView(SecureAPIView):
             pass
 
         ser = self.get_serializer_class()
+
         return JsonResponse({'user':
                                  {**ser(request.user).data,
                                   'actor': actor,
-                                  'is_logged_in': True}
+                                  'is_logged_in': True,
+                                  'is_authenticated': actor.token is not None,
+                                  'auth_url': get_redirect(actor.me.username, frontend_redirect=request.data['redirect'])}
                              })
 
 

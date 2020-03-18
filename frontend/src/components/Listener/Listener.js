@@ -65,8 +65,7 @@ class Listener extends React.Component {
                         <main className="listener-area">
                             <section className="listener-queue-container">
                                 <h2 className="listener-queue-title">Currently Playing</h2>
-                                <CurrentSongCard
-                                song={this.props.listener.currentSong}/>
+                                <CurrentSongCard song={this.props.listener.currentSong}/>
                                 <SongTable
                                     songs={this.props.listener.queue}
                                     withButtons={false}/>

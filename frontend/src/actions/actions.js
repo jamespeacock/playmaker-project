@@ -10,9 +10,9 @@ export const REFRESH_DEVICES = 'REFRESH_DEVICES'
 export const START_CONTROLLER = 'START_CONTROLLER'
 export const START_LISTENER = 'START_LISTENER'
 
-function checkLoggedIn() {
+function checkLoggedIn(redirect = 'dashboard') {
   return async (dispatch, getState) => {
-    const user = await new ApiInterface( {} ).isLoggedIn()
+    const user = await new ApiInterface( {} ).isLoggedIn(redirect)
     let devices = []
     let active_device = {};
     let group = '';
@@ -36,6 +36,7 @@ function checkLoggedIn() {
         group: group
       }
     }
+    if user.is_authenticateed
     dispatch(action)
 
   }

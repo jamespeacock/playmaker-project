@@ -12,25 +12,33 @@ class CurrentSongCard extends React.Component {
   constructor (props) {
     super(props)
     console.log('CurrentSongCard', this.props)
-    this.song = this.props.song
-    this.artists = this.props.song.artists.map((a) => (a.name)).join()
-    this.album = this.props.song.album && this.props.song.album.name
-    this.imageSrc = this.props.song.album.images[0].url
+    if (this.props.song.title) {
+      this.doRender = true
+      this.title = this.props.song.title
+      this.artists = this.props.song.artists.map((a) => (a.name)).join()
+      this.album = this.props.song.album && this.props.song.album.name
+      this.imageSrc = this.props.song.album.images[0].url
+    }
+
   }
 
   render() {
-    return (<Card bg="primary" className="text-center" style={{ width: '18rem' }}>
-      <Card.Body>
-        <Card.Img variant="top" src={this.imageSrc} />
-        <Card.Title>{this.title}</Card.Title>
-        <Card.Text>
-          {this.artists}
-        </Card.Text>
-        <Card.Text className="text-muted" >
-          {this.album}
-        </Card.Text>
-      </Card.Body>
-    </Card>)
+    if (this.doRender) {
+        return (<Card bg="primary" className="text-center" style={{ width: '18rem' }}>
+          <Card.Body>
+            <Card.Img variant="top" src={this.imageSrc} />
+            <Card.Title>{this.title}</Card.Title>
+            <Card.Text>
+              {this.artists}
+            </Card.Text>
+            <Card.Text className="text-muted" >
+              {this.album}
+            </Card.Text>
+          </Card.Body>
+        </Card>)
+    } else {
+        return (<div></div>)
+    }
   }
 }
 

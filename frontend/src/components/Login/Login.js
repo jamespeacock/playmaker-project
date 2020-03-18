@@ -29,7 +29,6 @@ class Login extends React.Component {
           { username, password, redirect: this.props.location.redirect || 'dashboard' })
         if (resp.url) {
           this.props.dispatch(checkLoggedIn())
-          window.location.href = resp.url
         } else {
           this.setState({error: 'Invalid credentials.'})
         }

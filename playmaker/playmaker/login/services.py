@@ -34,6 +34,7 @@ def authenticate(user, auth_code, save=True):
     return True
 
 
+#TODO prompt user to authorize login if refresh devices fails or if not linked with spotify at all
 def do_refresh_token(user):
     sp_oauth = get_auth(user.username)
 
@@ -44,3 +45,4 @@ def do_refresh_token(user):
 
     user.save_token(token_info)
     return user.access_token
+

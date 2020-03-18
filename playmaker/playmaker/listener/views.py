@@ -8,6 +8,7 @@ from rest_framework.generics import RetrieveAPIView
 from playmaker.controller.contants import DEVICE
 from playmaker.controller.models import Listener, Group, Controller
 from playmaker.controller.serializers import DeviceSerializer
+from playmaker.login.services import get_redirect
 from playmaker.shared.views import SecureAPIView
 
 SP_USER = 'spotify:user:'
@@ -67,6 +68,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         super(DevicesView, self).get(request)
         actor = request.user.actor
         ser = self.get_serializer_class()
+
         return JsonResponse([ser(d).data for d in actor.get_devices()], safe=False)
 
     def post(self, request, *args, **kwargs):

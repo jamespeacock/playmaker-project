@@ -6,7 +6,7 @@ import requests
 from django.core.exceptions import ObjectDoesNotExist
 
 from api.settings import HOSTNAME
-from playmaker.controller.models import SongInQueue
+from playmaker.controller.models import SongInQueue, Controller, Queue, Group
 from playmaker.controller.visitors import Action
 from playmaker.models import User
 from playmaker.songs.models import Song
@@ -208,3 +208,14 @@ def start_polling(user):
 def stop_polling(user):
     logging.log(logging.INFO, "Stop polling")
     pass
+
+
+def create_controller_and_group(user):
+    controller, created = Controller.objects.get_or_create(me=user)
+    Queue.objects.get_or_create(controller=controller)
+    group, created = Group.objects.get_or_create(controller=controller)
+    print("group created: " + str(created))
+    if not created:
+        logging.log(logging.INFO, "Group was not created for some reason! It already existed.")
+
+    return group.id, controller.id

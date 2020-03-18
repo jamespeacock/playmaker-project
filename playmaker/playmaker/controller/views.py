@@ -5,7 +5,7 @@ from playmaker.controller import services
 from playmaker.controller.contants import URIS, ADD, REMOVE, URI, START, STOP
 from playmaker.controller.models import Controller, Group, Queue, Listener
 from playmaker.controller.serializers import QueueActionSerializer
-from playmaker.controller.services import next_in_queue, start_polling, stop_polling
+from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_group
 from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
 from playmaker.shared.views import SecureAPIView
@@ -30,14 +30,10 @@ class StartGroupView(SecureAPIView):
         if getattr(request.user, 'listener', None):
             logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
             Listener.objects.get(me=request.user).delete()
-        controller, created = Controller.objects.get_or_create(me=request.user)
-        Queue.objects.get_or_create(controller=controller)
-        group, created = Group.objects.get_or_create(controller=controller)
-        if not created:
-            logging.log(logging.INFO, "Group was not created for some reason!")
+        group_id, controller_id = create_controller_and_group(request.user)
 
         started = start_polling(request.user)
-        return JsonResponse({"group": group.id, "controller": controller.id, "started": started})
+        return JsonResponse({"group": group_id, "controller": controller_id, "started": started})
 
 
 # Play song for current listeners

@@ -71,8 +71,8 @@ export default class ApiInterface  {
         .catch((e) => e.response.data)
   }
 
-  async isLoggedIn() {
-    return await this.axios.get( 'has_user' )
+  async isLoggedIn(redirect) {
+    return await this.axios.get( 'has_user?redirect=' + redirect )
       .then((res) => {
         if (res.data.user) {
           return res.data.user
