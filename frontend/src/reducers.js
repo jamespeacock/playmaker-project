@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-import {CHECK_LOGGED_IN, SET_CURRENT_DEVICE, REFRESH_DEVICES, START_CONTROLLER, START_LISTENER, CURRENT_SONG_SUCCESS} from './actions/actions'
+import {AUTHENTICATE, CHECK_LOGGED_IN, SET_CURRENT_DEVICE, REFRESH_DEVICES, START_CONTROLLER, START_LISTENER, CURRENT_SONG_SUCCESS} from './actions/actions'
 
 const defaultUser = {
     isLoggedIn: false,
@@ -19,6 +19,7 @@ function user(state=defaultUser, action) {
     case START_LISTENER:
     case START_CONTROLLER:
       return Object.assign({}, state, action.user)
+
     default:
       return state
   }
@@ -55,11 +56,9 @@ function listener(state=defaultListener, action) {
 //  console.log(action.listener)
   switch (action.type) {
     case CURRENT_SONG_SUCCESS:
-      console.log('CURR SONG STATE', state, action)
       return Object.assign({}, state, {...state, currentSong: action.current})
     case CHECK_LOGGED_IN:
     case START_LISTENER:
-      console.log('START LISTENER', state)
       return Object.assign({}, state, action.listener)
     default:
       return state

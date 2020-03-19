@@ -6,6 +6,7 @@ export const CURRENT_SONG_SUCCESS = "CURRENT_SONG_SUCCESS";
 export const CHECK_LOGGED_IN = 'CHECK_LOGGED_IN'
 export const SET_CURRENT_DEVICE = 'SET_CURRENT_DEVICE'
 export const REFRESH_DEVICES = 'REFRESH_DEVICES'
+export const AUTHENTICATE = 'AUTHENTICATE'
 
 export const START_CONTROLLER = 'START_CONTROLLER'
 export const START_LISTENER = 'START_LISTENER'
@@ -30,15 +31,15 @@ function checkLoggedIn(redirect = 'dashboard') {
         username: user.username,
         sp_username: user.sp_username,
         devices: devices,
-        current_device: active_device
+        current_device: active_device,
+        is_authenticated: user.is_authenticated,
+        auth_url: user.auth_url
       },
       listener: {
         group: group
       }
     }
-    if user.is_authenticateed
     dispatch(action)
-
   }
 }
 
@@ -116,6 +117,7 @@ function startListener(listener) {
 }
 
 function getCurrentSong () {
+    console.log('been called')
     return async (dispatch, getState) => {
       const current =  await new ListenerInterface({}).current()
       dispatch({type: CURRENT_SONG_SUCCESS, current})

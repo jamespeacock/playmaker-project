@@ -1,13 +1,14 @@
 import React from 'react'
-import { Redirect, withRouter } from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import {Button, Container, Row, Col, Jumbotron} from 'react-bootstrap'
+import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 
 
 
 class Dashboard extends React.Component {
 
     constructor ( props ) {
-      super(props)
+        super(props)
     }
 
     handlePlay = async () => {
@@ -23,7 +24,7 @@ class Dashboard extends React.Component {
     }
 
     render() {
-      return (
+        return (
           <React.Fragment>
               <Jumbotron>
                   <Container>
@@ -44,7 +45,7 @@ class Dashboard extends React.Component {
                   </Container>
               </Jumbotron>
           </React.Fragment>
-      )
+        )
     }
 }
 

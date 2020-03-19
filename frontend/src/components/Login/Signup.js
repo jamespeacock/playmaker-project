@@ -33,7 +33,7 @@ class Signup extends React.Component {
         )
         if (resp.url) {
             console.log('resp had url')
-            this.props.dispatch(checkLoggedIn())
+            // this.props.dispatch(checkLoggedIn())
             window.location.href = resp.url
         } else {
             console.log('resp did not have url, error: ', resp.error)

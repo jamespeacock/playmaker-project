@@ -1,4 +1,5 @@
-
+import cProfile
+import pstats
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -94,29 +95,41 @@ class IsLoggedInView(SecureAPIView):
 
     @csrf_exempt
     def get(self, request, *args, **kwargs):
+        # pr = cProfile.Profile()
+        # pr.enable()
         super(IsLoggedInView, self).get(request)
-        #replace this with user serializer
         actor = {}
+        user = request.user
+        u_actor = user.actor
         try:
             ser = None
-            if type(request.user.actor) == Listener:
+            if type(u_actor) == Listener:
                 ser = ListenerSerializer
-            elif type(request.user.actor) == Controller:
+            elif type(u_actor) == Controller:
                 ser = ControllerSerializer
             if ser:
-                actor = ser(request.user.actor).data
+                actor = ser(u_actor).data
         except (Listener.DoesNotExist, Controller.DoesNotExist):
             pass
 
         ser = self.get_serializer_class()
 
+        user_data = {**ser(user).data,
+         'actor': actor,
+         'is_logged_in': True}
+
+        if user.token:
+            user_data['is_authenticated'] = True
+        else:
+            user_data['is_authenticated'] = True
+            redirect = request.GET['redirect']
+            user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect or 'dashboard')
+
+        # pr.disable()
+        # ps = pstats.Stats(pr).sort_stats('tottime')
+        # ps.print_stats(20)
         return JsonResponse({'user':
-                                 {**ser(request.user).data,
-                                  'actor': actor,
-                                  'is_logged_in': True,
-                                  'is_authenticated': actor.token is not None,
-                                  'auth_url': get_redirect(actor.me.username, frontend_redirect=request.data['redirect'])}
-                             })
+                                 user_data})
 
 
 class LogoutView(LogoutView):

@@ -2,6 +2,18 @@ import ShowDevicesModal from "./Devices";
 import React, {useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 
+function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
+    if (!props.user.isLoggedIn) {
+        props.history.push({
+            pathname,
+            redirect
+        })
+    } else if (!props.user.is_authenticated) {
+        console.log('logged in but not authenticated!');
+        window.location.href = props.user.auth_url
+    }
+}
+
 const showSubmitReportProblem = () => {
     console.log("showing report.")
 }
@@ -87,6 +99,7 @@ class JoinGroupModal extends React.Component {
 export {
     showSubmitReportProblem,
     showDevicesModal,
-    showJoinGroupModal
+    showJoinGroupModal,
+    handleRedirectsIfNotLoggedInOrAuthed
 }
 

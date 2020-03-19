@@ -21,7 +21,12 @@ class SPModel(models.Model):
         if query:
             # Is it necessary to serialize this into an object just for querying? 
             # data = [cls.from_sp(save=save, **item) for item in data['items']]
-            return {cls.get_key(): [serializer(d).data for d in data['items']] if serializer else data['items'],
+            l = [] if serializer else data['items']
+            if not l:
+                for d in data['items']:
+                    ser_d = serializer(d)
+                    l.append(ser_d.data)
+            return {cls.get_key(): l,
                     "next": data['next']}
         else:
             data = [cls.from_sp(save=save, **obj) for obj in data]

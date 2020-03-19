@@ -60,7 +60,7 @@ class Song(SPModel):
     name = models.CharField(max_length=255, null=False)
     # name of artist or group/band
     artists = models.ManyToManyField(Artist, related_name="songs_rel", blank=True)
-    on_album = models.ForeignKey(Album, related_name="songs_rel", on_delete=CASCADE)
+    on_album = models.ForeignKey(Album, related_name="songs_rel", null=True, blank=True, on_delete=CASCADE)
     uri = models.CharField(max_length=255, null=False)
     duration_ms = models.IntegerField(null=True)
     popularity = models.IntegerField(null=True)
@@ -90,13 +90,13 @@ class Song(SPModel):
         return "tracks"
 
     @staticmethod
-    def from_sp(details=None, **kwargs):
+    def from_sp(details=None, save=False, **kwargs):
         kwargs = SPModel.from_sp(kwargs)
         Song.pop_kwargs(kwargs)
-        return Song.create_song(details, **kwargs)
+        return Song.create_song(details, save, **kwargs)
 
     @staticmethod
-    def create_song(details, **song):
+    def create_song(details, save=False, **song):
         artists = song.pop('artists')
         album = song.pop('album')
 
@@ -106,7 +106,8 @@ class Song(SPModel):
         else:
             song_obj = Song.objects.create(**song)
 
-        song_obj.save()
+        if save:
+            song_obj.save()
         for artist in artists:
             artist[SP_ID] = artist.pop(ID)
             a, a_created = Artist.objects.get_or_create(name=artist[NAME], uri=artist[URI], sp_id=artist[SP_ID])
@@ -114,13 +115,18 @@ class Song(SPModel):
 
         album['sp_id'] = album.pop('id')
         alb, _ = Album.objects.get_or_create(name=album[NAME], uri=album[URI], sp_id=album[SP_ID])
-        alb.save()
+        if save:
+            alb.save()
         for img in album['images']:
-            alb.images.add(Image.objects.get_or_create(**img))
+            img_obj, _ = Image.objects.get_or_create(**img)
+            alb.images.add(img_obj.id)
+        if save:
+            alb.save()
         song_obj.on_album = alb
 
         if details:
             pass
 
-        song_obj.save()
+        if save:
+            song_obj.save()
         return song_obj

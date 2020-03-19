@@ -1,5 +1,4 @@
 import React from 'react'
-import Header from '../Header/Header'
 import { Redirect, withRouter } from 'react-router-dom'
 import ControllerInterface from '../../api/ControllerInterface'
 import SongTable from '../shared/SongTable'
@@ -7,6 +6,11 @@ import SearchBar from '../shared/Search'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
 import {checkLoggedIn, startController} from "../../actions/actions";
+import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Button from "react-bootstrap/Button";
 
 
 const uuid = require('uuid/v4')
@@ -36,9 +40,6 @@ class Controller extends React.Component {
 
     createGroup = async () => {
         this.props.dispatch(startController())
-        // const state = await new ApiInterface({}).get('controller/start')
-        // this.setState({group: state.group})
-        // this.refreshQueue()
     }
 
     async handleNext() {
@@ -75,9 +76,9 @@ class Controller extends React.Component {
         this.setState({searchResults})
     }
 
-    addToQueueHandler = async (songRow) => {
-      console.log('adding ' + songRow.name + ' to queue.')
-      const success = await this.controller.add(songRow.uri)
+    addToQueueHandler = async (songUri) => {
+      console.log('adding ' + songUri + ' to queue.')
+      const success = await this.controller.add(songUri)
       if (success) {
         this.refreshQueue()
       } else { 
@@ -96,13 +97,18 @@ class Controller extends React.Component {
       }
     }
 
+    clearSearchResults = () => {
+        this.state.searchResults = {'tracks': []}
+    }
+
+    componentWillMount() {
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
+    }
+
     render() {
-        if (!this.props.user.isLoggedIn) {
-            this.props.history.push({
-                pathname: '/login',
-                redirect: 'play'
-            })
-        }
+        const searchHeaders = ['', 'title', 'artists', 'album', 'Add']
+        const queueHeaders = ['', 'title', 'artists', 'album', 'Remove']
+
         return (
             <React.Fragment>
                 <Card style={{ width: '18rem' }}>
@@ -113,54 +119,47 @@ class Controller extends React.Component {
                     </Card.Body>
                 </Card>
                 <main className="main-area">
-                    <div className="col-container">
-                        <section className="controller-queue-container">
-                            <div className="col-title">Queue</div>
-                            <SongTable 
-                            songs={this.state.queue}
-                            withButtons={true}
-                            handleAdd={this.removeFromQueueHandler}/>
-                        </section>
+                    <Container className="col-container">
+                        <Row>
+                            <Col className="search-container">
+                                <h2>Search Results</h2>
+                                <SearchBar setSearchResults={this.searchHandler} />
+                                <SongTable
+                                    songs={this.state.searchResults.tracks}
+                                    handleAdd={this.addToQueueHandler}
+                                    actionName={'Add'}
+                                    header={searchHeaders}/>
+                            </Col>
+                            <Col className="controller-queue-container">
+                                <h2>Current Queue</h2>
+                                <SongTable
+                                songs={this.state.queue}
+                                handleAdd={this.removeFromQueueHandler}
+                                actionName={'Remove'}
+                                header={queueHeaders}/>
+                                <Row>
+                                    <Col className="button-col">
+                                        <Button
+                                            key={uuid()}
+                                            className="button"
+                                            onClick={this.handlePlay}>
+                                            PLAY
+                                        </Button>
+                                        <Button
+                                            key={uuid()}
+                                            className="button"
+                                            onClick={this.handleNext}>
+                                            NEXT
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </Col>
 
-                        <section className="search-container">
-                          <div className="col-title">Search</div>
-                            <SearchBar setSearchResults={this.searchHandler} />
-                            <SongTable 
-                              songs={this.state.searchResults.tracks}
-                              withButtons={true}
-                              handleAdd={this.addToQueueHandler}
-                              handlePlay={this.handlePlay}/>
-                        </section>
 
-                    </div>
-                    <div className="button-container">
-                            <div className="button-col">
-                                <button
-                                    key={uuid()}
-                                    className="button"
-                                    onClick={this.handlePlay}>
-                                    PLAY
-                                </button>
-                                <button
-                                    key={uuid()}
-                                    className="button"
-                                    onClick={this.handleSeek}>
-                                    SEEK
-                                </button>
-                                <button
-                                    key={uuid()}
-                                    className="button"
-                                    onClick={this.handleNext}>
-                                    NEXT
-                                </button>
-                                <button
-                                    key={uuid()}
-                                    className="button"
-                                    onClick={this.handlePause}>
-                                    PAUSE
-                                </button>
-                            </div>
-                        </div>
+                        </Row>
+
+                    </Container>
+
                 </main>
             </React.Fragment>
         )

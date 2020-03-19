@@ -126,6 +126,7 @@ class QueueActionView(ControllerView):
         seen = defaultdict(int)
         for s in songs:
             s['position'] = s.pop('in_q')[seen[s[URI]]]
+            s['album'] = s.pop('on_album')
             seen[s[URI]] += 1
 
         return JsonResponse(songs, safe=False)
