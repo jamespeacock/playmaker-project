@@ -9,7 +9,6 @@ from playmaker.shared.models import SPModel
 from playmaker.models import User
 from playmaker.songs.models import Song
 from playmaker.songs.serializers import SongSerializer
-from playmaker.songs.services import fetch_songs
 
 # TODO let Controller have two modes - control & follow
 # Control means playmaker queue is sent out to listeners and controller is free to listen to different tracks (to prepare)
@@ -18,6 +17,7 @@ from playmaker.songs.services import fetch_songs
 
 class Controller(models.Model):
     me = models.OneToOneField(User, related_name='controller', on_delete=models.CASCADE)
+    mode = models.CharField(choices=[('broadcast','broadcast'), ('curate','curate')], max_length=128)
 
     def __str__(self):
         return 'ID: {} - username: {}'.format(self.id, self.me.username)
@@ -36,7 +36,8 @@ class Queue(models.Model):
     def currently_playing(self, detail=False):
         logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
         # TODO need to lock around this to prevent multiple updates
-        controller_current_song = self.controller.me.sp.currently_playing()
+        sp_client =  self.controller.me.sp
+        controller_current_song =sp_client.currently_playing()
         controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
         if not controller_song_uri:
             return None
@@ -44,8 +45,9 @@ class Queue(models.Model):
             self.current_song = controller_song_uri # from _obj or whatever
             # self.current_song_detail = fetch_songs(self.controller, self.current_song, save=True)
             self.save()
+         # TODO End lock here
         if detail:
-            details = self.controller.me.sp.audio_features(tracks=[controller_current_song['item']['uri']])
+            details = sp_client.audio_features(tracks=[controller_current_song['item']['uri']])
             song_detailed = Song.from_sp(details=details, **controller_current_song['item'])
             song_detailed.position_ms = controller_current_song['progress_ms']
             return SongSerializer(song_detailed).data
@@ -127,7 +129,6 @@ class Listener(models.Model):
             current_device = current_playback[DEVICE]
             current_device[LISTENER] = self
             return Device.from_sp(save=True, **current_device)
-
 
 
         logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active or selected devices.")

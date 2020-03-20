@@ -1,4 +1,5 @@
 import React from "react";
+import Spinner from "react-bootstrap/Spinner";
 
 export default class SongTable extends React.Component {
     //TODO make this body a SongCard that can be reusable separately from ths polling Card
@@ -14,6 +15,7 @@ export default class SongTable extends React.Component {
             const album = song.album.name
             const imageSrc = song.album.images[2].url
             const uri = song.uri
+
             return (
                 <tr key={index}>
                     <td className="text-center"><img className="img-responsive"
@@ -21,7 +23,13 @@ export default class SongTable extends React.Component {
                     <td className="text-center">{title}</td>
                     <td className="text-center">{artists}</td>
                     <td className="text-center">{album}</td>
-                    <td className="text-center"><button type="button" className="btn btn-primary" onClick={() => this.props.handleAdd(uri)}>{this.props.actionName}</button></td>
+                    {this.props.actionName && <td className="text-center">
+                        <button type="button"
+                                className="btn btn-primary"
+                                onClick={() => this.props.handleAction(uri, song.position)}>
+                            {this.props.actionName}
+                        </button>
+                    </td>}
                 </tr>
             )
         })
@@ -34,8 +42,10 @@ export default class SongTable extends React.Component {
     }
 
     render() {
-        if (this.props.songs.length == 0) {
+        if (this.props.songs.length === 0) {
             return (<div></div>)
+        } else if (this.props.fetching) {
+            return (<Spinner animation="border" variant="primary" />)
         }
         return (
             <div>

@@ -1,16 +1,18 @@
 import React from 'react'
 import { Redirect, withRouter } from 'react-router-dom'
-import ControllerInterface from '../../api/ControllerInterface'
+import { debounce } from "throttle-debounce";
 import SongTable from '../shared/SongTable'
-import SearchBar from '../shared/Search'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
-import {checkLoggedIn, startController} from "../../actions/actions";
+import {updateMode, refreshQueue, startController, editQueue, nextSong} from "../../actions/actions";
 import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
+import InputGroup from "react-bootstrap/InputGroup";
+import FormControl from "react-bootstrap/FormControl";
+import SongsInterface from "../../api/SongsInterface";
 
 
 const uuid = require('uuid/v4')
@@ -23,18 +25,19 @@ class Controller extends React.Component {
         this.state = {
             searchResults: {'tracks':[]},
             recommendationResults: [],
-            queue: [],
             query: '',
-            group: this.props.location.group || ''
+            mode: 'brodcast',
+            searchFetching: false,
+            queueFetching: false,
         }
-        this.searchHandler = this.searchHandler.bind(this)
-        this.addToQueueHandler = this.addToQueueHandler.bind(this)
-        this.handleNext = this.handleNext.bind(this)
-        this.handlePause = this.handlePause.bind(this)
-        this.handlePlay = this.handlePlay.bind(this)
-        this.handleSeek = this.handleSeek.bind(this)
-
-        this.controller = new ControllerInterface()
+        // this.addToQueueHandler = this.addToQueueHandler.bind(this)
+        // this.handleNext = this.handleNext.bind(this)
+        // this.handlePlay = this.handlePlay.bind(this)
+        // this.handleSeek = this.handleSeek.bind(this)
+        // this.SearchBar = this.SearchBar.bind(this)
+        // this.changeMode = this.changeMode.bind(this)
+        this.searchThrottled = debounce(500, this.search);
+        this.songsInterface = new SongsInterface( {})
         
     }
 
@@ -42,21 +45,21 @@ class Controller extends React.Component {
         this.props.dispatch(startController())
     }
 
+    async changeMode( ) {
+        if ('broadcast' === this.state.mode) {
+            this.setState({mode: 'curate'});
+        } else {
+            this.setState({mode: 'broadcast'})
+        }
+        this.props.dispatch(updateMode(this.state.mode))
+    }
+
     async handleNext() {
-      await this.controller.next()
-      this.refreshQueue()
-    }
-
-    handlePause() {
-      this.controller.pause()
-    }
-
-    handlePlay( uri ) {
-        this.controller.play(uri)
+      this.props.dispatch(nextSong(()=>this.setState({queueFetching:false})))
     }
 
     handleSeek( position ) {
-        this.controller.seek(position)
+        // this.controller.seek(position)
     }
 
     componentDidMount() {
@@ -65,36 +68,63 @@ class Controller extends React.Component {
         }
     }
 
-    refreshQueue = async ( ) => {
-        const songs = await this.controller.queue()
-        //dispatch update queue
-        this.setState( { queue: songs } )
+    search = async ( q ) => {
+        this.setState({ searchFetching: true })
+        //dispatch update search results
+        const searchResults = await this.songsInterface.search(q)
+        if (q === this.waitingFor) {
+            this.setState({searchResults})
+            this.setState({ searchFetching: false })
+        }
     }
 
-    searchHandler(searchResults) {
-        //dispatch update search results
-        this.setState({searchResults})
+    trySearch = event => {
+        this.setState( { q:event.target.value },() => {
+            if (this.state.q.length > 0) {
+                this.waitingFor = this.state.q;
+                this.searchThrottled(this.state.q)
+            }
+        } )
+    }
+
+    SearchBar = () => {
+        return (
+            <div>
+                <React.Fragment>
+                    <InputGroup className="mb-2">
+                        <FormControl
+                            type="text"
+                            name="query"
+                            className="input-left"
+                            placeholder="Search tracks"
+                            required
+                            onChange={this.trySearch}
+                            aria-label="Search tracks"
+                            aria-describedby="basic-addon2"
+                        />
+                    </InputGroup>
+                </React.Fragment>
+            </div>
+        )
+    }
+
+    changeOrderHandler = async (songUri, oldPosition, newPosition) => {
+
+    }
+
+    refreshQueue = async ( ) => {
+        this.setState({queueFetching: true})
+        this.props.dispatch(refreshQueue('controller', () => this.setState({queueFetching: false})))
     }
 
     addToQueueHandler = async (songUri) => {
-      console.log('adding ' + songUri + ' to queue.')
-      const success = await this.controller.add(songUri)
-      if (success) {
-        this.refreshQueue()
-      } else { 
-        console.log('Could not add song to queue')
-      }
+        this.setState({queueFetching: true})
+        this.props.dispatch(editQueue(songUri, ()=>this.setState({queueFetching:false})))
     }
 
-    removeFromQueueHandler = async (songRow) => {
-      console.log('removing ' + songRow.name + ' from queue.')
-      const success = await this.controller.remove(songRow.uri, songRow.position)
-      console.log(success)
-      if (success) {
-        this.refreshQueue()
-      } else { 
-        console.log('Could not remove song from queue')
-      }
+    removeFromQueueHandler = async (uri, position) => {
+        this.setState({queueFetching: true})
+        this.props.dispatch(editQueue(uri,()=>this.setState({queueFetching:false}), position, true))
     }
 
     clearSearchResults = () => {
@@ -103,6 +133,7 @@ class Controller extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
+        this.refreshQueue();
     }
 
     render() {
@@ -123,28 +154,24 @@ class Controller extends React.Component {
                         <Row>
                             <Col className="search-container">
                                 <h2>Search Results</h2>
-                                <SearchBar setSearchResults={this.searchHandler} />
+                                {this.SearchBar()}
                                 <SongTable
                                     songs={this.state.searchResults.tracks}
-                                    handleAdd={this.addToQueueHandler}
+                                    handleAction={this.addToQueueHandler}
                                     actionName={'Add'}
-                                    header={searchHeaders}/>
+                                    header={searchHeaders}
+                                    fetching={this.state.searchFetching}/>
                             </Col>
                             <Col className="controller-queue-container">
                                 <h2>Current Queue</h2>
                                 <SongTable
-                                songs={this.state.queue}
-                                handleAdd={this.removeFromQueueHandler}
+                                songs={this.props.controller.queue}
+                                handleAction={this.removeFromQueueHandler}
                                 actionName={'Remove'}
-                                header={queueHeaders}/>
+                                header={queueHeaders}
+                                fetching={this.state.queueFetching}/>
                                 <Row>
                                     <Col className="button-col">
-                                        <Button
-                                            key={uuid()}
-                                            className="button"
-                                            onClick={this.handlePlay}>
-                                            PLAY
-                                        </Button>
                                         <Button
                                             key={uuid()}
                                             className="button"

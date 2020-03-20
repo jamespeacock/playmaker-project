@@ -120,16 +120,12 @@ class QueueActionView(ControllerView):
     """
     def get(self, request, *args, **kwargs):
         super(QueueActionView, self).get(request)
-        params = request.query_params
-        songs = services.get_queue(params, request.user)
+        songs = services.get_queue(request.user)
         # post filter songs to make sure each song has just one position
-        seen = defaultdict(int)
-        for s in songs:
-            s['position'] = s.pop('in_q')[seen[s[URI]]]
-            s['album'] = s.pop('on_album')
-            seen[s[URI]] += 1
 
-        return JsonResponse(songs, safe=False)
+        currentSong = request.user.actor.queue.currently_playing()
+
+        return JsonResponse({"currentSong": currentSong, "queue": songs}, safe=False)
 
     """
     Performs specified action on current queue for current room/group/controller.
@@ -140,12 +136,13 @@ class QueueActionView(ControllerView):
         super(QueueActionView, self).post(request)
         body = request.data
         if action == ADD:
-            res = services.add_to_queue(request.user.uuid, body.get(URIS))
+            success = services.add_to_queue(request.user.uuid, body.get(URIS))
         elif action == REMOVE:
-            res = services.remove_from_queue(request.user.uuid, body.get(URIS), body.get('positions'))
+            success = services.remove_from_queue(request.user.uuid, body.get(URIS), body.get('positions'))
 
-        return JsonResponse({"success": res}, status=200, safe=False) if res else\
-            JsonResponse("That action could not be completed.", status=500, safe=False)
+        songs = services.get_queue(request.user)
+        currentSong = request.user.actor.queue.currently_playing()
+        return JsonResponse({"success": success, "currentSong": currentSong, "queue": songs}, safe=False)
 
 
 class PollView(ControllerView):

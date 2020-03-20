@@ -1,5 +1,15 @@
 import { combineReducers } from 'redux'
-import {AUTHENTICATE, CHECK_LOGGED_IN, SET_CURRENT_DEVICE, REFRESH_DEVICES, START_CONTROLLER, START_LISTENER, CURRENT_SONG_SUCCESS} from './actions/actions'
+import {
+  REFRESH_QUEUE_CONTROLLER,
+  CHECK_LOGGED_IN,
+  SET_CURRENT_DEVICE,
+  // SEARCH,
+  REFRESH_DEVICES,
+  START_CONTROLLER,
+  START_LISTENER,
+  CURRENT_SONG_SUCCESS,
+  REFRESH_QUEUE_LISTENER
+} from './actions/actions'
 
 const defaultUser = {
     isLoggedIn: false,
@@ -28,7 +38,7 @@ function user(state=defaultUser, action) {
 const defaultController = {
   queue: [],
   group: '',
-  searchResult: [],
+  searchResults: {tracks: []},
   listeners: []
 }
 
@@ -37,6 +47,9 @@ function controller(state=defaultController, action) {
 //  console.log('state', state)
 //  console.log(action.controller)
   switch (action.type) {
+    // case SEARCH:
+    case REFRESH_QUEUE_CONTROLLER:
+      return Object.assign({}, state, action.actor)
     case START_CONTROLLER:
       return Object.assign({}, state, action.controller)
     default:
@@ -58,6 +71,8 @@ function listener(state=defaultListener, action) {
     case CURRENT_SONG_SUCCESS:
       return Object.assign({}, state, {...state, currentSong: action.current})
     case CHECK_LOGGED_IN:
+    case REFRESH_QUEUE_LISTENER:
+      return Object.assign({}, state, action.actor)
     case START_LISTENER:
       return Object.assign({}, state, action.listener)
     default:

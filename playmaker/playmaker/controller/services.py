@@ -1,11 +1,13 @@
 import logging
 import threading
+from collections import defaultdict
 
 import polling
 import requests
 from django.core.exceptions import ObjectDoesNotExist
 
 from api.settings import HOSTNAME
+from playmaker.controller.contants import URI
 from playmaker.controller.models import SongInQueue, Controller, Queue, Group
 from playmaker.controller.visitors import Action
 from playmaker.models import User
@@ -78,10 +80,16 @@ def as_views(items, serializer):
 
 ## Queue related actions
 
-def get_queue(params, user):
+def get_queue(user):
 
     if user.actor:
-        return as_views(user.actor.queue.contents(), QueuedSongSerializer)
+        songs = as_views(user.actor.queue.contents(), QueuedSongSerializer)
+        seen = defaultdict(int)
+        for s in songs:
+            s['position'] = s.pop('in_q')[seen[s[URI]]]
+            s['album'] = s.pop('on_album')
+            seen[s[URI]] += 1
+        return songs
     else:
         print("User does not have an associated listener or controller.")
         return []
@@ -122,8 +130,11 @@ def add_to_queue(uuid, uris):
 def remove_from_queue(uuid, uris, positions):
     actor = User.objects.get(uuid=uuid).actor
     songs = Song.objects.filter(uri__in=uris).all()
-    [SongInQueue.objects.get(song=s, queue=actor.queue, position=positions[i]).delete() for i, s in enumerate(songs)]
-    return True
+    if songs:
+        [SongInQueue.objects.get(song=s, queue=actor.queue, position=positions[i]).delete() for i, s in enumerate(songs)]
+        return True
+    else:
+        return False
 
 
 """

@@ -14,6 +14,16 @@ export default class ControllerInterface  {
 
   }
 
+  updateMode = async ( mode ) => {
+    return await this.apiInterface.put('controller/mode',
+        {'mode': mode}
+      )
+  }
+
+  start = async () => {
+    return await this.apiInterface.get('controller/start')
+  }
+
  /* Get Current Room Queue */
   queue = async ( ) => {
     return await this.apiInterface.get('controller/queue')
@@ -34,10 +44,6 @@ export default class ControllerInterface  {
   /* Actions Section TODO these should all be PUT*/
   next = async ( ) => {
     return await this.apiInterface.get('controller/next')
-  }
-
-  pause = async ( ) => {
-    return await this.apiInterface.get('controller/pause')
   }
 
   play = async ( uri ) => {
