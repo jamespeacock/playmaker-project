@@ -27,12 +27,13 @@ class StartGroupView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
         super(StartGroupView, self).get(request)
-        if getattr(request.user, 'listener', None):
+        user = request.user
+        if getattr(user, 'listener', None):
             logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
-            Listener.objects.get(me=request.user).delete()
-        group_id, controller_id = create_controller_and_group(request.user)
+            Listener.objects.get(me=user).delete()
+        group_id, controller_id = create_controller_and_group(user)
 
-        started = start_polling(request.user)
+        started = start_polling(user)
         return JsonResponse({"group": group_id, "controller": controller_id, "started": started})
 
 
@@ -47,8 +48,9 @@ class PlaySongView(ControllerView):
         if not params.get(URIS):
             return
 
+        actor = request.user.actor
         failed_results = [r for r in services.perform_action(
-            request.user,
+            actor,
             Action.PLAY,
             uris=make_iterable(params.get(URIS))) if r]
 
@@ -62,8 +64,9 @@ class PauseSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
         super(PauseSongView, self).get(request)
+        actor = request.user.actor
         failed_results = [r for r in services.perform_action(
-            request.user,
+            actor,
             Action.PAUSE) if r]
 
         if failed_results:
@@ -76,10 +79,11 @@ class NextSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
         super(NextSongView, self).get(request)
-        next_song = next_in_queue(request.user.actor.queue)
+        actor = request.user.actor
+        next_song = next_in_queue(actor.queue)
         if next_song:
             failed_results = [r for r in services.perform_action(
-                request.user,
+                actor,
                 Action.PLAY,
                 uris=[next_song.uri]) if r]
         else:
@@ -99,8 +103,9 @@ class SeekSongView(ControllerView):
             return not_authed_resp
         pos = request.query_params.get('position', None)
         if pos:
+            actor = request.user.actor
             failed_results = [r for r in services.perform_action(
-                request.user,
+                actor,
                 Action.SEEK,
                 position_ms=pos) if r]
 
@@ -120,10 +125,11 @@ class QueueActionView(ControllerView):
     """
     def get(self, request, *args, **kwargs):
         super(QueueActionView, self).get(request)
-        songs = services.get_queue(request.user)
+        actor = request.user.actor
+        songs = services.get_queue(actor)
         # post filter songs to make sure each song has just one position
 
-        currentSong = request.user.actor.queue.currently_playing()
+        currentSong = actor.queue.currently_playing()
 
         return JsonResponse({"currentSong": currentSong, "queue": songs}, safe=False)
 
@@ -135,13 +141,15 @@ class QueueActionView(ControllerView):
         # TODO how to validate contents of request body
         super(QueueActionView, self).post(request)
         body = request.data
+        user = request.user
+        actor = user.actor
         if action == ADD:
-            success = services.add_to_queue(request.user.uuid, body.get(URIS))
+            success = services.add_to_queue(user.uuid, body.get(URIS))
         elif action == REMOVE:
-            success = services.remove_from_queue(request.user.uuid, body.get(URIS), body.get('positions'))
+            success = services.remove_from_queue(user.uuid, body.get(URIS), body.get('positions'))
 
-        songs = services.get_queue(request.user)
-        currentSong = request.user.actor.queue.currently_playing()
+        songs = services.get_queue(actor)
+        currentSong = actor.queue.currently_playing()
         return JsonResponse({"success": success, "currentSong": currentSong, "queue": songs}, safe=False)
 
 

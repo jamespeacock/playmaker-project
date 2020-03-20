@@ -36,12 +36,12 @@ class Login extends React.Component {
 
     updateUsername = ( e ) => {
         const username = e.target.value;
-        this.setState( { username } )
+        this.setState( { username, error: '' } )
     }
 
     updatePassword = ( e ) => {
         const password = e.target.value;
-        this.setState( { password } )
+        this.setState( { password, error: '' } )
     }
 
     render() {

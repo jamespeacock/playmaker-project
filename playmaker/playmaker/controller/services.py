@@ -28,7 +28,7 @@ def user_matches_actor(user, actor_uuid, cls):
         return False
 
 
-def can_perform_action(user, listener_uuid, action, scope="ALL"):
+def can_perform_action(actor, listener_uuid, action, scope="ALL"):
 
     # Check User to controller permission
     return True
@@ -47,9 +47,9 @@ def kickoff_request(v, action, *args, **kwargs):
     return v.execute(action, *args, **kwargs)
 
 
-def perform_action(user, action, *args, **kwargs):
+def perform_action(actor, action, *args, **kwargs):
     # Is this the right place to do can_perform_action?
-    listeners = [listener for listener in user.actor.listeners if can_perform_action(user, listener, str(action))]
+    listeners = [listener for listener in actor.listeners if can_perform_action(actor, listener, str(action))]
 
     # Filter out listeners without active devices
     # TODO Just verify all listeners have a selected device. Notify those who dont?
@@ -80,10 +80,9 @@ def as_views(items, serializer):
 
 ## Queue related actions
 
-def get_queue(user):
-
-    if user.actor:
-        songs = as_views(user.actor.queue.contents(), QueuedSongSerializer)
+def get_queue(actor):
+    if actor:
+        songs = as_views(actor.queue.contents(), QueuedSongSerializer)
         seen = defaultdict(int)
         for s in songs:
             s['position'] = s.pop('in_q')[seen[s[URI]]]

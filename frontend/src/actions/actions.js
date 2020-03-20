@@ -130,7 +130,7 @@ function nextSong(signalDone) {
   }
 }
 
-function startController( ) {
+function startController( callback ) {
   return async (dispatch, getState) => {
     const controller = await new ControllerInterface({}).start();
     console.log('start controller: ', controller)
@@ -149,6 +149,7 @@ function startController( ) {
       }
     };
     dispatch(actionUser)
+    callback()
   }
 }
 

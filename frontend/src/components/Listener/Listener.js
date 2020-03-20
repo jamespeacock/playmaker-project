@@ -37,7 +37,7 @@ class Listener extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'listen');
-        this.props.currentSongAction();
+        // this.props.currentSongAction();
         this.queuePolling = setInterval(
             () => {
                 this.refreshQueue();
@@ -50,6 +50,7 @@ class Listener extends React.Component {
     }
 
     render() {
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'dashboard');
         const willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && '' !== this.props.listener.group)
         return (
             <AppContext.Consumer>

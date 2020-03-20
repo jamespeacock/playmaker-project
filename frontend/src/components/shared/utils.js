@@ -3,7 +3,7 @@ import React, {useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
-    if (!props.user.isLoggedIn) {
+    if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {
         props.history.push({
             pathname,
             redirect

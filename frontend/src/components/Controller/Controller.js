@@ -42,7 +42,7 @@ class Controller extends React.Component {
     }
 
     createGroup = async () => {
-        this.props.dispatch(startController())
+        this.props.dispatch(startController(this.refreshQueue))
     }
 
     async changeMode( ) {
@@ -64,7 +64,7 @@ class Controller extends React.Component {
 
     componentDidMount() {
         if (this.props.user.isLoggedIn) {
-            this.createGroup()
+            this.createGroup();
         }
     }
 
@@ -133,10 +133,10 @@ class Controller extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
-        this.refreshQueue();
     }
 
     render() {
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'dashboard');
         const searchHeaders = ['', 'title', 'artists', 'album', 'Add']
         const queueHeaders = ['', 'title', 'artists', 'album', 'Remove']
 
