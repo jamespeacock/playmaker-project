@@ -8,10 +8,11 @@ from django.utils import timezone as tz
 from django.contrib.auth import models as auth_models
 from django.db import models
 
-from playmaker.controller.contants import ID
+from playmaker.controller.contants import ID, DEVICE, USER
 from playmaker.songs import utils
 from playmaker.login import services as logins
 from playmaker.songs.models import Artist, Song
+from playmaker.shared.models import SPModel
 
 
 class User(auth_models.AbstractUser):
@@ -73,6 +74,63 @@ class User(auth_models.AbstractUser):
         self.save()
         return self.info
 
+    def current_song(self):
+        cp = self.sp.currently_playing()
+        return cp['item']['uri'] if cp else None
+
+    @property
+    def active_device(self):
+        if self.token is None:
+            logging.log(logging.INFO, "Lost token for " + self.username)
+            return None
+
+        ad = self.devices.filter(is_active=True).first()
+        if ad:
+            return ad
+
+        sd = self.devices.filter(is_selected=True).first()
+        if sd:
+            return sd
+
+        current_playback = self.sp.current_playback()
+        if current_playback:
+            current_device = current_playback[DEVICE]
+            current_device[USER] = self
+            return Device.from_sp(save=True, **current_device)
+
+        logging.log(logging.INFO, "Listener: " + self.username + " does not have any active or selected devices.")
+        return None
+
+    def get_devices(self):
+        all_ds = []
+        for d in self.sp.devices()[Device.get_key()]:
+            d[USER] = self
+            all_ds.append(Device.from_sp(save=False, **d))
+        return all_ds
+
+    def set_device(self, device_id):
+        device = self.devices.get(sp_id=device_id)
+        if device:
+            # Set all other devices for this user to is_selected=False
+            for d in self.devices.filter(is_selected=True).all():
+                d.is_selected = False
+                d.save()
+            device.listener = self
+            device.is_selected = True
+            device.save()
+            return True
+        else:
+            # Fetch current playback and set is_selected device
+            logging.log(logging.ERROR, "Selected device for %s was not in database. Fetching now." % self.username)
+            for d in self.sp.devices()[Device.get_key()]:
+                if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
+                    d[USER] = self
+                    Device.from_sp(save=True, **d)
+                    return True
+
+        logging.log(logging.ERROR, "Selected device %s was not found for requesting user." % device_id)
+        return False
+
     @property
     def info(self):
         me = self.sp.me()
@@ -99,3 +157,34 @@ class User(auth_models.AbstractUser):
     @property
     def saved_tracks(self, limit=20, offset=0):
         return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), Song)
+
+
+class Device(SPModel):
+    user = models.ForeignKey(User, related_name='devices', on_delete=models.CASCADE)
+    is_selected = models.BooleanField(null=True)
+    is_active = models.BooleanField(null=True)
+    is_private_session = models.BooleanField(null=True)
+    is_restricted = models.BooleanField(null=True)
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=64)
+    volume_percent = models.IntegerField(null=True)
+
+    @staticmethod
+    def from_sp(save=False, **kwargs):
+        kwargs = SPModel.from_sp(kwargs)
+        kwargs['is_selected'] = False
+        d, _ = Device.objects.get_or_create(
+            user=kwargs.pop('user'),
+            sp_id=kwargs.pop('sp_id'),
+            name=kwargs.pop('name'),
+            type=kwargs.pop('type'))
+        for k, v in kwargs.items():
+            d.__setattr__(k, v)
+
+        if save:
+            d.save()
+        return d
+
+    @staticmethod
+    def get_key():
+        return "devices"

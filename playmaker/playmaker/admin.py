@@ -1,10 +1,14 @@
 from django.contrib import admin
 
 from playmaker.login.forms import CustomUserChangeForm, CustomUserCreationForm
-from playmaker.models import User
+from playmaker.models import User, Device
 
 
 # Register your models here.
+
+class DeviceAdmin(admin.ModelAdmin):
+    pass
+
 
 class UserAdmin(admin.ModelAdmin):
     add_form = CustomUserCreationForm
@@ -14,3 +18,4 @@ class UserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Device, DeviceAdmin)

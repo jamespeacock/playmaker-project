@@ -68,20 +68,18 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         super(DevicesView, self).get(request)
-        actor = request.user.actor
+        user = request.user
         ser = self.get_serializer_class()
 
-        return JsonResponse([ser(d).data for d in actor.get_devices()], safe=False)
+        return JsonResponse([ser(d).data for d in user.get_devices()], safe=False)
 
     def post(self, request, *args, **kwargs):
         super(DevicesView, self).post(request)
         user = request.user
-        actor = user.actor
-        assert isinstance(actor, Listener)
         device_id = request.data.get(DEVICE)
-        if actor.set_device(device_id):
-            currentSong = checkPlaySeek(actor, user.is_listener)
-            return JsonResponse({"currentSong": currentSong})
+        if user.set_device(device_id):
+            current_song = checkPlaySeek(user)
+            return JsonResponse({"currentSong": current_song})
         return JsonResponse({"error": "Selected device %s was not found for requesting user." % device_id})
 
 

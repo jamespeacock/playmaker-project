@@ -4,8 +4,8 @@ import { debounce } from "throttle-debounce";
 import SongTable from '../shared/SongTable'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
-import {updateMode, refreshQueue, startController, editQueue, nextSong} from "../../actions/actions";
-import {handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
+import {updateMode, refreshQueue, startController, editQueue, nextSong, playSong} from "../../actions/actions";
+import {handleRedirectsIfNotLoggedInOrAuthed, showDevicesModal, showPlaying} from "../shared/utils";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -31,12 +31,7 @@ class Controller extends React.Component {
             searchFetching: false,
             queueFetching: false,
         }
-        // this.addToQueueHandler = this.addToQueueHandler.bind(this)
-        // this.handleNext = this.handleNext.bind(this)
-        // this.handlePlay = this.handlePlay.bind(this)
-        // this.handleSeek = this.handleSeek.bind(this)
-        // this.SearchBar = this.SearchBar.bind(this)
-        // this.changeMode = this.changeMode.bind(this)
+        this.handleNext = this.handleNext.bind(this);
         this.searchThrottled = debounce(500, this.search);
         this.songsInterface = new SongsInterface( {})
         
@@ -123,6 +118,10 @@ class Controller extends React.Component {
         this.props.dispatch(refreshQueue('controller', () => this.setState({queueFetching: false})))
     }
 
+    async playSongHandler(uri) {
+        this.props.dispatch(playSong(uri))
+    }
+
     addToQueueHandler = async (songUri) => {
         this.setState({queueFetching: 0 === this.props.controller.queue.length})
         this.props.dispatch(editQueue(songUri, ()=>this.setState({queueFetching:false})))
@@ -168,8 +167,8 @@ class Controller extends React.Component {
                                 {this.SearchBar()}
                                 {!this.state.searchFetching ? <SongTable
                                         songs={this.state.searchResults.tracks}
-                                        handleAction={this.addToQueueHandler}
-                                        actionName={'Add'}
+                                        handleAction={this.props.controller.currentSong ? this.addToQueueHandler : this.playSongHandler}
+                                        actionName={this.props.controller.currentSong ? 'Add' : 'Play'}
                                     /> :
                                     <Spinner animation="border" variant="primary"/>
                                 }
@@ -198,6 +197,7 @@ class Controller extends React.Component {
                         Live chat feed coming soon!
                     </Container>
                 </main>
+                {showDevicesModal(this.props.user, this.props.user.isLoggedIn && !this.props.user.current_device )}
             </React.Fragment>
         )
     }

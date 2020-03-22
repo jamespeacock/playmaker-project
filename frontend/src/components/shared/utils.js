@@ -3,8 +3,6 @@ import React, {useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import CurrentSongCard from "./SongCards";
 import SongTable from "./SongTable";
-import Card from "react-bootstrap/Card";
-import Col from "react-bootstrap/Col";
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
     if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {

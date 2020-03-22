@@ -138,6 +138,13 @@ function nextSong(signalDone) {
   }
 }
 
+function playSong(uri) {
+  return async (dispatch, getState) => {
+    const resp = await new ControllerInterface().play(uri)
+    dispatch(getCurrentSong())
+  }
+}
+
 function startController( mode, callback ) {
   return async (dispatch, getState) => {
     const controller = await new ControllerInterface({}).start(mode);
@@ -216,5 +223,6 @@ export {
     refreshQueue,
     editQueue,
     nextSong,
+    playSong,
     updateMode
 }

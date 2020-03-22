@@ -28,3 +28,4 @@ SONG = 'song' # internal
 PLAYLIST = 'playlist'
 SEARCH_TYPES = [ARTIST, ALBUM, TRACK, PLAYLIST]
 DEVICE = 'device'
+USER = 'user'

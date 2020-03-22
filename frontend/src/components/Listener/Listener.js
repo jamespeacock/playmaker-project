@@ -75,7 +75,7 @@ class Listener extends React.Component {
                                 Chat room coming soon!
                             </Container>
                         </main>
-                        {showDevicesModal(this.props.user, !willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.current_device && this.props.user.isListener )}
+                        {showDevicesModal(this.props.user, !willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.current_device )}
                         {showJoinGroupModal(this.findGroup, willOpenGroupModal)}
                     </React.Fragment>
                 }

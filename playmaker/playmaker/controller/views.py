@@ -7,7 +7,6 @@ from playmaker.controller.serializers import QueueActionSerializer
 from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_group, \
     perform_action_for_listeners
 from playmaker.listener.services import checkPlaySeek
-from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
 from playmaker.shared.views import SecureAPIView
 
@@ -35,7 +34,7 @@ class StartGroupView(SecureAPIView):
         group_id, controller_id = create_controller_and_group(user, mode)
 
         start_polling(user)
-        currentSong = user.actor.queue.currently_playing(detail=True) if mode == 'broadcast' else {}
+        currentSong = user.actor.queue.currently_playing(detail=True, refresh=True) if mode == 'broadcast' else {}
         return JsonResponse({"group": group_id, "controller": controller_id, "currentSong": currentSong})
 
 
@@ -62,7 +61,7 @@ class NextSongView(ControllerView):
         actor = request.user.actor
         next_song = next_in_queue(actor.queue)
         if next_song:
-            success = perform_action_for_listeners(actor, Action.PLAY,uris=[next_song.uri])
+            success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song])
         else:
             songs = actor.group.suggest_next_songs()
             return JsonResponse({"suggested": songs, "success": False}, safe=False)
@@ -95,9 +94,8 @@ class QueueActionView(ControllerView):
         user = request.user
         actor = user.actor
         songs = services.get_queue(actor)
-        # post filter songs to make sure each song has just one position
-        currentSong = checkPlaySeek(actor, user.is_listener)
-        return JsonResponse({"currentSong": currentSong, "queue": songs}, safe=False)
+        current_song = checkPlaySeek(user)
+        return JsonResponse({"currentSong": current_song, "queue": songs}, safe=False)
 
     """
     Performs specified action on current queue for current room/group/controller.

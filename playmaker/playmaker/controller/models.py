@@ -3,16 +3,10 @@ import logging
 from django.db import models
 
 from api.settings import DEFAULT_MS_ADDITION
-from playmaker.controller.contants import LISTENER, DEVICE
 from playmaker.controller.visitors import ActionVisitor
-from playmaker.shared.models import SPModel
 from playmaker.models import User
 from playmaker.songs.models import Song
 from playmaker.songs.serializers import SongSerializer
-
-# TODO let Controller have two modes - control & follow
-# Control means playmaker queue is sent out to listeners and controller is free to listen to different tracks (to prepare)
-# Follow means controller does not have to mess with UI and just listens, the app will throw songs out to users upon changes
 
 
 class Controller(models.Model):
@@ -25,6 +19,7 @@ class Controller(models.Model):
     @property
     def listeners(self):
         return Listener.objects.filter(group=self.group).all()
+
 
 
 class Queue(models.Model):
@@ -54,7 +49,7 @@ class Queue(models.Model):
                 return None
             # details = sp_client.audio_features(tracks=[controller_current_song['item']['uri']])
             controller_current_song['item']['position_ms'] =  controller_current_song['progress_ms']
-            return SongSerializer(controller_current_song['item']).data#SPModel.from_response([controller_current_song], Song, serializer=SongSerializer)
+            return SongSerializer(controller_current_song['item']).data
 
         return self.current_song
 
@@ -75,7 +70,7 @@ class SongInQueue(models.Model):
 
 
 class Group(models.Model):
-    controller = models.OneToOneField(Controller, on_delete=models.CASCADE)
+    controller = models.OneToOneField(Controller, related_name='group', on_delete=models.CASCADE)
     # TODO save tracks played
 
     @property
@@ -92,8 +87,7 @@ class Group(models.Model):
         return
 
     def play_suggested_song(self):
-        return
-
+        return # uri of next song to play
 
 
 class Listener(models.Model):
@@ -114,96 +108,6 @@ class Listener(models.Model):
     @property
     def queue(self):
         return self.group.queue
-
-    def get_devices(self):
-        all_ds = []
-        for d in self.me.sp.devices()[Device.get_key()]:
-            d[LISTENER] = self
-            all_ds.append(Device.from_sp(save=False, **d))
-        return all_ds
-
-
-    @property
-    def active_device(self):
-        if self.me.token is None:
-            logging.log(logging.INFO, "Lost token for " + self.me.username)
-            return None
-
-        ad = self.devices.filter(is_active=True).first()
-        if ad:
-            return ad
-
-        sd = self.devices.filter(is_selected=True).first()
-        if sd:
-            return sd
-
-        current_playback = self.me.sp.current_playback()
-        if current_playback:
-            current_device = current_playback[DEVICE]
-            current_device[LISTENER] = self
-            return Device.from_sp(save=True, **current_device)
-
-
-        logging.log(logging.INFO, "Listener: " + self.me.username + " does not have any active or selected devices.")
-        return None
-
-    def set_device(self, device_id):
-        device = self.devices.get(sp_id=device_id)
-        if device:
-            # Set all other devices for this user to is_selected=False
-            for d in self.devices.filter(is_selected=True).all():
-                d.is_selected = False
-                d.save()
-            device.listener = self
-            device.is_selected = True
-            device.save()
-            return True
-        else:
-            # Fetch current playback and set is_selected device
-            logging.log(logging.ERROR, "Selected device for %s was not in database. Fetching now." % self.me.username)
-            for d in self.me.sp.devices()[Device.get_key()]:
-                if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
-                    d[LISTENER] = self
-                    Device.from_sp(save=True, **d)
-                    return True
-
-        logging.log(logging.ERROR, "Selected device %s was not found for requesting user." % device_id)
-        return False
-
-    def current_song(self):
-        cp = self.me.sp.currently_playing()
-        return cp['item']['uri'] if cp else None
-
-
-class Device(SPModel):
-    listener = models.ForeignKey(Listener, related_name='devices', on_delete=models.CASCADE)
-    is_selected = models.BooleanField(null=True)
-    is_active = models.BooleanField(null=True)
-    is_private_session = models.BooleanField(null=True)
-    is_restricted = models.BooleanField(null=True)
-    name = models.CharField(max_length=255)
-    type = models.CharField(max_length=64)
-    volume_percent = models.IntegerField(null=True)
-
-    @staticmethod
-    def from_sp(save=False, **kwargs):
-        kwargs = SPModel.from_sp(kwargs)
-        kwargs['is_selected'] = False
-        d, _ = Device.objects.get_or_create(
-            listener=kwargs.pop('listener'),
-            sp_id=kwargs.pop('sp_id'),
-            name=kwargs.pop('name'),
-            type=kwargs.pop('type'))
-        for k, v in kwargs.items():
-            d.__setattr__(k, v)
-
-        if save:
-            d.save()
-        return d
-
-    @staticmethod
-    def get_key():
-        return "devices"
 
 
 class Permission(models.Model):  # inherit auth_models.Permission if need be

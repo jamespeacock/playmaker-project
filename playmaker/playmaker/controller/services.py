@@ -114,7 +114,7 @@ def next_in_queue(queue):
     ns = queue.songs.first()
     if not ns:
         return None
-    queue.current_song = ns
+    queue.current_song = ns.uri
     SongInQueue.objects.get(song=ns, queue=queue).delete()
     queue.save()
     return queue.current_song
@@ -197,7 +197,7 @@ class CurrentSongPoller(object):
 
         if not next_song:
             next_song = group.play_suggested_song()
-        success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song.uri])
+        success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song])
         success = success and perform_action_for_listeners(actor, Action.SEEK, position_ms=current_song_pos)
         group.current_song(refresh=True)
 

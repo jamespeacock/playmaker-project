@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
-from playmaker.controller.models import Device, Listener, Controller
+from playmaker.controller.models import Listener, Controller
 from playmaker.shared.serializers import ParamSerializer
+from playmaker.models import Device
 
 
 # (Inbound)
