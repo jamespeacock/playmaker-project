@@ -32,15 +32,13 @@ class Listener extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'listen');
-        // this.props.currentSongAction();
-        this.setState({queueFetching: this.props.listener.queue && 0 === this.props.listener.queue.length})
         if (this.props.listener.group) {
             this.findGroup(this.props.listener.group);
             this.queuePolling = setInterval(
                 () => {
                     this.refreshQueue();
                 },
-                5000);
+                10000);
         }
     }
 
@@ -52,8 +50,11 @@ class Listener extends React.Component {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
         let willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && '' !== this.props.listener.group)
         let willOpenDevicesModal = (!willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.active_device)
-        console.log(!this.props.user.active_device)
-        console.log(this.props.user.active_device)
+        if (this.props.listener.group && this.props.listener.roomClosed) {
+            //TODO Redirect to room selection page in the future
+            clearInterval(this.queuePolling);
+            return <Redirect to={'dashboard'}/>
+        }
         return (
             <AppContext.Consumer>
                 {() =>

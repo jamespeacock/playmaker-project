@@ -45,16 +45,14 @@ class Controller extends React.Component {
             () => {
                 this.refreshQueue();
             },
-            5000);
+            10000);
     }
 
     async changeMode( ) {
         if ('broadcast' === this.state.mode) {
             this.setState({mode: 'curate'});
-            this.kickoffPoll();
         } else {
             this.setState({mode: 'broadcast'});
-            this.kickoffPoll();
         }
         this.props.dispatch(updateMode(this.state.mode))
     }
@@ -148,7 +146,6 @@ class Controller extends React.Component {
 
     render() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force logout
-
         return (
             <React.Fragment>
                 <Card style={{ width: '18rem' }}>

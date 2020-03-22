@@ -14,6 +14,7 @@ class CurrentSongCard extends React.Component {
   }
 
   render() {
+    console.log('rendering song card', this.props)
     if (this.props.song.name) {
       this.doRender = true
       this.title = this.props.song.name

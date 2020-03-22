@@ -85,7 +85,7 @@ function ShowJoinGroupModal(props) {
     }, [props])
 
     //Do I need use effect down here?
-    const [group, setGroup] = React.useState('');
+    const [group, setGroup] = React.useState('',);
     const [error, setError] = React.useState('');
 
     return(<JoinGroupModal
@@ -107,11 +107,6 @@ class JoinGroupModal extends React.Component {
 
     handleJoin = async () => {
         const success = await this.props.findGroup(this.props.group);
-        if (success) {
-            this.props.onHide()
-        } else {
-            this.props.setError('Sorry, that group does not exist.')
-        }
     }
 
     render() {

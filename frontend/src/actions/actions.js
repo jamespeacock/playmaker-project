@@ -109,10 +109,16 @@ function refreshQueue( user , signalDone) {
   return async (dispatch, getState) => {
     let action = {type: 'listener' === user ? REFRESH_QUEUE_LISTENER : REFRESH_QUEUE_CONTROLLER}
     const resp = await new ControllerInterface({}).queue();
-    if (resp) {
+    if (resp && !resp.error) {
       action.actor = {
         currentSong: resp.currentSong ? resp.currentSong : {},
-        queue: resp.queue ? resp.queue : []
+        queue: resp.queue ? resp.queue : [],
+        roomClosed: false
+      }
+    } else {
+      //Group is probably closed or controller is not playing music anymore
+      action.actor = {
+        roomClosed: true
       }
     }
     dispatch(action)
@@ -162,6 +168,9 @@ function startListener(group) {
     let action = {type: START_LISTENER}
     if (resp && resp.group) {
       action.listener = resp
+      action.listener.roomClosed = false;
+    } else if (resp.error) {
+      action.listener.group = ''
     }
     action.user = {
         isLoggedIn: true,

@@ -44,9 +44,10 @@ class User(auth_models.AbstractUser):
     def actor(self):
         if hasattr(self, 'controller') and self.controller:
             if hasattr(self, 'listener') and self.listener:
-                logging.log(logging.WARN, "User has both controller and listener. Deleting listener.")
-                self.listener.delete()
-                self.save()
+                logging.log(logging.WARN, "User has both controller and listener.")
+                # self.listener.delete()
+                # self.save()
+                return None
             self.is_controller = True
             self.is_listener = False
             self.save()
