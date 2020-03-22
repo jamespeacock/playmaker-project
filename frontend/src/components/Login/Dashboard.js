@@ -1,7 +1,6 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
-import {Button, Container, Row, Col, Jumbotron} from 'react-bootstrap'
-import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
+import {Button, Container, Row, Col} from 'react-bootstrap'
 
 
 
@@ -11,9 +10,10 @@ class Dashboard extends React.Component {
         super(props)
     }
 
-    handlePlay = async () => {
+    handlePlay = async (mode) => {
         this.props.history.push({
-          pathname: '/play'
+          pathname: '/play',
+          mode: mode
         })
     }
 
@@ -26,24 +26,31 @@ class Dashboard extends React.Component {
     render() {
         return (
           <React.Fragment>
-              <Jumbotron>
-                  <Container>
-                      <Row>
+                  <Container fluid>
+                      <Row md={4} sm={6}>
                           <Col>
                               <Button
-                                  onClick={this.handlePlay}>
-                                  Curate for Others
+                                  onClick={this.handleListen}>
+                                  Listen with Friends
+                              </Button>
+                          </Col>
+                      </Row>
+                      <br/>
+                      <Row md={4} sm={6}>
+                          <Col>
+                              <Button
+                                  onClick={() => this.handlePlay('broadcast')}>
+                                  Broadcast your Vibes
                               </Button>
                           </Col>
                           <Col>
                               <Button
-                                  onClick={this.handleListen}>
-                                  Join Room & Start Listening
+                                  onClick={() => this.handlePlay('curate')}>
+                                  Curate a Set
                               </Button>
                           </Col>
                       </Row>
                   </Container>
-              </Jumbotron>
           </React.Fragment>
         )
     }

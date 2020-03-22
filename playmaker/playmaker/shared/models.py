@@ -29,5 +29,5 @@ class SPModel(models.Model):
             return {cls.get_key(): l,
                     "next": data['next']}
         else:
-            data = [cls.from_sp(save=save, **obj) for obj in data]
+            # data = [cls.from_sp(save=save, **obj) for obj in data]
             return [serializer(d).data if serializer else d for d in data]

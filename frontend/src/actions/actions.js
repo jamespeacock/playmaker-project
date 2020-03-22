@@ -19,13 +19,11 @@ function checkLoggedIn(redirect = 'dashboard') {
     const user = await new ApiInterface( {} ).isLoggedIn(redirect)
     let devices = []
     let active_device = {};
-    let group = '';
     if (user.actor) {
       devices = user.actor.devices || [];
       active_device = user.actor.active_device;
-      group = user.actor.group;
     }
-    const action = {
+    let action = {
       type:CHECK_LOGGED_IN,
       user: {
         isLoggedIn: user.is_logged_in,
@@ -37,10 +35,13 @@ function checkLoggedIn(redirect = 'dashboard') {
         current_device: active_device,
         is_authenticated: user.is_authenticated,
         auth_url: user.auth_url
-      },
-      listener: {
-        group: group
       }
+    }
+    if (user.is_listener) {
+        action.listener = user.actor
+    }
+    if (user.is_controller) {
+        action.controller = user.actor
     }
     dispatch(action)
   }
@@ -93,7 +94,7 @@ function editQueue( songUri, signalDone, position=null, toRemove=false) {
     } else if (!toRemove) {
       resp = await new ControllerInterface().add(songUri)
     }
-    if (resp.success) {
+    if (resp && resp.success) {
       action.actor = {
         currentSong: resp.currentSong,
         queue: resp.queue
@@ -114,9 +115,16 @@ function refreshQueue( user , signalDone) {
   return async (dispatch, getState) => {
     let action = {type: 'listener' === user ? REFRESH_QUEUE_LISTENER : REFRESH_QUEUE_CONTROLLER}
     const resp = await new ControllerInterface({}).queue();
-    action.actor = {
-      currentSong: resp.currentSong,
-      queue: resp.queue,
+    if (resp) {
+      action.actor = {
+        currentSong: resp.currentSong,
+        queue: resp.queue,
+      }
+    } else {
+      action.actor = {
+        currentSong: {},
+        queue: []
+      }
     }
     dispatch(action)
     signalDone()
@@ -130,26 +138,25 @@ function nextSong(signalDone) {
   }
 }
 
-function startController( callback ) {
+function startController( mode, callback ) {
   return async (dispatch, getState) => {
-    const controller = await new ControllerInterface({}).start();
+    const controller = await new ControllerInterface({}).start(mode);
     console.log('start controller: ', controller)
-    const actionController = {
-      type: START_CONTROLLER,
-      controller: {
-        group: controller.group,
-        queue: []
-      }
-    };
-    dispatch(actionController)
-    const actionUser = {
+    const action = {
       type: START_CONTROLLER,
       user: {
         isController: true
+      },
+      controller: {
+        group: controller.group,
+        queue: [],
+        currentSong: controller.currentSong
       }
     };
-    dispatch(actionUser)
-    callback()
+    dispatch(action)
+    if (callback) {
+      callback()
+    }
   }
 }
 
@@ -188,11 +195,15 @@ function startListener(listener) {
 // }
 
 function getCurrentSong () {
-    console.log('been called')
     return async (dispatch, getState) => {
       const current =  await new ListenerInterface({}).current()
-      dispatch({type: CURRENT_SONG_SUCCESS, current})
-    };
+      console.log(current)
+      if (current) {
+        dispatch({type: CURRENT_SONG_SUCCESS, current: current.currentSong})
+      } else {
+        dispatch({type: CURRENT_SONG_SUCCESS, current: null})
+      }
+    }
 }
 
 export {

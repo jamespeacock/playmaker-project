@@ -3,10 +3,12 @@ import ListenerInterface from '../../api/ListenerInterface'
 import CurrentSongCard from '../shared/SongCards'
 import {Redirect, withRouter} from "react-router-dom";
 import AppContext from "../AppContext";
-import {showDevicesModal, showJoinGroupModal, handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
+import {showDevicesModal, showJoinGroupModal, handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
 import {connect} from "react-redux";
 import {refreshQueue, startListener} from "../../actions/actions";
 import SongTable from "../shared/SongTable";
+import Spinner from "react-bootstrap/Spinner";
+import Container from "react-bootstrap/Container";
 
 class Listener extends React.Component {
 
@@ -14,6 +16,9 @@ class Listener extends React.Component {
         super( props )
         this.listener = new ListenerInterface()
         console.log('listener props', this.props)
+        this.state = {
+            queueFetching: false
+        }
     }
 
 
@@ -31,13 +36,15 @@ class Listener extends React.Component {
     }
 
     refreshQueue = async () => {
-        this.props.dispatch(refreshQueue('listener'))
+        this.props.dispatch(refreshQueue('listener', () => this.setState({queueFetching: false })))
     }
 
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'listen');
         // this.props.currentSongAction();
+        this.setState({queueFetching: this.props.listener.queue && 0 === this.props.listener.queue.length})
+        this.refreshQueue()
         this.queuePolling = setInterval(
             () => {
                 this.refreshQueue();
@@ -50,20 +57,23 @@ class Listener extends React.Component {
     }
 
     render() {
-        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'dashboard');
-        const willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && '' !== this.props.listener.group)
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
+        let willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && '' !== this.props.listener.group)
         return (
             <AppContext.Consumer>
                 {() =>
                     <React.Fragment>
                         <main className="listener-area">
-                            <section className="listener-queue-container">
+                            <Container className="listener-queue-container">
                                 <h2 className="listener-queue-title">Currently Playing</h2>
-                                {this.props.listener.currentSong.title && <CurrentSongCard song={this.props.listener.currentSong}/> }
-                                <SongTable
-                                    songs={this.props.listener.queue}
-                                    headers={['', 'title', 'artists', 'album']}/>
-                            </section>
+                                {!this.state.queueFetching ?
+                                    showPlaying(this.props.listener.currentSong, this.props.listener.queue) :
+                                    <Spinner animation="border" variant="primary" />
+                                }
+                            </Container>
+                            <Container>
+                                Chat room coming soon!
+                            </Container>
                         </main>
                         {showDevicesModal(this.props.user, !willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.current_device && this.props.user.isListener )}
                         {showJoinGroupModal(this.findGroup, willOpenGroupModal)}

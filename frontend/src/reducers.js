@@ -14,7 +14,8 @@ import {
 const defaultUser = {
     isLoggedIn: false,
     isController: false,
-    isListener: false
+    isListener: false,
+    mode: '' // Can change this to broadcast, curate or listen...what else? broadcast/curate imply/require isController:true
 }
 
 //Define reducers here
@@ -39,7 +40,8 @@ const defaultController = {
   queue: [],
   group: '',
   searchResults: {tracks: []},
-  listeners: []
+  listeners: [],
+  currentSong: {}
 }
 
 function controller(state=defaultController, action) {
@@ -47,9 +49,12 @@ function controller(state=defaultController, action) {
 //  console.log('state', state)
 //  console.log(action.controller)
   switch (action.type) {
-    // case SEARCH:
+  // case SEARCH
+    case CURRENT_SONG_SUCCESS:
+      return Object.assign({}, state, {...state, currentSong: action.current})
     case REFRESH_QUEUE_CONTROLLER:
       return Object.assign({}, state, action.actor)
+    case CHECK_LOGGED_IN:
     case START_CONTROLLER:
       return Object.assign({}, state, action.controller)
     default:
@@ -70,9 +75,9 @@ function listener(state=defaultListener, action) {
   switch (action.type) {
     case CURRENT_SONG_SUCCESS:
       return Object.assign({}, state, {...state, currentSong: action.current})
-    case CHECK_LOGGED_IN:
     case REFRESH_QUEUE_LISTENER:
       return Object.assign({}, state, action.actor)
+    case CHECK_LOGGED_IN:
     case START_LISTENER:
       return Object.assign({}, state, action.listener)
     default:
@@ -91,11 +96,6 @@ function createReducer(initialState, handlers) {
     }
   }
 }
-
-// const userReducer = createReducer({}, {
-//   user,
-//   controller
-// })
 
 const playmakerApp = combineReducers({
   user,

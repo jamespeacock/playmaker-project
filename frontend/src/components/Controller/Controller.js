@@ -5,7 +5,7 @@ import SongTable from '../shared/SongTable'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
 import {updateMode, refreshQueue, startController, editQueue, nextSong} from "../../actions/actions";
-import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
+import {handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -13,6 +13,7 @@ import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import SongsInterface from "../../api/SongsInterface";
+import Spinner from "react-bootstrap/Spinner";
 
 
 const uuid = require('uuid/v4')
@@ -26,7 +27,7 @@ class Controller extends React.Component {
             searchResults: {'tracks':[]},
             recommendationResults: [],
             query: '',
-            mode: 'brodcast',
+            mode: this.props.location.mode,
             searchFetching: false,
             queueFetching: false,
         }
@@ -41,13 +42,23 @@ class Controller extends React.Component {
         
     }
 
-    createGroup = async () => {
-        this.props.dispatch(startController(this.refreshQueue))
+    createGroup = async ( mode ) => {
+        //TODO figure out style for handling constants
+        this.props.dispatch(startController(mode, 'curate' === mode ? this.refreshQueue : null))
+    }
+
+    async kickoffPoll () {
+        this.queuePolling = setInterval(
+            () => {
+                this.refreshQueue();
+            },
+            50000);
     }
 
     async changeMode( ) {
         if ('broadcast' === this.state.mode) {
             this.setState({mode: 'curate'});
+            this.kickoffPoll();
         } else {
             this.setState({mode: 'broadcast'})
         }
@@ -58,19 +69,14 @@ class Controller extends React.Component {
       this.props.dispatch(nextSong(()=>this.setState({queueFetching:false})))
     }
 
-    handleSeek( position ) {
-        // this.controller.seek(position)
-    }
-
     componentDidMount() {
         if (this.props.user.isLoggedIn) {
-            this.createGroup();
+            this.createGroup(this.state.mode);
         }
     }
 
     search = async ( q ) => {
         this.setState({ searchFetching: true })
-        //dispatch update search results
         const searchResults = await this.songsInterface.search(q)
         if (q === this.waitingFor) {
             this.setState({searchResults})
@@ -84,7 +90,7 @@ class Controller extends React.Component {
                 this.waitingFor = this.state.q;
                 this.searchThrottled(this.state.q)
             }
-        } )
+        })
     }
 
     SearchBar = () => {
@@ -113,17 +119,17 @@ class Controller extends React.Component {
     }
 
     refreshQueue = async ( ) => {
-        this.setState({queueFetching: true})
+        this.setState({queueFetching: 0 === this.props.controller.queue.length})
         this.props.dispatch(refreshQueue('controller', () => this.setState({queueFetching: false})))
     }
 
     addToQueueHandler = async (songUri) => {
-        this.setState({queueFetching: true})
+        this.setState({queueFetching: 0 === this.props.controller.queue.length})
         this.props.dispatch(editQueue(songUri, ()=>this.setState({queueFetching:false})))
     }
 
     removeFromQueueHandler = async (uri, position) => {
-        this.setState({queueFetching: true})
+        this.setState({queueFetching: 0 === this.props.controller.queue.length})
         this.props.dispatch(editQueue(uri,()=>this.setState({queueFetching:false}), position, true))
     }
 
@@ -133,12 +139,16 @@ class Controller extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
+        this.kickoffPoll();
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.queuePolling);
     }
 
     render() {
-        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'dashboard');
-        const searchHeaders = ['', 'title', 'artists', 'album', 'Add']
-        const queueHeaders = ['', 'title', 'artists', 'album', 'Remove']
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force logout
+
 
         return (
             <React.Fragment>
@@ -152,25 +162,26 @@ class Controller extends React.Component {
                 <main className="main-area">
                     <Container className="col-container">
                         <Row>
+                            {'curate' === this.state.mode &&
                             <Col className="search-container">
                                 <h2>Search Results</h2>
                                 {this.SearchBar()}
-                                <SongTable
-                                    songs={this.state.searchResults.tracks}
-                                    handleAction={this.addToQueueHandler}
-                                    actionName={'Add'}
-                                    header={searchHeaders}
-                                    fetching={this.state.searchFetching}/>
+                                {!this.state.searchFetching ? <SongTable
+                                        songs={this.state.searchResults.tracks}
+                                        handleAction={this.addToQueueHandler}
+                                        actionName={'Add'}
+                                    /> :
+                                    <Spinner animation="border" variant="primary"/>
+                                }
                             </Col>
+                            }
                             <Col className="controller-queue-container">
-                                <h2>Current Queue</h2>
-                                <SongTable
-                                songs={this.props.controller.queue}
-                                handleAction={this.removeFromQueueHandler}
-                                actionName={'Remove'}
-                                header={queueHeaders}
-                                fetching={this.state.queueFetching}/>
-                                <Row>
+                                {showPlaying(
+                                    this.props.controller.currentSong,
+                                    this.props.controller.queue,
+                                    this.removeFromQueueHandler,
+                                    'Remove')}
+                                {this.props.controller.queue.length > 0 &&
                                     <Col className="button-col">
                                         <Button
                                             key={uuid()}
@@ -179,14 +190,13 @@ class Controller extends React.Component {
                                             NEXT
                                         </Button>
                                     </Col>
-                                </Row>
+                                }
                             </Col>
-
-
                         </Row>
-
                     </Container>
-
+                    <Container>
+                        Live chat feed coming soon!
+                    </Container>
                 </main>
             </React.Fragment>
         )

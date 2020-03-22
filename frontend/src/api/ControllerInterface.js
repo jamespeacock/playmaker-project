@@ -20,8 +20,8 @@ export default class ControllerInterface  {
       )
   }
 
-  start = async () => {
-    return await this.apiInterface.get('controller/start')
+  start = async ( mode ) => {
+    return await this.apiInterface.get('controller/start?mode=' + mode)
   }
 
  /* Get Current Room Queue */

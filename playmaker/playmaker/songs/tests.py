@@ -6,7 +6,7 @@ from playmaker.songs.serializers import SongSerializer
 
 # tests for views
 
-
+# Example View Tests TODO implement more
 class BaseViewTest(APITestCase):
     client = APIClient()
 

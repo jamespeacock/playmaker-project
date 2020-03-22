@@ -33,24 +33,29 @@ class Queue(models.Model):
     next_pos = models.IntegerField(default=0, blank=False, null=False)
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
-    def currently_playing(self, detail=False):
+    def currently_playing(self, detail=False, refresh=False):
         logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
-        # TODO need to lock around this to prevent multiple updates
-        sp_client =  self.controller.me.sp
-        controller_current_song =sp_client.currently_playing()
-        controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
-        if not controller_song_uri:
-            return None
-        if not self.current_song or self.current_song != controller_song_uri:
-            self.current_song = controller_song_uri # from _obj or whatever
-            # self.current_song_detail = fetch_songs(self.controller, self.current_song, save=True)
-            self.save()
-         # TODO End lock here
+        sp_client = self.controller.me.sp
+        refresh = refresh or self.current_song is None
+        controller_current_song = None
+        if refresh:
+            # TODO need to lock around this to prevent multiple updates
+            controller_current_song = sp_client.currently_playing()
+            controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
+            if not controller_song_uri:
+                return None
+            if not self.current_song or self.current_song != controller_song_uri:
+                self.current_song = controller_song_uri
+                self.save()
+            # TODO End lock here
         if detail:
-            details = sp_client.audio_features(tracks=[controller_current_song['item']['uri']])
-            song_detailed = Song.from_sp(details=details, **controller_current_song['item'])
-            song_detailed.position_ms = controller_current_song['progress_ms']
-            return SongSerializer(song_detailed).data
+            controller_current_song = controller_current_song or sp_client.currently_playing()
+            if not controller_current_song:
+                return None
+            # details = sp_client.audio_features(tracks=[controller_current_song['item']['uri']])
+            controller_current_song['item']['position_ms'] =  controller_current_song['progress_ms']
+            return SongSerializer(controller_current_song['item']).data#SPModel.from_response([controller_current_song], Song, serializer=SongSerializer)
+
         return self.current_song
 
     def current_offset(self):
@@ -71,16 +76,24 @@ class SongInQueue(models.Model):
 
 class Group(models.Model):
     controller = models.OneToOneField(Controller, on_delete=models.CASCADE)
+    # TODO save tracks played
 
     @property
     def queue(self):
         return self.controller.queue
 
-    def current_song(self, detail=False):
-        return self.queue.currently_playing(detail=detail)
+    def current_song(self, detail=False, refresh=False):
+        return self.queue.currently_playing(detail, refresh)
 
     def current_offset(self):
         return self.queue.current_offset()
+
+    def suggest_next_songs(self):
+        return
+
+    def play_suggested_song(self):
+        return
+
 
 
 class Listener(models.Model):
@@ -154,6 +167,7 @@ class Listener(models.Model):
                     Device.from_sp(save=True, **d)
                     return True
 
+        logging.log(logging.ERROR, "Selected device %s was not found for requesting user." % device_id)
         return False
 
     def current_song(self):

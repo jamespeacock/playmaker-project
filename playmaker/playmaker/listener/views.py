@@ -8,7 +8,8 @@ from rest_framework.generics import RetrieveAPIView
 from playmaker.controller.contants import DEVICE
 from playmaker.controller.models import Listener, Group, Controller
 from playmaker.controller.serializers import DeviceSerializer
-from playmaker.login.services import get_redirect
+from playmaker.controller.services import stop_polling
+from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.views import SecureAPIView
 
 SP_USER = 'spotify:user:'
@@ -42,11 +43,12 @@ class StartListeningView(SecureAPIView):
             return JsonResponse("Group with indicator %s does not exist" % str(group_id), status=404, safe=False)
 
         try:
-            Listener.objects.get_or_create(me=request.user, group=group)
-            if getattr(request.user, 'controller', None):
+            user = request.user
+            Listener.objects.get_or_create(me=user, group=group)
+            if getattr(user, 'controller', None):
                 logging.log(logging.INFO, "Removing controller now that user wants to be a listener.")
-                Controller.objects.get(me=request.user).delete()
-                # TODO how to notify listeners. Text message?
+                stop_polling(user)
+                Controller.objects.get(me=user).delete()
         except IntegrityError as e:
             logging.log(logging.INFO, "Mismatch for user/group/listener")
             return JsonResponse("Mismatch for user/group/listener", safe=False)
@@ -73,29 +75,26 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         super(DevicesView, self).post(request)
-        actor = request.user.actor
+        user = request.user
+        actor = user.actor
         assert isinstance(actor, Listener)
         device_id = request.data.get(DEVICE)
         if actor.set_device(device_id):
-            current_group_song = actor.group.current_song()
-            if not current_group_song:
-                logging.log(logging.ERROR, "Group %s does not have a current song." % str(actor.group.id))
-                #TODO pick random song out of group's listening habits!
-            elif current_group_song != actor.current_song():
-                actor.me.sp.start_playback(actor.active_device.sp_id, uris=[actor.group.current_song()])
-                actor.me.sp.seek_track(actor.group.current_offset())
-            return JsonResponse({"currentSong": actor.group.current_song(detail=True)})
-        return JsonResponse("Failed", safe=False, status=500)
+            currentSong = checkPlaySeek(actor, user.is_listener)
+            return JsonResponse({"currentSong": currentSong})
+        return JsonResponse({"error": "Selected device %s was not found for requesting user." % device_id})
 
 
 class ListenView(SecureAPIView, RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
-        currentSongView = request.user.listener.group.current_song(detail=True)
+        currentSongView = request.user.actor.group.current_song(detail=True)
         return JsonResponse({"currentSong": currentSongView})
 
 
-class GetQueueView(SecureAPIView, RetrieveAPIView):
-
-    def get(self, request, *args, **kwargs):
-        return JsonResponse(request.user.listener.group.queue)
+# class GetQueueView(SecureAPIView, RetrieveAPIView):
+#
+#     def get(self, request, *args, **kwargs):
+#         listener = request.user.listener
+#         currentSong = checkPlaySeek(listener)
+#         return JsonResponse({"currentSong": currentSong, "queue": listener.group.queue}, safe=False)

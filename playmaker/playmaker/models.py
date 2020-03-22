@@ -27,6 +27,7 @@ class User(auth_models.AbstractUser):
     sp_username = models.CharField(max_length=256, null=True, blank=True)
     is_listener = models.BooleanField(default=False)
     is_controller = models.BooleanField(default=False)
+    shouldPoll = models.BooleanField(default=False)
     _sp_cached = None
 
     # make @memoized maybe

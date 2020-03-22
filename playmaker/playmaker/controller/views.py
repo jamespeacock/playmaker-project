@@ -1,11 +1,12 @@
 import logging
-from collections import defaultdict
 from django.http import JsonResponse
 from playmaker.controller import services
-from playmaker.controller.contants import URIS, ADD, REMOVE, URI, START, STOP
-from playmaker.controller.models import Controller, Group, Queue, Listener
+from playmaker.controller.contants import URIS, ADD, REMOVE, START, STOP
+from playmaker.controller.models import Listener
 from playmaker.controller.serializers import QueueActionSerializer
-from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_group
+from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_group, \
+    perform_action_for_listeners
+from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.utils import make_iterable
 from playmaker.controller.visitors import Action
 from playmaker.shared.views import SecureAPIView
@@ -22,7 +23,6 @@ class ControllerView(SecureAPIView):
 
 
 # Create a group
-
 class StartGroupView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
@@ -31,10 +31,12 @@ class StartGroupView(SecureAPIView):
         if getattr(user, 'listener', None):
             logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
             Listener.objects.get(me=user).delete()
-        group_id, controller_id = create_controller_and_group(user)
+        mode = request.GET.get('mode', '')
+        group_id, controller_id = create_controller_and_group(user, mode)
 
-        started = start_polling(user)
-        return JsonResponse({"group": group_id, "controller": controller_id, "started": started})
+        start_polling(user)
+        currentSong = user.actor.queue.currently_playing(detail=True) if mode == 'broadcast' else {}
+        return JsonResponse({"group": group_id, "controller": controller_id, "currentSong": currentSong})
 
 
 # Play song for current listeners
@@ -46,33 +48,11 @@ class PlaySongView(ControllerView):
         params = self.get_params(request.query_params)
 
         if not params.get(URIS):
-            return
-
+            return JsonResponse({"error": "Did not provide URIs to play."})
         actor = request.user.actor
-        failed_results = [r for r in services.perform_action(
-            actor,
-            Action.PLAY,
-            uris=make_iterable(params.get(URIS))) if r]
+        success = perform_action_for_listeners(actor, Action.PLAY, uris=params.get(URIS))
 
-        if failed_results:
-            return JsonResponse({"status": []})
-
-        return JsonResponse({"status": "Success."})
-
-
-class PauseSongView(ControllerView):
-
-    def get(self, request, *args, **kwargs):
-        super(PauseSongView, self).get(request)
-        actor = request.user.actor
-        failed_results = [r for r in services.perform_action(
-            actor,
-            Action.PAUSE) if r]
-
-        if failed_results:
-            return JsonResponse({"status": "Meh."})
-
-        return JsonResponse({"status": "Success."})
+        return JsonResponse({"status": success})
 
 
 class NextSongView(ControllerView):
@@ -82,37 +62,24 @@ class NextSongView(ControllerView):
         actor = request.user.actor
         next_song = next_in_queue(actor.queue)
         if next_song:
-            failed_results = [r for r in services.perform_action(
-                actor,
-                Action.PLAY,
-                uris=[next_song.uri]) if r]
+            success = perform_action_for_listeners(actor, Action.PLAY,uris=[next_song.uri])
         else:
-            return JsonResponse("No songs remain in the queue.", safe=False)
+            songs = actor.group.suggest_next_songs()
+            return JsonResponse({"suggested": songs, "success": False}, safe=False)
 
-        if failed_results:
-            return JsonResponse({"status": failed_results})
-
-        return JsonResponse({"status": "Success."})
+        return JsonResponse({"status": success})
 
 
 class SeekSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
-        not_authed_resp = super(SeekSongView, self).get(request)
-        if not_authed_resp:
-            return not_authed_resp
+        super(SeekSongView, self).get(request)
         pos = request.query_params.get('position', None)
         if pos:
             actor = request.user.actor
-            failed_results = [r for r in services.perform_action(
-                actor,
-                Action.SEEK,
-                position_ms=pos) if r]
-
-            if failed_results:
-                return JsonResponse({"status": failed_results})
-
-        return JsonResponse({"status": "Success."})
+            success = perform_action_for_listeners(actor, Action.SEEK, position_ms=pos)
+            return JsonResponse({"status": success})
+        return JsonResponse({"error": "Missing 'position' parameter."})
 
 
 class QueueActionView(ControllerView):
@@ -125,12 +92,11 @@ class QueueActionView(ControllerView):
     """
     def get(self, request, *args, **kwargs):
         super(QueueActionView, self).get(request)
-        actor = request.user.actor
+        user = request.user
+        actor = user.actor
         songs = services.get_queue(actor)
         # post filter songs to make sure each song has just one position
-
-        currentSong = actor.queue.currently_playing()
-
+        currentSong = checkPlaySeek(actor, user.is_listener)
         return JsonResponse({"currentSong": currentSong, "queue": songs}, safe=False)
 
     """
@@ -149,8 +115,8 @@ class QueueActionView(ControllerView):
             success = services.remove_from_queue(user.uuid, body.get(URIS), body.get('positions'))
 
         songs = services.get_queue(actor)
-        currentSong = actor.queue.currently_playing()
-        return JsonResponse({"success": success, "currentSong": currentSong, "queue": songs}, safe=False)
+        current_song = actor.queue.currently_playing()
+        return JsonResponse({"success": success, "currentSong": current_song, "queue": songs}, safe=False)
 
 
 class PollView(ControllerView):
@@ -161,7 +127,10 @@ class PollView(ControllerView):
         try:
             if action == START:
                 # kicks off thread that will poll until song changes and then
-                started = start_polling(request.user)
+                user = request.user
+                user.shouldPoll = True
+                # user.save()
+                started = start_polling(user)
                 return JsonResponse({"started": started})
             elif action == STOP:
                 stopped = stop_polling()
@@ -170,13 +139,13 @@ class PollView(ControllerView):
             logging.log(logging.ERROR, e)
             return JsonResponse(str(e), status=500, safe=False)
 
+
 # Listener/Group Data Section
-
-
 class GroupTastesView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
         pass
+
 # Fetch Playlists
 
 # Fetch Recommendations

@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from playmaker.controller.models import Listener, Group
-from playmaker.controller.services import create_controller_and_group, perform_action
+from playmaker.controller.services import create_controller_and_group, perform_action_for_listeners
 from playmaker.controller.visitors import Action
 from playmaker.models import User
 
@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         u, _ = User.objects.get_or_create(username=USERNAME)
-        g_id, c_id = create_controller_and_group(u)
+        g_id, c_id = create_controller_and_group(u, 'broadcast')
         print("Created group number: " + str(g_id))
 
         users = options['users'] or []
@@ -29,13 +29,8 @@ class Command(BaseCommand):
 
         for song_uri in SONG_URIS:
             input("Press Enter to play next song!")
-            failed_results = [r for r in perform_action(
-                u,
-                Action.PLAY,
-                uris=[song_uri]) if r]
-            if failed_results:
-                print("Failed to play for all users in group!")
-                print(failed_results)
+            success = perform_action_for_listeners(u.actor, Action.PLAY, uris=[song_uri])
+            print(success)
         # for poll_id in options['poll_ids']:
         #     try:
         #         poll = Poll.objects.get(pk=poll_id)

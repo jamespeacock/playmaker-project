@@ -1,6 +1,10 @@
 import ShowDevicesModal from "./Devices";
 import React, {useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
+import CurrentSongCard from "./SongCards";
+import SongTable from "./SongTable";
+import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
     if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {
@@ -29,6 +33,43 @@ const showJoinGroupModal = (findGroup, show) => {
                             findGroup={findGroup}/>)
 
 };
+
+const showPlaying = (currentSong, queue, handleAction=null, actionName='') => {
+        return (
+            <div>
+                <h2>Now Playing</h2>
+                <CurrentSongCard song={currentSong}/>
+                {queue.length > 0 && <h2>Up Next</h2> }
+                <SongTable
+                    songs={queue}
+                    handleAction={handleAction}
+                    actionName={actionName}/>
+            </div>
+        )
+}
+
+// class PlayingScene extends React.Component {
+//     constructor(currentSong, queue) {
+//         super()
+//     }
+//
+//     render() {
+//         if (currentSong) {
+//             return (
+//                 <div>
+//                     <CurrentSongCard song={currentSong}/>
+//                     <SongTable songs={queue}/>)
+//                 </div>
+//             )
+//         } else {
+//             //TODO Prompt to join another room
+//             return (<Card>
+//                 <Card.Text>This room does not have any songs playing right now.</Card.Text>
+//             </Card>)
+//         }
+//
+//     }
+// }
 
 function ShowJoinGroupModal(props) {
     const [modalShow, setModalShow] = React.useState(props.show);
@@ -100,6 +141,7 @@ export {
     showSubmitReportProblem,
     showDevicesModal,
     showJoinGroupModal,
+    showPlaying,
     handleRedirectsIfNotLoggedInOrAuthed
 }
 

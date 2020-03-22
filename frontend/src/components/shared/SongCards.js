@@ -12,17 +12,17 @@ class CurrentSongCard extends React.Component {
   constructor (props) {
     super(props)
     console.log('CurrentSongCard', this.props)
-    if (this.props.song.title) {
-      this.doRender = true
-      this.title = this.props.song.title
-      this.artists = this.props.song.artists.map((a) => (a.name)).join()
-      this.album = this.props.song.album && this.props.song.album.name
-      this.imageSrc = this.props.song.album.images[0].url
-    }
-
   }
 
   render() {
+    if (this.props.song.name) {
+      this.doRender = true
+      this.title = this.props.song.name
+      this.artists = this.props.song.artists.map((a) => (a.name)).join()
+      this.album = this.props.song.album && this.props.song.album.name
+      this.imageSrc = this.props.song.album.images[0].url
+      console.log(this.imageSrc)
+    }
     if (this.doRender) {
         return (<Card bg="primary" className="text-center" style={{ width: '18rem' }}>
           <Card.Body>
@@ -37,15 +37,22 @@ class CurrentSongCard extends React.Component {
           </Card.Body>
         </Card>)
     } else {
-        return (<div></div>)
+      return (
+          <Card.Body>
+            <Card.Text className="text-muted">
+              This room does not have any songs playing right now.
+            </Card.Text>
+          </Card.Body>
+      )
     }
   }
 }
 
 const mapStateToProps = state => ({
-    currentSong: state.listener.currentSong
+    // currentSong: state.listener.currentSong
 });
 const mapDispatchToProps = {};
-export default withSongPolling(getCurrentSong)(
-    connect(mapStateToProps, mapDispatchToProps)(CurrentSongCard)
-  );
+export default CurrentSongCard
+// export default withSongPolling(getCurrentSong)(
+//     connect(mapStateToProps, mapDispatchToProps)(CurrentSongCard)
+//   );

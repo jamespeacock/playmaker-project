@@ -36,7 +36,8 @@ export default class SongTable extends React.Component {
     }
 
     renderTableHeader() {
-        return this.props.header.map((key, index) => {
+        let header = ['', 'title', 'artists', 'album', '']
+        return header.map((key, index) => {
             return <th className="text-center" key={index}>{key.toUpperCase()}</th>
         })
     }
@@ -44,8 +45,6 @@ export default class SongTable extends React.Component {
     render() {
         if (this.props.songs.length === 0) {
             return (<div></div>)
-        } else if (this.props.fetching) {
-            return (<Spinner animation="border" variant="primary" />)
         }
         return (
             <div>
