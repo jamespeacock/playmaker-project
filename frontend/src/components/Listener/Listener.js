@@ -21,18 +21,8 @@ class Listener extends React.Component {
         }
     }
 
-
     findGroup = async (group) => {
-        //TODO should I refactor to have api call in action?
-        // dispatch(startListener(group))
-        const resp = await new ListenerInterface({}).joinGroup(group)
-        if (resp && resp.group) {
-            const action = startListener(resp)
-            this.props.dispatch(action)
-            return true
-        } else {
-            return false
-        }
+        this.props.dispatch(startListener(group))
     }
 
     refreshQueue = async () => {
@@ -44,12 +34,14 @@ class Listener extends React.Component {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'listen');
         // this.props.currentSongAction();
         this.setState({queueFetching: this.props.listener.queue && 0 === this.props.listener.queue.length})
-        this.refreshQueue()
-        this.queuePolling = setInterval(
-            () => {
-                this.refreshQueue();
-            },
-            50000);
+        if (this.props.listener.group) {
+            this.findGroup(this.props.listener.group);
+            this.queuePolling = setInterval(
+                () => {
+                    this.refreshQueue();
+                },
+                5000);
+        }
     }
 
     componentWillUnmount() {
@@ -59,13 +51,15 @@ class Listener extends React.Component {
     render() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
         let willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && '' !== this.props.listener.group)
+        let willOpenDevicesModal = (!willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.active_device)
+        console.log(!this.props.user.active_device)
+        console.log(this.props.user.active_device)
         return (
             <AppContext.Consumer>
                 {() =>
                     <React.Fragment>
                         <main className="listener-area">
                             <Container className="listener-queue-container">
-                                <h2 className="listener-queue-title">Currently Playing</h2>
                                 {!this.state.queueFetching ?
                                     showPlaying(this.props.listener.currentSong, this.props.listener.queue) :
                                     <Spinner animation="border" variant="primary" />
@@ -75,7 +69,7 @@ class Listener extends React.Component {
                                 Chat room coming soon!
                             </Container>
                         </main>
-                        {showDevicesModal(this.props.user, !willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.active_device )}
+                        {showDevicesModal(this.props.user, willOpenDevicesModal )}
                         {showJoinGroupModal(this.findGroup, willOpenGroupModal)}
                     </React.Fragment>
                 }

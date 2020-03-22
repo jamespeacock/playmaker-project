@@ -1,6 +1,7 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
 import {Button, Container, Row, Col} from 'react-bootstrap'
+import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 
 
 
@@ -24,6 +25,7 @@ class Dashboard extends React.Component {
     }
 
     render() {
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
         return (
           <React.Fragment>
                   <Container fluid>

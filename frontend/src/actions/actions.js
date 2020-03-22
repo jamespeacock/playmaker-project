@@ -114,11 +114,6 @@ function refreshQueue( user , signalDone) {
         currentSong: resp.currentSong ? resp.currentSong : {},
         queue: resp.queue ? resp.queue : []
       }
-    } else {
-      action.actor = {
-        currentSong: {},
-        queue: []
-      }
     }
     dispatch(action)
     signalDone()
@@ -161,22 +156,19 @@ function startController( mode, callback ) {
   }
 }
 
-function startListener(listener) {
+function startListener(group) {
   return async (dispatch, getState) => {
-    const actionUser = {
-      type: START_LISTENER,
-      user: {
+    const resp = await new ListenerInterface({}).joinGroup(group)
+    let action = {type: START_LISTENER}
+    if (resp && resp.group) {
+      action.listener = resp
+    }
+    action.user = {
         isLoggedIn: true,
         isListener: true,
         isController: false
       }
-    }
-    const actionListener = {
-      type: START_LISTENER,
-      listener
-    }
-    dispatch(actionListener)
-    dispatch(actionUser)
+    dispatch(action)
   }
 }
 

@@ -8,7 +8,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('playmaker', '0009_user_shouldpoll'),
+        ('playmaker', '0008_auto_20191026_1916'),
     ]
 
     operations = [

@@ -8,7 +8,7 @@ from rest_framework.generics import RetrieveAPIView
 from playmaker.controller.contants import DEVICE
 from playmaker.controller.models import Listener, Group, Controller
 from playmaker.serializers import DeviceSerializer, UserSerializer
-from playmaker.controller.services import stop_polling
+from playmaker.controller.services import stop_polling, get_queue
 from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.views import SecureAPIView
 
@@ -57,7 +57,8 @@ class StartListeningView(SecureAPIView):
         # Send back current queue, other listeners, etc.
         return JsonResponse({"group": group_id,
                              "songs": [],
-                             "currentSong": group.current_song(detail=True)
+                             "currentSong": checkPlaySeek(user),
+                             "queue": get_queue(user.actor)
                              })
 
 
@@ -69,7 +70,8 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         super(DevicesView, self).get(request)
         user = request.user
-        ser = self.get_serializer_class()
+        if not user.devices.first():
+            user.get_devices()
 
         return JsonResponse(UserSerializer(user).data, safe=False)
 

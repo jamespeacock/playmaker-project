@@ -21,6 +21,7 @@ export default class ControllerInterface  {
   }
 
   start = async ( mode ) => {
+    // await this.apiInterface.get('controller/poll/stop')
     return await this.apiInterface.get('controller/start?mode=' + mode)
   }
 
@@ -48,7 +49,7 @@ export default class ControllerInterface  {
 
   play = async ( uri ) => {
     return await this.apiInterface.get(
-      'controller/play?controller={0}&uris={1}'.format(this.controller, uri)
+      'controller/play?uris=' + uri
       )
   }
 
@@ -62,6 +63,7 @@ export default class ControllerInterface  {
   recs = async ( ) => {
     return await this.apiInterface.get('controller/recs')
   }
+
 
 
 }

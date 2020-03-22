@@ -6,8 +6,8 @@ from playmaker.controller.models import Listener
 from playmaker.controller.serializers import QueueActionSerializer
 from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_group, \
     perform_action_for_listeners
-from playmaker.listener.services import checkPlaySeek
 from playmaker.controller.visitors import Action
+from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.views import SecureAPIView
 
 
@@ -33,9 +33,10 @@ class StartGroupView(SecureAPIView):
         mode = request.GET.get('mode', '')
         group_id, controller_id = create_controller_and_group(user, mode)
 
-        start_polling(user)
-        currentSong = user.actor.queue.currently_playing(detail=True, refresh=True) if mode == 'broadcast' else {}
-        return JsonResponse({"group": group_id, "controller": controller_id, "currentSong": currentSong})
+        if not user.hasActivePoller:
+            start_polling(user)
+        current_song = user.actor.queue.currently_playing(detail=True) if mode == 'broadcast' else {}
+        return JsonResponse({"group": group_id, "controller": controller_id, "currentSong": current_song or {}})
 
 
 # Play song for current listeners
@@ -58,10 +59,14 @@ class NextSongView(ControllerView):
 
     def get(self, request, *args, **kwargs):
         super(NextSongView, self).get(request)
-        actor = request.user.actor
+        user = request.user
+        actor = user.actor
         next_song = next_in_queue(actor.queue)
         if next_song:
+            user.play_song(next_song)
             success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song])
+            success = stop_polling(user) and success
+            success = start_polling(user) and success
         else:
             songs = actor.group.suggest_next_songs()
             return JsonResponse({"suggested": songs, "success": False}, safe=False)
@@ -94,8 +99,11 @@ class QueueActionView(ControllerView):
         user = request.user
         actor = user.actor
         songs = services.get_queue(actor)
-        current_song = checkPlaySeek(user)
-        return JsonResponse({"currentSong": current_song, "queue": songs}, safe=False)
+        current_song = checkPlaySeek(user) # Redundant check to make sure song showing up on UI is actually playing too.
+        if current_song:
+            return JsonResponse({"currentSong": current_song, "queue": songs}, safe=False)
+        return JsonResponse({"error": "There is a problem with the queue/group. Most likely it has been closed."},
+                            status=404, safe=False)
 
     """
     Performs specified action on current queue for current room/group/controller.
@@ -113,7 +121,7 @@ class QueueActionView(ControllerView):
             success = services.remove_from_queue(user.uuid, body.get(URIS), body.get('positions'))
 
         songs = services.get_queue(actor)
-        current_song = actor.queue.currently_playing()
+        current_song = actor.queue.currently_playing(detail=True)
         return JsonResponse({"success": success, "currentSong": current_song, "queue": songs}, safe=False)
 
 
@@ -123,15 +131,12 @@ class PollView(ControllerView):
     def get(self, request, action=None, *args, **kwargs):
         super(PollView, self).get(request)
         try:
+            user = request.user
             if action == START:
-                # kicks off thread that will poll until song changes and then
-                user = request.user
-                user.shouldPoll = True
-                # user.save()
                 started = start_polling(user)
                 return JsonResponse({"started": started})
             elif action == STOP:
-                stopped = stop_polling()
+                stopped = stop_polling(user)
                 return JsonResponse({"stopped": stopped})
         except Exception as e:
             logging.log(logging.ERROR, e)

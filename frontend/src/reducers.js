@@ -15,7 +15,8 @@ const defaultUser = {
     isLoggedIn: false,
     isController: false,
     isListener: false,
-    mode: '' // Can change this to broadcast, curate or listen...what else? broadcast/curate imply/require isController:true
+    mode: '', // Can change this to broadcast, curate or listen...what else? broadcast/curate imply/require isController:true
+    active_device: {}
 }
 
 //Define reducers here

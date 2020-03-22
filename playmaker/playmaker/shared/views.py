@@ -1,3 +1,5 @@
+import time
+
 from rest_framework import generics
 
 from playmaker.models import User
@@ -20,10 +22,16 @@ class SecureAPIView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         # This check if only true if the user has a valid token and is therefore not an AnonymousUser
-        if not isinstance(request.user, User):
+        user = request.user
+        if not isinstance(user, User):
             raise NotLoggedInException
+        user.last_action = time.time()
+        # user.save() How expensive is this ?  Will later calls to save handle it
 
     def post(self, request, *args, **kwargs):
         # This check if only true if the user has a valid token and is therefore not an AnonymousUser
-        if not isinstance(request.user, User):
+        user = request.user
+        if not isinstance(user, User):
             raise NotLoggedInException
+        user.last_action = time.time()
+        # user.save() How expensive is this ?  Will later calls to save handle it

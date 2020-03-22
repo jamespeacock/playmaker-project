@@ -2,7 +2,7 @@ import logging
 
 from django.db import models
 
-from api.settings import DEFAULT_MS_ADDITION
+from api.settings import DEFAULT_MS_ADDITION, TURN_OFF_IDLE_CONTROLLERS
 from playmaker.controller.visitors import ActionVisitor
 from playmaker.models import User
 from playmaker.songs.models import Song
@@ -21,32 +21,30 @@ class Controller(models.Model):
         return Listener.objects.filter(group=self.group).all()
 
 
-
 class Queue(models.Model):
     songs = models.ManyToManyField(Song, through='SongInQueue')
     current_song = models.CharField(max_length=256, null=True)
     next_pos = models.IntegerField(default=0, blank=False, null=False)
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
-    def currently_playing(self, detail=False, refresh=False):
+    def currently_playing(self, detail=False):
         logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
         sp_client = self.controller.me.sp
-        refresh = refresh or self.current_song is None
-        controller_current_song = None
-        if refresh:
-            # TODO need to lock around this to prevent multiple updates
-            controller_current_song = sp_client.currently_playing()
-            controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
-            if not controller_song_uri:
-                return None
-            if not self.current_song or self.current_song != controller_song_uri:
-                self.current_song = controller_song_uri
-                self.save()
-            # TODO End lock here
+        # TODO need to lock around this to prevent multiple updates
+        controller_current_song = sp_client.currently_playing()
+        controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
+        if not controller_song_uri:
+            logging.log(logging.ERROR, "No currently playing song for controller.")
+            if not self.controller.me.active and TURN_OFF_IDLE_CONTROLLERS:
+                self.controller.delete()
+            return {}
+        if not self.current_song or self.current_song != controller_song_uri:
+            self.current_song = controller_song_uri
+            self.save()
+        # TODO End lock here
         if detail:
-            controller_current_song = controller_current_song or sp_client.currently_playing()
-            if not controller_current_song:
-                return None
+            if not controller_current_song or not controller_current_song['item']:
+                return {}
             # details = sp_client.audio_features(tracks=[controller_current_song['item']['uri']])
             controller_current_song['item']['position_ms'] =  controller_current_song['progress_ms']
             return SongSerializer(controller_current_song['item']).data
@@ -54,7 +52,10 @@ class Queue(models.Model):
         return self.current_song
 
     def current_offset(self):
-        return self.controller.me.sp.currently_playing()['progress_ms'] + DEFAULT_MS_ADDITION
+        song = self.controller.me.sp.currently_playing()
+        if song and song['item']:
+            return song['progress_ms'] + DEFAULT_MS_ADDITION
+        return 0
 
     def contents(self):
         return self.songs.order_by('in_q__position').all()
@@ -77,8 +78,8 @@ class Group(models.Model):
     def queue(self):
         return self.controller.queue
 
-    def current_song(self, detail=False, refresh=False):
-        return self.queue.currently_playing(detail, refresh)
+    def current_song(self, detail=False):
+        return self.queue.currently_playing(detail)
 
     def current_offset(self):
         return self.queue.current_offset()
@@ -87,7 +88,7 @@ class Group(models.Model):
         return
 
     def play_suggested_song(self):
-        return # uri of next song to play
+        return "spotify:track:7fPuWrlpwDcHm5aHCH5D9t"# uri of next song to play
 
 
 class Listener(models.Model):

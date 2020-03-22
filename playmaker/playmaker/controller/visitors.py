@@ -43,7 +43,7 @@ class ActionVisitor(object):
                 #TODO ensure current_playback matches uri in kwargs
             # end here
         except SpotifyException as e:
-            traceback.print_stack()
+            print(traceback.format_exc())
             return {"error": "Error occurred for sp client %s: %s" % (self.username, e)}
 
     @classmethod

@@ -11,7 +11,6 @@ class CurrentSongCard extends React.Component {
   //TODO make this body a SongCard that can be reusable separately from ths polling Card
   constructor (props) {
     super(props)
-    console.log('CurrentSongCard', this.props)
   }
 
   render() {
@@ -21,7 +20,6 @@ class CurrentSongCard extends React.Component {
       this.artists = this.props.song.artists.map((a) => (a.name)).join()
       this.album = this.props.song.album && this.props.song.album.name
       this.imageSrc = this.props.song.album.images[0].url
-      console.log(this.imageSrc)
     }
     if (this.doRender) {
         return (<Card bg="primary" className="text-center" style={{ width: '18rem' }}>
@@ -53,6 +51,7 @@ const mapStateToProps = state => ({
 });
 const mapDispatchToProps = {};
 export default CurrentSongCard
+//Was used for song to poll for itself.
 // export default withSongPolling(getCurrentSong)(
 //     connect(mapStateToProps, mapDispatchToProps)(CurrentSongCard)
 //   );

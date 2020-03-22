@@ -16,8 +16,6 @@ import SongsInterface from "../../api/SongsInterface";
 import Spinner from "react-bootstrap/Spinner";
 
 
-const uuid = require('uuid/v4')
-
 class Controller extends React.Component {
 
     constructor( props ) {
@@ -42,12 +40,12 @@ class Controller extends React.Component {
         this.props.dispatch(startController(mode, 'curate' === mode ? this.refreshQueue : null))
     }
 
-    async kickoffPoll () {
+    kickoffPoll () {
         this.queuePolling = setInterval(
             () => {
                 this.refreshQueue();
             },
-            50000);
+            5000);
     }
 
     async changeMode( ) {
@@ -55,7 +53,8 @@ class Controller extends React.Component {
             this.setState({mode: 'curate'});
             this.kickoffPoll();
         } else {
-            this.setState({mode: 'broadcast'})
+            this.setState({mode: 'broadcast'});
+            this.kickoffPoll();
         }
         this.props.dispatch(updateMode(this.state.mode))
     }
@@ -118,7 +117,7 @@ class Controller extends React.Component {
         this.props.dispatch(refreshQueue('controller', () => this.setState({queueFetching: false})))
     }
 
-    async playSongHandler(uri) {
+    playSongHandler = async (uri)  =>{
         this.props.dispatch(playSong(uri))
     }
 
@@ -138,7 +137,9 @@ class Controller extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
-        this.kickoffPoll();
+        if (this.props.controller.group) {
+            this.kickoffPoll();
+        }
     }
 
     componentWillUnmount() {
@@ -174,21 +175,14 @@ class Controller extends React.Component {
                             </Col>
                             }
                             <Col className="controller-queue-container">
+                                <Row>
                                 {showPlaying(
                                     this.props.controller.currentSong,
                                     this.props.controller.queue,
                                     this.removeFromQueueHandler,
+                                    this.handleNext,
                                     'Remove')}
-                                {this.props.controller.queue.length > 0 &&
-                                    <Col className="button-col">
-                                        <Button
-                                            key={uuid()}
-                                            className="button"
-                                            onClick={this.handleNext}>
-                                            NEXT
-                                        </Button>
-                                    </Col>
-                                }
+                                </Row>
                             </Col>
                         </Row>
                     </Container>
@@ -196,7 +190,7 @@ class Controller extends React.Component {
                         Live chat feed coming soon!
                     </Container>
                 </main>
-                {showDevicesModal(this.props.user, this.props.user.isLoggedIn && !this.props.user.active_device )}
+                {showDevicesModal(this.props.user, 'curate' === this.state.mode && this.props.user.isLoggedIn && !this.props.user.active_device )}
             </React.Fragment>
         )
     }

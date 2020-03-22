@@ -1,4 +1,5 @@
 import logging
+import time
 
 import spotipy
 import uuid as uuid
@@ -8,6 +9,7 @@ from django.utils import timezone as tz
 from django.contrib.auth import models as auth_models
 from django.db import models
 
+from api.settings import DEFAULT_INACTIVE_LEN
 from playmaker.controller.contants import ID, DEVICE, USER
 from playmaker.songs import utils
 from playmaker.login import services as logins
@@ -28,8 +30,14 @@ class User(auth_models.AbstractUser):
     sp_username = models.CharField(max_length=256, null=True, blank=True)
     is_listener = models.BooleanField(default=False)
     is_controller = models.BooleanField(default=False)
-    shouldPoll = models.BooleanField(default=False)
+    hasActivePoller = models.BooleanField(default=False)
+    pollingThread = models.CharField(null=True, max_length=128)
+    last_action = models.FloatField(null=True)
     _sp_cached = None
+
+    @property
+    def active(self):
+        return (time.time() - self.last_action < DEFAULT_INACTIVE_LEN)
 
     # make @memoized maybe
     @property
@@ -76,7 +84,10 @@ class User(auth_models.AbstractUser):
 
     def current_song(self):
         cp = self.sp.currently_playing()
-        return cp['item']['uri'] if cp else None
+        return cp['item']['uri'] if cp and cp['is_playing'] else None
+
+    def play_song(self, uri):
+        self.sp.start_playback(device_id=self.active_device.sp_id, uris=[uri])
 
     @property
     def active_device(self):

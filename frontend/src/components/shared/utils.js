@@ -3,6 +3,7 @@ import React, {useEffect} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import CurrentSongCard from "./SongCards";
 import SongTable from "./SongTable";
+const uuid = require('uuid/v4')
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
     if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {
@@ -32,11 +33,19 @@ const showJoinGroupModal = (findGroup, show) => {
 
 };
 
-const showPlaying = (currentSong, queue, handleAction=null, actionName='') => {
+const showPlaying = (currentSong, queue, handleAction=null, handleSkip, actionName='') => {
         return (
             <div>
                 <h2>Now Playing</h2>
                 <CurrentSongCard song={currentSong}/>
+                {queue.length > 0 &&
+                <Button
+                    key={uuid()}
+                    className="button"
+                    onClick={handleSkip}>
+                    SKIP
+                </Button>
+                }
                 {queue.length > 0 && <h2>Up Next</h2> }
                 <SongTable
                     songs={queue}
