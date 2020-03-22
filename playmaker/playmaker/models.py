@@ -86,6 +86,7 @@ class User(auth_models.AbstractUser):
 
         ad = self.devices.filter(is_active=True).first()
         if ad:
+            # Should there be a check if this is still the active device?
             return ad
 
         sd = self.devices.filter(is_selected=True).first()

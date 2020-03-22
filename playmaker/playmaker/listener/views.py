@@ -7,7 +7,7 @@ from rest_framework.generics import RetrieveAPIView
 
 from playmaker.controller.contants import DEVICE
 from playmaker.controller.models import Listener, Group, Controller
-from playmaker.controller.serializers import DeviceSerializer
+from playmaker.serializers import DeviceSerializer, UserSerializer
 from playmaker.controller.services import stop_polling
 from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.views import SecureAPIView
@@ -71,7 +71,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         user = request.user
         ser = self.get_serializer_class()
 
-        return JsonResponse([ser(d).data for d in user.get_devices()], safe=False)
+        return JsonResponse(UserSerializer(user).data, safe=False)
 
     def post(self, request, *args, **kwargs):
         super(DevicesView, self).post(request)
@@ -79,7 +79,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         device_id = request.data.get(DEVICE)
         if user.set_device(device_id):
             current_song = checkPlaySeek(user)
-            return JsonResponse({"currentSong": current_song})
+            return JsonResponse({"user": UserSerializer(user).data, "current_song": current_song})
         return JsonResponse({"error": "Selected device %s was not found for requesting user." % device_id})
 
 

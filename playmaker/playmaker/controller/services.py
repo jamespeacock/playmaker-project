@@ -123,7 +123,7 @@ def next_in_queue(queue):
 def add_to_queue(uuid, uris):
     actor = User.objects.get(uuid=uuid).actor
     songs = fetch_songs(actor, uris, save=True)
-    songs = Song.objects.filter(uri__in=[s['uri'] for s in songs]).all()
+    # songs = Song.objects.filter(uri__in=[s['uri'] for s in songs]).all()
     next_pos = actor.queue.next_pos
     for s in songs:
         SongInQueue.objects.create(song=s, queue=actor.queue, position=actor.queue.next_pos)

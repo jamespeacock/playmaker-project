@@ -148,7 +148,6 @@ class Controller extends React.Component {
     render() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force logout
 
-
         return (
             <React.Fragment>
                 <Card style={{ width: '18rem' }}>
@@ -167,8 +166,8 @@ class Controller extends React.Component {
                                 {this.SearchBar()}
                                 {!this.state.searchFetching ? <SongTable
                                         songs={this.state.searchResults.tracks}
-                                        handleAction={this.props.controller.currentSong ? this.addToQueueHandler : this.playSongHandler}
-                                        actionName={this.props.controller.currentSong ? 'Add' : 'Play'}
+                                        handleAction={this.props.controller.currentSong.name ? this.addToQueueHandler : this.playSongHandler}
+                                        actionName={this.props.controller.currentSong.name ? 'Add' : 'Play'}
                                     /> :
                                     <Spinner animation="border" variant="primary"/>
                                 }
@@ -197,7 +196,7 @@ class Controller extends React.Component {
                         Live chat feed coming soon!
                     </Container>
                 </main>
-                {showDevicesModal(this.props.user, this.props.user.isLoggedIn && !this.props.user.current_device )}
+                {showDevicesModal(this.props.user, this.props.user.isLoggedIn && !this.props.user.active_device )}
             </React.Fragment>
         )
     }

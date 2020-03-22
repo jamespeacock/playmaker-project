@@ -17,12 +17,6 @@ export const START_LISTENER = 'START_LISTENER'
 function checkLoggedIn(redirect = 'dashboard') {
   return async (dispatch, getState) => {
     const user = await new ApiInterface( {} ).isLoggedIn(redirect)
-    let devices = []
-    let active_device = {};
-    if (user.actor) {
-      devices = user.actor.devices || [];
-      active_device = user.actor.active_device;
-    }
     let action = {
       type:CHECK_LOGGED_IN,
       user: {
@@ -31,8 +25,8 @@ function checkLoggedIn(redirect = 'dashboard') {
         isListener: user.is_listener,
         username: user.username,
         sp_username: user.sp_username,
-        devices: devices,
-        current_device: active_device,
+        devices: user.devices,
+        active_device: user.active_device,
         is_authenticated: user.is_authenticated,
         auth_url: user.auth_url
       }
@@ -50,12 +44,11 @@ function checkLoggedIn(redirect = 'dashboard') {
 function setDevice( deviceRow ) {
   return async (dispatch, getState) => {
     const resp = await new ListenerInterface().setDevice(deviceRow.sp_id)
-    if (resp.current_device) {
+    if (resp) {
       const action = {
         type: SET_CURRENT_DEVICE,
-        user: {
-          current_device: resp.current_device
-        }
+        user: resp.user,
+        currentSong: resp.current_song
       }
       dispatch(action)
     }
@@ -72,12 +65,13 @@ function updateMode( mode ) {
 
 function refreshDevices( ) {
   return async (dispatch, getState) => {
-    const devices = await new ListenerInterface().devices()
-    if (devices) {
+    const resp = await new ListenerInterface().devices()
+    if (resp) {
       const action = {
         type: REFRESH_DEVICES,
         user: {
-          devices
+          devices: resp.devices,
+          active_device: resp.active_device
         }
       }
     dispatch(action)
@@ -96,8 +90,8 @@ function editQueue( songUri, signalDone, position=null, toRemove=false) {
     }
     if (resp && resp.success) {
       action.actor = {
-        currentSong: resp.currentSong,
-        queue: resp.queue
+        currentSong: resp.currentSong ? resp.currentSong : {},
+        queue: resp.queue ? resp.queue : []
       }
       dispatch(action)
     } else {
@@ -117,8 +111,8 @@ function refreshQueue( user , signalDone) {
     const resp = await new ControllerInterface({}).queue();
     if (resp) {
       action.actor = {
-        currentSong: resp.currentSong,
-        queue: resp.queue,
+        currentSong: resp.currentSong ? resp.currentSong : {},
+        queue: resp.queue ? resp.queue : []
       }
     } else {
       action.actor = {

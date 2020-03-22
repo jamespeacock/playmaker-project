@@ -2,7 +2,7 @@ from django.db import models
 
 
 class SPModel(models.Model):
-    sp_id = models.CharField(max_length=255, unique=True)
+    sp_id = models.CharField(max_length=255, unique=True) # If more key collisions occur bc spotify spids are not unique, then change this to not unique
     href = models.CharField(max_length=511)
 
     @staticmethod
@@ -29,5 +29,6 @@ class SPModel(models.Model):
             return {cls.get_key(): l,
                     "next": data['next']}
         else:
-            # data = [cls.from_sp(save=save, **obj) for obj in data]
+            if save:
+                return [cls.from_sp(save=save, **obj) for obj in data]
             return [serializer(d).data if serializer else d for d in data]
