@@ -216,9 +216,10 @@ class Controller extends React.Component {
                                 {showPlaying(
                                     this.props.controller.currentSong,
                                     this.props.controller.queue,
-                                    this.removeFromQueueHandler,
                                     this.handleNext,
-                                    'Remove')}
+                                    this.removeFromQueueHandler,
+                                    'Remove',
+                                    true)}
                                 </Row>
                             </Col>
                         </Row>

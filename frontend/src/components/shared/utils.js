@@ -33,11 +33,11 @@ const showJoinRoomModal = (findRoom, show) => {
 
 };
 
-const showPlaying = (currentSong, queue, handleAction=null, handleSkip, actionName='') => {
+const showPlaying = (currentSong, queue, handleSkip, handleAction=null,  actionName='', isController=false) => {
         return (
             <div>
                 <h2>Now Playing</h2>
-                <CurrentSongCard song={currentSong}/>
+                <CurrentSongCard song={currentSong} isController={isController}/>
                 {queue.length > 0 &&
                 <Button
                     key={uuid()}
