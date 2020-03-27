@@ -41,7 +41,7 @@ class App extends React.Component {
   render() {
     return (
     <AppContext.Provider value={{user:this.props.user, logout:this.logout}}>
-      <Header/>
+      <Header auth_url={this.props.user && this.props.user.auth_url}/>
       <BrowserRouter>
         <Switch>
           <Route exact path='/'

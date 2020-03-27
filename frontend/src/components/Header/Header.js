@@ -39,10 +39,10 @@ export default class Header extends React.Component {
                         {user.isLoggedIn &&
                             <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
                                 <NavDropdown title="Account" id="basic-nav-dropdown">
-                                    <NavDropdown.Item href="#action/3.3">Settings</NavDropdown.Item>
                                     <NavDropdown.Item onClick={() => {
                                         this.setState({showDevices: true})
                                     }}>Devices</NavDropdown.Item>
+                                    <NavDropdown.Item href={this.props.auth_url}>Reauthenticae</NavDropdown.Item>
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item onClick={showSubmitReportProblem}>Report a Problem</NavDropdown.Item>
                                     <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>

@@ -90,7 +90,6 @@ class SpotifyCallbackView(LoginView):
 
 class IsLoggedInView(SecureAPIView):
 
-
     def get_serializer_class(self):
         return UserSerializer
 
@@ -123,14 +122,13 @@ class IsLoggedInView(SecureAPIView):
             user_data['is_authenticated'] = True
         else:
             user_data['is_authenticated'] = True
-            redirect = request.GET['redirect']
-            user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect or 'dashboard')
+        redirect = request.GET.get('redirect', 'dashboard')
+        user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect or 'dashboard')
 
         # pr.disable()
         # ps = pstats.Stats(pr).sort_stats('tottime')
         # ps.print_stats(20)
-        return JsonResponse({'user':
-                                 user_data})
+        return JsonResponse({'user': user_data})
 
 
 class LogoutView(LogoutView):

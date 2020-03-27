@@ -38,9 +38,12 @@ def authenticate(user, auth_code, save=True):
 def do_refresh_token(user):
     sp_oauth = get_auth(user.username)
 
-    token_info = sp_oauth.refresh_access_token(user.refresh_token)
-    if not token_info:
-        logging.log(logging.ERROR, "Refresh token failed for " + user.username)
+    try:
+        token_info = sp_oauth.refresh_access_token(user.refresh_token)
+        if not token_info:
+            logging.log(logging.ERROR, "Refresh token failed for " + user.username)
+            return ""
+    except ConnectionError:
         return ""
 
     user.save_token(token_info)
