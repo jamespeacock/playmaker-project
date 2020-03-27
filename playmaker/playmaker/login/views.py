@@ -9,7 +9,8 @@ from rest_auth.registration.views import RegisterView
 from rest_framework.exceptions import ValidationError
 
 from api.settings import FRONTEND
-from playmaker.controller.models import Listener, Controller
+from playmaker.controller.models import Controller
+from playmaker.listener.models import Listener
 from playmaker.controller.serializers import ControllerSerializer, ListenerSerializer
 from playmaker.login import services
 from playmaker.login.services import get_redirect

@@ -1,8 +1,10 @@
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
 
-from playmaker.controller.models import Listener, Controller
+from playmaker.controller.models import Controller
+from playmaker.listener.models import Listener
+from playmaker.rooms.serializers import RoomSerializer
 from playmaker.shared.serializers import ParamSerializer
-from playmaker.models import Device
 
 
 # (Inbound)
@@ -19,14 +21,17 @@ class QueueActionSerializer(ActionSerializer):
 # (Outbound)
 # Model Serializers
 class ListenerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     class Meta:
         model = Listener
-        fields = ['group']
+        fields = ['room', 'username']
 
 
 class ControllerSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    room = RoomSerializer(default={})
 
     class Meta:
         model = Controller
-        fields = ['group']
+        fields = ['room', 'username']

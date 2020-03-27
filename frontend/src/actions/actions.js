@@ -1,6 +1,7 @@
 import ApiInterface from '../api/ApiInterface'
-import ListenerInterface from "../api/ListenerInterface";
 import ControllerInterface from "../api/ControllerInterface";
+import ListenerInterface from "../api/ListenerInterface";
+import RoomInterface from '../api/RoomInterface'
 // import {toastr} from "react-redux-toastr";
 
 export const CURRENT_SONG_SUCCESS = "CURRENT_SONG_SUCCESS";
@@ -9,9 +10,11 @@ export const SET_CURRENT_DEVICE = 'SET_CURRENT_DEVICE'
 export const REFRESH_DEVICES = 'REFRESH_DEVICES'
 export const REFRESH_QUEUE_CONTROLLER = 'REFRESH_QUEUE_CONTROLLER'
 export const REFRESH_QUEUE_LISTENER = 'REFRESH_QUEUE_LISTENER'
+export const FETCH_ROOMS = 'FETCH_ROOMS'
 // export const SEARCH = 'SEARCH'
 
 export const START_CONTROLLER = 'START_CONTROLLER'
+export const UPDATE_CONTROLLER = 'UPDATE_CONTROLLER'
 export const START_LISTENER = 'START_LISTENER'
 
 function checkLoggedIn(redirect = 'dashboard') {
@@ -38,6 +41,19 @@ function checkLoggedIn(redirect = 'dashboard') {
         action.controller = user.actor
     }
     dispatch(action)
+  }
+}
+
+function fetchRooms( ) {
+  return async (dispatch, getState) => {
+    const rooms = await new RoomInterface().all()
+    if (rooms) {
+      const action = {
+        type: FETCH_ROOMS,
+        rooms
+      }
+      dispatch(action)
+    }
   }
 }
 
@@ -116,7 +132,7 @@ function refreshQueue( user , signalDone) {
         roomClosed: false
       }
     } else {
-      //Group is probably closed or controller is not playing music anymore
+      //Room is probably closed or controller is not playing music anymore
       action.actor = {
         roomClosed: true
       }
@@ -150,7 +166,7 @@ function startController( mode, callback ) {
         isController: true
       },
       controller: {
-        group: controller.group,
+        room: controller.room,
         queue: [],
         currentSong: controller.currentSong
       }
@@ -162,15 +178,15 @@ function startController( mode, callback ) {
   }
 }
 
-function startListener(group) {
+function startListener(room) {
   return async (dispatch, getState) => {
-    const resp = await new ListenerInterface({}).joinGroup(group)
+    const resp = await new ListenerInterface({}).joinRoom(room)
     let action = {type: START_LISTENER}
-    if (resp && resp.group) {
+    if (resp && resp.room) {
       action.listener = resp
       action.listener.roomClosed = false;
     } else if (resp.error) {
-      action.listener.group = ''
+      action.listener.room = ''
     }
     action.user = {
         isLoggedIn: true,
@@ -208,6 +224,15 @@ function getCurrentSong () {
     }
 }
 
+function setRoomName (id, name) {
+  return async (dispatch, getState) => {
+    const room = await new RoomInterface().setRoomName(id, name)
+    if (room) {
+      dispatch({type: UPDATE_CONTROLLER, controller: {room}})
+    }
+  }
+
+}
 export {
     checkLoggedIn,
     setDevice,
@@ -219,5 +244,7 @@ export {
     editQueue,
     nextSong,
     playSong,
-    updateMode
+    updateMode,
+    fetchRooms,
+    setRoomName
 }

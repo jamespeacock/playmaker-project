@@ -6,7 +6,9 @@ from django.http import JsonResponse
 from rest_framework.generics import RetrieveAPIView
 
 from playmaker.controller.contants import DEVICE
-from playmaker.controller.models import Listener, Group, Controller
+from playmaker.listener.models import Listener
+from playmaker.controller.models import Controller
+from playmaker.rooms.models import Room
 from playmaker.serializers import DeviceSerializer, UserSerializer
 from playmaker.controller.services import stop_polling, get_queue
 from playmaker.listener.services import checkPlaySeek
@@ -15,20 +17,23 @@ from playmaker.shared.views import SecureAPIView
 SP_USER = 'spotify:user:'
 
 
-def find_group(group_identifier):
+def find_room(room_identifier, return_all=False):
 
-    # if group_indicator is spotify uri of friend
-    if SP_USER in group_identifier:
+    # if room_indicator is spotify uri of friend
+    if SP_USER in room_identifier:
         try:
-            Group.objects.get(controller=Controller.objects.filter(me__sp_id=group_identifier))
+            Room.objects.get(controller=Controller.objects.filter(me__sp_id=room_identifier))
         except ObjectDoesNotExist as e:
             pass
 
-    # if group_indicator is group_id
+    # if room_indicator is room_id
     try:
-        return Group.objects.get(id=group_identifier)
-    except ObjectDoesNotExist as e:
-        return None
+        rooms_match_by_name = Room.objects.filter(name=room_identifier).all()
+        if rooms_match_by_name and return_all:
+            return rooms_match_by_name
+        elif rooms_match_by_name:
+            return rooms_match_by_name.first()
+        return Room.objects.get(id=room_identifier)
     except ValueError:
         return None
 
@@ -37,25 +42,25 @@ class StartListeningView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
         super(StartListeningView, self).get(request)
-        group_id = request.query_params.get('group')
-        group = find_group(group_id)
-        if not group:
-            return JsonResponse("Group with indicator %s does not exist" % str(group_id), status=404, safe=False)
+        room_id = request.query_params.get('room')
+        room = find_room(room_id) if room_id else None
+        if not room:
+            return JsonResponse("Room with indicator %s does not exist" % str(room_id), status=404, safe=False)
 
         try:
             user = request.user
-            Listener.objects.get_or_create(me=user, group=group)
+            Listener.objects.get_or_create(me=user, room=room)
             if getattr(user, 'controller', None):
                 logging.log(logging.INFO, "Removing controller now that user wants to be a listener.")
                 stop_polling(user)
                 Controller.objects.get(me=user).delete()
         except IntegrityError as e:
-            logging.log(logging.INFO, "Mismatch for user/group/listener")
-            return JsonResponse("Mismatch for user/group/listener", safe=False)
+            logging.log(logging.INFO, "Mismatch for user/room/listener")
+            return JsonResponse("Mismatch for user/room/listener", safe=False)
 
-        # TODO return group/session info
+        # TODO return room/session info
         # Send back current queue, other listeners, etc.
-        return JsonResponse({"group": group_id,
+        return JsonResponse({"room": room_id,
                              "songs": [],
                              "currentSong": checkPlaySeek(user),
                              "queue": get_queue(user.actor)
@@ -88,7 +93,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
 class ListenView(SecureAPIView, RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
-        currentSongView = request.user.actor.group.current_song(detail=True)
+        currentSongView = request.user.actor.room.current_song(detail=True)
         return JsonResponse({"currentSong": currentSongView})
 
 
@@ -97,4 +102,4 @@ class ListenView(SecureAPIView, RetrieveAPIView):
 #     def get(self, request, *args, **kwargs):
 #         listener = request.user.listener
 #         currentSong = checkPlaySeek(listener)
-#         return JsonResponse({"currentSong": currentSong, "queue": listener.group.queue}, safe=False)
+#         return JsonResponse({"currentSong": currentSong, "queue": listener.room.queue}, safe=False)

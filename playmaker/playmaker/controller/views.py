@@ -2,9 +2,9 @@ import logging
 from django.http import JsonResponse
 from playmaker.controller import services
 from playmaker.controller.contants import URIS, ADD, REMOVE, START, STOP
-from playmaker.controller.models import Listener
+from playmaker.listener.models import Listener
 from playmaker.controller.serializers import QueueActionSerializer
-from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_group, \
+from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_room, \
     perform_action_for_listeners
 from playmaker.controller.visitors import Action
 from playmaker.listener.services import checkPlaySeek
@@ -22,21 +22,21 @@ class ControllerView(SecureAPIView):
 
 
 # Create a group
-class StartGroupView(SecureAPIView):
+class StartRoomView(SecureAPIView):
 
     def get(self, request, *args, **kwargs):
-        super(StartGroupView, self).get(request)
+        super(StartRoomView, self).get(request)
         user = request.user
         if getattr(user, 'listener', None):
             logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
             Listener.objects.get(me=user).delete()
         mode = request.GET.get('mode', '')
-        group_id, controller_id = create_controller_and_group(user, mode)
+        room_id, controller_id = create_controller_and_room(user, mode)
 
         if not user.hasActivePoller:
             start_polling(user)
-        current_song = user.actor.queue.currently_playing(detail=True) if mode == 'broadcast' else {}
-        return JsonResponse({"group": group_id, "controller": controller_id, "currentSong": current_song or {}})
+        current_song = user.actor.queue.now_playing() if mode != 'curate' else {}
+        return JsonResponse({"room": {"id": room_id}, "controller": controller_id, "currentSong": current_song or {}})
 
 
 # Play song for current listeners
@@ -121,7 +121,7 @@ class QueueActionView(ControllerView):
             success = services.remove_from_queue(user.uuid, body.get(URIS), body.get('positions'))
 
         songs = services.get_queue(actor)
-        current_song = actor.queue.currently_playing(detail=True)
+        current_song = actor.queue.now_playing()
         return JsonResponse({"success": success, "currentSong": current_song, "queue": songs}, safe=False)
 
 
@@ -143,10 +143,9 @@ class PollView(ControllerView):
             return JsonResponse(str(e), status=500, safe=False)
 
 
-# Listener/Group Data Section
-class GroupTastesView(SecureAPIView):
+class ModeDetailView(ControllerView):
 
-    def get(self, request, *args, **kwargs):
+    def put(self, request, ):
         pass
 
 # Fetch Playlists
@@ -154,3 +153,5 @@ class GroupTastesView(SecureAPIView):
 # Fetch Recommendations
 
 #  - filter recs
+
+

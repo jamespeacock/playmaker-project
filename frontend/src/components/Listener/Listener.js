@@ -1,28 +1,22 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
-import CurrentSongCard from '../shared/SongCards'
 import {Redirect, withRouter} from "react-router-dom";
 import AppContext from "../AppContext";
-import {showDevicesModal, showJoinGroupModal, handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
+import {showDevicesModal, showJoinRoomModal, handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
 import {connect} from "react-redux";
 import {refreshQueue, startListener} from "../../actions/actions";
-import SongTable from "../shared/SongTable";
 import Spinner from "react-bootstrap/Spinner";
 import Container from "react-bootstrap/Container";
+import {Card} from "react-bootstrap";
 
-class Listener extends React.Component {
+class Room extends React.Component {
 
     constructor( props ) {
         super( props )
         this.listener = new ListenerInterface()
-        console.log('listener props', this.props)
         this.state = {
             queueFetching: false
         }
-    }
-
-    findGroup = async (group) => {
-        this.props.dispatch(startListener(group))
     }
 
     refreshQueue = async () => {
@@ -32,8 +26,8 @@ class Listener extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'listen');
-        if (this.props.listener.group) {
-            this.findGroup(this.props.listener.group);
+        if (this.props.listener.room) {
+            this.props.dispatch(startListener(this.props.listener.room))
             this.queuePolling = setInterval(
                 () => {
                     this.refreshQueue();
@@ -48,9 +42,9 @@ class Listener extends React.Component {
 
     render() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
-        let willOpenGroupModal = !(this.props.user.isListener && this.props.listener.group && '' !== this.props.listener.group)
-        let willOpenDevicesModal = (!willOpenGroupModal && this.props.user.isLoggedIn && !this.props.user.active_device)
-        if (this.props.listener.group && this.props.listener.roomClosed) {
+        let willOpenRoomModal = !(this.props.user.isListener && this.props.listener.room && '' !== this.props.listener.room)
+        let willOpenDevicesModal = (!willOpenRoomModal && this.props.user.isLoggedIn && !this.props.user.active_device)
+        if (this.props.listener.room && this.props.listener.roomClosed) {
             //TODO Redirect to room selection page in the future
             clearInterval(this.queuePolling);
             return <Redirect to={'dashboard'}/>
@@ -59,6 +53,13 @@ class Listener extends React.Component {
             <AppContext.Consumer>
                 {() =>
                     <React.Fragment>
+                        <Card style={{ width: '18rem' }}>
+                            <Card.Body>
+                                <Card.Text style={{color: 'black'}}>
+                                    Room: {this.props.listener.room.name || this.props.listener.room.id}
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
                         <main className="listener-area">
                             <Container className="listener-queue-container">
                                 {!this.state.queueFetching ?
@@ -71,7 +72,7 @@ class Listener extends React.Component {
                             </Container>
                         </main>
                         {showDevicesModal(this.props.user, willOpenDevicesModal )}
-                        {showJoinGroupModal(this.findGroup, willOpenGroupModal)}
+                        {showJoinRoomModal(this.findRoom, willOpenRoomModal)}
                     </React.Fragment>
                 }
             </AppContext.Consumer>
@@ -79,4 +80,4 @@ class Listener extends React.Component {
     }
 }
 
-export default withRouter(connect()(Listener))
+export default withRouter(connect()(Room))

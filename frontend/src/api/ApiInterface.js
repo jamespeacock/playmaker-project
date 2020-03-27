@@ -60,6 +60,24 @@ export default class ApiInterface  {
         })
   }
 
+    put ( url, body) {
+        //TODO Make these errors throw toasts so I can see their errors
+        return this.axios.put( url, JSON.stringify(body) )
+            .then( response => {
+                // throw an error when the response is empty
+                if ( !response ) {
+                    throw "No response"
+                }
+                return response
+            })
+            .then((res) => res.data)
+            .catch(e => {
+                if (e.response.status != 500) {
+                    return e.response.data
+                }
+            })
+    }
+
   fetchLoginRedirect (url, body) {
     return this.axios.post( url, body)
       .then((res) => {

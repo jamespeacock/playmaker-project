@@ -1,9 +1,4 @@
-import config from '../config'
-import axios from 'axios';
-import Cookies from 'js-cookie';
 import ApiInterface from './ApiInterface'
-
-
 
 export default class ControllerInterface  {
 
@@ -21,7 +16,6 @@ export default class ControllerInterface  {
   }
 
   start = async ( mode ) => {
-    // await this.apiInterface.get('controller/poll/stop')
     return await this.apiInterface.get('controller/start?mode=' + mode)
   }
 

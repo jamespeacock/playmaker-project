@@ -7,6 +7,8 @@ from playmaker.controller.contants import ID, SP_ID, URI, NAME
 from playmaker.shared.models import SPModel
 from django.core import serializers
 
+from playmaker.songs.services import nice_images
+
 
 class Image(models.Model):
     height = models.IntegerField()
@@ -60,7 +62,7 @@ class Song(SPModel):
     name = models.CharField(max_length=255, null=False)
     # name of artist or group/band
     artists = models.ManyToManyField(Artist, related_name="songs_rel", blank=True)
-    on_album = models.ForeignKey(Album, related_name="songs_rel", null=True, blank=True, on_delete=CASCADE)
+    albums = models.ForeignKey(Album, related_name="songs_rel", null=True, blank=True, on_delete=CASCADE)
     uri = models.CharField(max_length=255, null=False)
     duration_ms = models.IntegerField(null=True)
     popularity = models.IntegerField(null=True)
@@ -79,6 +81,20 @@ class Song(SPModel):
     # acousticness = models.FloatField(null=True)
 
     # Analysis features TODO
+    @property
+    def album(self):
+        return self.albums.name
+
+    @property
+    def position(self):
+        in_q = self.__getattribute__('in_q', None)
+        if in_q:
+            return in_q.position
+        return 0
+
+    @property
+    def images(self):
+        return nice_images(self.album.images['album']['images'])
 
     @staticmethod
     def pop_kwargs(kwargs):

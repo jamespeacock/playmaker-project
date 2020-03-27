@@ -11,9 +11,9 @@ export default class SongTable extends React.Component {
         return this.props.songs.map((song, index) => {
             const title = song.name
             const artists = song.artists.map((a) => (a.name)).join()
-            const album = song.album.name
-            const imageSrc = song.album.images[2].url
-            const uri = song.uri
+            const album = song.album
+            const imageSrc = song.images['sm']
+            const uri = song.uriimages
 
             return (
                 <tr key={index}>

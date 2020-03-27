@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from playmaker.controller.models import Controller, Listener, Group, Permission, Queue, SongInQueue
+from playmaker.controller.models import Controller, Queue, SongInQueue
+from playmaker.listener.models import Listener
+from playmaker.rooms.models import Room
 
 
 class ControllerAdmin(admin.ModelAdmin):
@@ -11,8 +13,8 @@ class ListenerAdmin(admin.ModelAdmin):
     pass
 
 
-class GroupAdmin(admin.ModelAdmin):
-    model = Group
+class RoomAdmin(admin.ModelAdmin):
+    model = Room
     # fields = ('get_group', 'get_listeners')
 
     def get_group(self, obj):
@@ -43,6 +45,6 @@ class QueueAdmin(admin.ModelAdmin):
 
 admin.site.register(Controller, ControllerAdmin)
 admin.site.register(Listener, ListenerAdmin)
-admin.site.register(Group, GroupAdmin)
-admin.site.register(Permission, PermissionAdmin)
+admin.site.register(Room, RoomAdmin)
+# admin.site.register(Permission, PermissionAdmin)
 admin.site.register(Queue, QueueAdmin)

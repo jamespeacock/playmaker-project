@@ -8,13 +8,14 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from api.settings import DEFAULT_MS_OFFSET, TURN_OFF_IDLE_CONTROLLERS
 from playmaker.controller.contants import URI, URIS
-from playmaker.controller.models import SongInQueue, Controller, Queue, Group
+from playmaker.controller.models import SongInQueue, Controller, Queue
+from playmaker.rooms.models import Room
 from playmaker.controller.visitors import Action
 from playmaker.models import User
+from playmaker.shared.models import SPModel
 from playmaker.shared.utils import make_iterable
 from playmaker.songs.models import Song
-from playmaker.songs.serializers import QueuedSongSerializer
-from playmaker.songs.services import fetch_songs
+from playmaker.songs.serializers import QueuedSongSerializer, SongSerializer
 
 TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []
@@ -123,17 +124,18 @@ def next_in_queue(queue):
 
 def add_to_queue(uuid, uris):
     actor = User.objects.get(uuid=uuid).actor
-    songs = fetch_songs(actor, uris, save=True)
-    # songs = Song.objects.filter(uri__in=[s['uri'] for s in songs]).all()
-    next_pos = actor.queue.next_pos
-    for s in songs:
-        SongInQueue.objects.create(song=s, queue=actor.queue, position=actor.queue.next_pos)
-        next_pos += 1
-    actor.queue.next_pos = next_pos
-    actor.queue.save()
-
-    # TODO validation here
-    return True
+    if uris:
+        sp = actor.me.sp
+        songs = SPModel.from_response(sp.tracks(uris), Song, serializer=SongSerializer, save=True)
+        next_pos = actor.queue.next_pos
+        for s in songs:
+            SongInQueue.objects.create(song=s, queue=actor.queue, position=actor.queue.next_pos)
+            next_pos += 1
+        actor.queue.next_pos = next_pos
+        actor.queue.save()
+        return True
+    else:
+        return False
 
 
 def remove_from_queue(uuid, uris, positions):
@@ -252,9 +254,9 @@ class CurrentSongPoller(object):
                 user.save()
             return
         actor = user.actor
-        group = actor.group
+        room = actor.room
         if song_changed:
-            logging.log(logging.INFO, "Song has changed for group: " + str(group.id))
+            logging.log(logging.INFO, "Song has changed for group: " + str(room.id))
 
         # Set current song and push out to all listeners. Do I have access to response
         next_song = song_changed['item'] if song_changed else None
@@ -263,13 +265,13 @@ class CurrentSongPoller(object):
         # Handle curate next song in queue playing (overwrite if anything else was playing next for controller)
         if actor.mode == 'curate':
             print("Actor in curate. Going to next song in queue.")
-            next_song = next_in_queue(group.queue)
+            next_song = next_in_queue(room.queue)
             current_song_pos = 0
 
         # In all cases, if there is no next song, make sure there is one
         if not next_song:
             print("Playing next suggested song bc no songs were in queue or currently playing.")
-            next_song = group.play_suggested_song()
+            next_song = room.play_suggested_song()
             current_song_pos = 0
 
         if actor.mode == 'curate':
@@ -327,16 +329,16 @@ def stop_polling(user):
     return True
 
 
-def create_controller_and_group(user, mode):
+def create_controller_and_room(user, mode):
     controller, created = Controller.objects.get_or_create(me=user)
     if mode:
         controller.mode = mode
     user.save()
     Queue.objects.get_or_create(controller=controller)
-    group, created = Group.objects.get_or_create(controller=controller)
+    room, created = Room.objects.get_or_create(controller=controller)
     controller.save()
     if not created:
-        logging.log(logging.INFO, "Group was not created for some reason! It already existed.")
+        logging.log(logging.INFO, "Room was not created for some reason! It already existed.")
 
     if not find_thread_match(user.pollingThread):
         user.pollingThread = None
@@ -344,4 +346,4 @@ def create_controller_and_group(user, mode):
         user.save()
         start_polling(user)
 
-    return group.id, controller.id
+    return room.id, controller.id

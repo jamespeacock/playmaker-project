@@ -32,24 +32,21 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 class SongSerializer(serializers.ModelSerializer):
     artists = ArtistSerializer(many=True)
-    album = AlbumSerializer(many=False)
+    albums = AlbumSerializer(allow_null=True, many=False)
+    album = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     class Meta:
         model = Song
-        fields = ['name', 'artists', 'uri', 'album', 'position_ms', 'popularity', 'duration_ms']
+        fields = ['name', 'artists', 'uri', 'album', 'albums', 'position_ms', 'popularity', 'duration_ms', 'images']
 
 
 class QueuedSongSerializer(SongSerializer):
-    on_album = AlbumSerializer(many=False)
-    in_q = serializers.SlugRelatedField(
-            many=True,
-            read_only=True,
-            slug_field='position'
-        )
+    albums = AlbumSerializer(many=True)
+    position = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
     class Meta:
         model = Song
-        fields = ['in_q', 'name', 'artists', 'uri', 'on_album', 'position_ms', 'popularity', 'duration_ms']
+        fields = ['position', 'name', 'artists', 'uri', 'albums', 'position_ms', 'popularity', 'duration_ms']
 
 
 class PlaylistSerializer(serializers.ModelSerializer):

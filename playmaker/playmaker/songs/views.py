@@ -26,18 +26,19 @@ class LoadSongView(SecureAPIView, generics.RetrieveAPIView):
         return ParamSerializer
 
     def get(self, request, *args, **kwargs):
-        params = self.get_params(request.query_params)
-        songs = services.fetch_songs(request.user.actor, make_iterable(params.get('uris')))
-        return JsonResponse(services.as_views(songs, SongSerializer), status=200, safe=False)
+        pass
+        # params = self.get_params(request.query_params)
+        # songs = services.fetch_songs(request.user.actor, make_iterable(params.get('uris')))
+        # return JsonResponse(services.as_views(songs, SongSerializer), status=200, safe=False)
 
 
 class LoadArtistView(SecureAPIView, generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
-        uris = make_iterable(self.get_params(request.query_params).get(URIS))
-        sp = request.user.sp
-        for artist in SPModel.from_response(sp.artists(uris), Artist):
-            to_save = Artist(artist)
+        # uris = make_iterable(self.get_params(request.query_params).get(URIS))
+        # sp = request.user.sp
+        # for artist in SPModel.from_response(sp.artists(uris), Artist):
+        #     to_save = Artist(artist)
         pass
 
 

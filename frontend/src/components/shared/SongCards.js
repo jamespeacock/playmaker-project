@@ -14,13 +14,12 @@ class CurrentSongCard extends React.Component {
   }
 
   render() {
-    console.log('rendering song card', this.props)
     if (this.props.song.name) {
       this.doRender = true
       this.title = this.props.song.name
       this.artists = this.props.song.artists.map((a) => (a.name)).join()
       this.album = this.props.song.album && this.props.song.album.name
-      this.imageSrc = this.props.song.album.images[0].url
+      this.imageSrc = this.props.song.images["lg"].url
     }
     if (this.doRender) {
         return (<Card bg="primary" className="text-center" style={{ width: '18rem' }}>

@@ -156,6 +156,15 @@ class User(auth_models.AbstractUser):
         return me
 
     @property
+    def is_in_room(self):
+        return self.is_listener and self.listener.room
+
+    @property
+    def room(self):
+        if self.is_in_room:
+            return self.listener.room.id
+
+    @property
     def top_artists(self):
         return utils.from_response(self.sp.current_user_top_artists(), Artist)
 

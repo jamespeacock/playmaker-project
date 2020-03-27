@@ -11,8 +11,8 @@ export default class ListenerInterface  {
   //   return await this.apiInterface.get('listener/queue')
   // }
   
-  joinGroup = async ( group ) => {
-    return await this.apiInterface.get('listener/join?group=' + group)
+  joinRoom = async ( room ) => {
+    return await this.apiInterface.get('listener/join?room=' + room)
   }
 
   devices = async ( ) => {

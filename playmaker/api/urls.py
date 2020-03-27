@@ -34,5 +34,6 @@ urlpatterns = [
     path('search/<str:_type>/', SearchView.as_view(), name="search-view"),
     path('signup/', SpotifyRegisterView.as_view(), name="signup-view"),
     path('songs/', include('playmaker.songs.urls')),
+    path('rooms/', include('playmaker.rooms.urls'), name="rooms-view"),
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

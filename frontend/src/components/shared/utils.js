@@ -27,9 +27,9 @@ const showDevicesModal = (user, show) => {
         user={user}/>)
 }
 
-const showJoinGroupModal = (findGroup, show) => {
-    return (<ShowJoinGroupModal show={show}
-                            findGroup={findGroup}/>)
+const showJoinRoomModal = (findRoom, show) => {
+    return (<ShowJoinRoomModal show={show}
+                            findRoom={findRoom}/>)
 
 };
 
@@ -55,58 +55,35 @@ const showPlaying = (currentSong, queue, handleAction=null, handleSkip, actionNa
         )
 }
 
-// class PlayingScene extends React.Component {
-//     constructor(currentSong, queue) {
-//         super()
-//     }
-//
-//     render() {
-//         if (currentSong) {
-//             return (
-//                 <div>
-//                     <CurrentSongCard song={currentSong}/>
-//                     <SongTable songs={queue}/>)
-//                 </div>
-//             )
-//         } else {
-//             //TODO Prompt to join another room
-//             return (<Card>
-//                 <Card.Text>This room does not have any songs playing right now.</Card.Text>
-//             </Card>)
-//         }
-//
-//     }
-// }
-
-function ShowJoinGroupModal(props) {
+function ShowJoinRoomModal(props) {
     const [modalShow, setModalShow] = React.useState(props.show);
     useEffect(() => {
         setModalShow(props.show);
     }, [props])
 
     //Do I need use effect down here?
-    const [group, setGroup] = React.useState('',);
+    const [room, setRoom] = React.useState('',);
     const [error, setError] = React.useState('');
 
-    return(<JoinGroupModal
+    return(<JoinRoomModal
         show={modalShow}
-        group={group}
-        findGroup={props.findGroup}
-        setGroup={setGroup}
+        room={room}
+        findRoom={props.findRoom}
+        setRoom={setRoom}
         onHide = {() => setModalShow(false)}
         error = {error}
         setError={setError}
     />)
 };
 
-class JoinGroupModal extends React.Component {
+class JoinRoomModal extends React.Component {
 
     constructor (props) {
         super(props)
     }
 
     handleJoin = async () => {
-        const success = await this.props.findGroup(this.props.group);
+        const success = await this.props.findRoom(this.props.room);
     }
 
     render() {
@@ -114,7 +91,7 @@ class JoinGroupModal extends React.Component {
             <Modal show={this.props.show} onHide={this.props.onHide}>
                 <Form>
                     <Modal.Header>
-                        <Modal.Title style={{color:'black'}}>Join a Group</Modal.Title>
+                        <Modal.Title style={{color:'black'}}>Join a Room</Modal.Title>
                     </Modal.Header>
                     <Form.Group>
                         <Form.Control
@@ -122,7 +99,7 @@ class JoinGroupModal extends React.Component {
                             placeholder="shared room code"
                             onChange={(e) => {
                                 this.props.setError('')
-                                this.props.setGroup(e.target.value)
+                                this.props.setRoom(e.target.value)
                               }
                             }
                             isInvalid={this.props.error}
@@ -130,7 +107,7 @@ class JoinGroupModal extends React.Component {
                         <Form.Control.Feedback type='invalid'>{this.props.error}</Form.Control.Feedback>
                     </Form.Group>
                     <Button variant="primary" onClick={this.handleJoin}>
-                        Join Group
+                        Join Room
                     </Button>
                 </Form>
             </Modal>)
@@ -142,7 +119,7 @@ class JoinGroupModal extends React.Component {
 export {
     showSubmitReportProblem,
     showDevicesModal,
-    showJoinGroupModal,
+    showJoinRoomModal,
     showPlaying,
     handleRedirectsIfNotLoggedInOrAuthed
 }

@@ -7,11 +7,12 @@ import Controller from './components/Controller/Controller'
 import Login from './components/Login/Login'
 import Signup from './components/Login/Signup'
 import Dashboard from './components/Login/Dashboard'
-import Listener from './components/Listener/Listener'
+import Room from './components/Listener/Listener'
 import Header from './components/Header/Header'
 import {checkLoggedIn} from './actions/actions'
 import './App.css'
 import ApiInterface from "./api/ApiInterface";
+import RoomList from "./components/rooms/RoomList";
 require('dotenv').config()
 
 class App extends React.Component {
@@ -29,6 +30,14 @@ class App extends React.Component {
     this.props.dispatch(checkLoggedIn())
   }
 
+  Dash = () => {
+     return(<Dashboard
+         user={this.props.user}
+         controller={this.props.controller}
+         listener={this.props.listener}
+     />)
+  }
+
   render() {
     return (
     <AppContext.Provider value={{user:this.props.user, logout:this.logout}}>
@@ -36,11 +45,11 @@ class App extends React.Component {
       <BrowserRouter>
         <Switch>
           <Route exact path='/'
-                 render={() => <Dashboard user={this.props.user} />}>
+                 render={()=>this.Dash()}>
           </Route>
           <Route
               path='/dashboard'
-              render={() => <Dashboard user={this.props.user} />}>
+              render={()=>this.Dash()}>
           </Route>
           <Route
               path='/play'
@@ -50,10 +59,16 @@ class App extends React.Component {
               />}>
           </Route>
           <Route
-              path='/listen'
-              render={() => <Listener
+              exact path='/listen'
+              render={() => <RoomList
                   user={this.props.user}
-                  listener={this.props.listener}/>}>
+                  rooms={this.props.rooms}
+                  />}>
+          </Route>
+          <Route exact path="/listen/:id" render={() =><Room
+              user={this.props.user}
+              listener={this.props.listener}
+              />}>
           </Route>
           <Route
               path='/login'
@@ -74,12 +89,13 @@ App.propTypes = {
   user: PropTypes.object.isRequired,
   controller: PropTypes.object,
   listener: PropTypes.object,
+  rooms: PropTypes.array,
   dispatch: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
   //what the fuck should i be doing here???
-  const { user, listener, controller } = state
+  const { user, listener, controller, rooms } = state
   // const { isFetching, lastUpdated, items: posts } = postsBySubreddit[
   //   selectedSubreddit
   // ] || {

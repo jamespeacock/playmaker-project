@@ -6,24 +6,24 @@ import {
   // SEARCH,
   REFRESH_DEVICES,
   START_CONTROLLER,
+  UPDATE_CONTROLLER,
   START_LISTENER,
   CURRENT_SONG_SUCCESS,
-  REFRESH_QUEUE_LISTENER
+  REFRESH_QUEUE_LISTENER,
+  FETCH_ROOMS,
 } from './actions/actions'
 
 const defaultUser = {
     isLoggedIn: false,
     isController: false,
     isListener: false,
+    isInRoom: false,
     mode: '', // Can change this to broadcast, curate or listen...what else? broadcast/curate imply/require isController:true
     active_device: {}
 }
 
 //Define reducers here
 function user(state=defaultUser, action) {
-//  console.log('in user reducer: ' + action.type)
-//  console.log('state', state)
-//  console.log(action.user)
   switch (action.type) {
     case CHECK_LOGGED_IN:
     case SET_CURRENT_DEVICE:
@@ -37,18 +37,27 @@ function user(state=defaultUser, action) {
   }
 }
 
+function rooms(state=[], action) {
+  console.log(action.rooms)
+  switch (action.type) {
+    case CHECK_LOGGED_IN:
+    case FETCH_ROOMS:
+      return Object.assign([], state, action.rooms)
+
+    default:
+      return state
+  }
+}
+
 const defaultController = {
   queue: [],
-  group: '',
+  room: {},
   searchResults: {tracks: []},
   listeners: [],
   currentSong: {}
 }
 
 function controller(state=defaultController, action) {
-//  console.log('in controller reducer: ' + action.type)
-//  console.log('state', state)
-//  console.log(action.controller)
   switch (action.type) {
   // case SEARCH
     case CURRENT_SONG_SUCCESS:
@@ -57,6 +66,7 @@ function controller(state=defaultController, action) {
       return Object.assign({}, state, action.actor)
     case CHECK_LOGGED_IN:
     case START_CONTROLLER:
+    case UPDATE_CONTROLLER:
       return Object.assign({}, state, action.controller)
     default:
       return state
@@ -65,7 +75,7 @@ function controller(state=defaultController, action) {
 
 const defaultListener = {
   queue: [],
-  group: '',
+  room: {},
   currentSong: {},
 }
 
@@ -101,7 +111,8 @@ function createReducer(initialState, handlers) {
 const playmakerApp = combineReducers({
   user,
   controller,
-  listener
+  listener,
+  rooms
 })
 
 export default playmakerApp

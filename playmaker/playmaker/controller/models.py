@@ -3,10 +3,10 @@ import logging
 from django.db import models
 
 from api.settings import DEFAULT_MS_ADDITION, TURN_OFF_IDLE_CONTROLLERS
-from playmaker.controller.visitors import ActionVisitor
 from playmaker.models import User
 from playmaker.songs.models import Song
 from playmaker.songs.serializers import SongSerializer
+from playmaker.songs.services import align_sp_song
 
 
 class Controller(models.Model):
@@ -18,7 +18,11 @@ class Controller(models.Model):
 
     @property
     def listeners(self):
-        return Listener.objects.filter(group=self.group).all()
+        return self.room.listeners.all()
+
+    @property
+    def username(self):
+        return self.me.username
 
 
 class Queue(models.Model):
@@ -27,7 +31,7 @@ class Queue(models.Model):
     next_pos = models.IntegerField(default=0, blank=False, null=False)
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
-    def currently_playing(self, detail=False):
+    def now_playing(self):
         logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
         sp_client = self.controller.me.sp
         # TODO need to lock around this to prevent multiple updates
@@ -37,19 +41,16 @@ class Queue(models.Model):
             logging.log(logging.ERROR, "No currently playing song for controller.")
             if not self.controller.me.active and TURN_OFF_IDLE_CONTROLLERS:
                 self.controller.delete()
-            return {}
+            return None
         if not self.current_song or self.current_song != controller_song_uri:
             self.current_song = controller_song_uri
             self.save()
         # TODO End lock here
-        if detail:
             if not controller_current_song or not controller_current_song['item']:
-                return {}
-            # details = sp_client.audio_features(tracks=[controller_current_song['item']['uri']])
-            controller_current_song['item']['position_ms'] =  controller_current_song['progress_ms']
-            return SongSerializer(controller_current_song['item']).data
+                return None
 
-        return self.current_song
+        response_song = align_sp_song(controller_current_song)
+        return SongSerializer(response_song).data
 
     def current_offset(self):
         song = self.controller.me.sp.currently_playing()
@@ -70,48 +71,27 @@ class SongInQueue(models.Model):
     position = models.IntegerField(null=False, blank=False)
 
 
-class Group(models.Model):
-    controller = models.OneToOneField(Controller, related_name='group', on_delete=models.CASCADE)
-    # TODO save tracks played
+# class Group(models.Model):
+#     name = models.CharField(max_length=255, null=True, blank=False)
+#     controller = models.OneToOneField(Controller, related_name='group', on_delete=models.CASCADE)
+#     # TODO save tracks played
+#
+#     @property
+#     def queue(self):
+#         return self.controller.queue
+#
+#     def current_song(self, detail=False):
+#         if detail:
+#             return self.queue.now_playing()
+#         else:
+#             return self.queue.current_song if self.queue else None
+#
+#     def current_offset(self):
+#         return self.queue.current_offset()
+#
+#     def suggest_next_songs(self):
+#         return
+#
+#     def play_suggested_song(self):
+#         return "spotify:track:7fPuWrlpwDcHm5aHCH5D9t"# uri of next song to play
 
-    @property
-    def queue(self):
-        return self.controller.queue
-
-    def current_song(self, detail=False):
-        return self.queue.currently_playing(detail)
-
-    def current_offset(self):
-        return self.queue.current_offset()
-
-    def suggest_next_songs(self):
-        return
-
-    def play_suggested_song(self):
-        return "spotify:track:7fPuWrlpwDcHm5aHCH5D9t"# uri of next song to play
-
-
-class Listener(models.Model):
-    me = models.OneToOneField(User, related_name='listener', on_delete=models.CASCADE)
-    group = models.ForeignKey(Group, related_name='listeners', on_delete=models.CASCADE)
-    _v_cached = None
-
-    @property
-    def v(self):
-        if self._v_cached is None:
-            self._v_cached = ActionVisitor.get_visitor(self.me.sp, self.me.username)
-        return self._v_cached
-
-    @property
-    def token(self):
-        return self.me.token
-
-    @property
-    def queue(self):
-        return self.group.queue
-
-
-class Permission(models.Model):  # inherit auth_models.Permission if need be
-    actor = models.OneToOneField(Controller, on_delete=models.CASCADE)
-    listener = models.OneToOneField(Listener, on_delete=models.CASCADE)
-    scope = models.CharField(max_length=256)

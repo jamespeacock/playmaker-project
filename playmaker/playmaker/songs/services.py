@@ -1,13 +1,20 @@
-from playmaker.shared.models import SPModel
-from playmaker.songs.models import Song
-from playmaker.songs.serializers import SongSerializer
-
 
 # Fetch and save songs
 
+def nice_images(imgs):
+    images = {}
+    images['lg'] = imgs[0]
+    images['md'] = imgs[1]
+    images['sm'] = imgs[2]
+    return images
 
-def fetch_songs(actor, uris, save=False):
-    if uris:
-        sp = actor.me.sp
-        return SPModel.from_response(sp.tracks(uris), Song, serializer=SongSerializer, save=save)
-    return []
+
+def align_sp_song(sp_song):
+    # details = sp_client.audio_features(tracks=[sp_song['item']['uri']])
+    song = sp_song['item']
+    album = song['album']
+    song['albums'] = album
+    song['album'] = album['name']
+    song['images'] = nice_images(album['images'])
+    song['position_ms'] = sp_song['progress_ms']
+    return song

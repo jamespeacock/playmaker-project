@@ -4,12 +4,11 @@ import { debounce } from "throttle-debounce";
 import SongTable from '../shared/SongTable'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
-import {updateMode, refreshQueue, startController, editQueue, nextSong, playSong} from "../../actions/actions";
+import {updateMode, refreshQueue, startController, editQueue, nextSong, playSong, setRoomName} from "../../actions/actions";
 import {handleRedirectsIfNotLoggedInOrAuthed, showDevicesModal, showPlaying} from "../shared/utils";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
-import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import SongsInterface from "../../api/SongsInterface";
@@ -35,7 +34,7 @@ class Controller extends React.Component {
         
     }
 
-    createGroup = async ( mode ) => {
+    createRoom = async ( mode ) => {
         //TODO figure out style for handling constants
         this.props.dispatch(startController(mode, 'curate' === mode ? this.refreshQueue : null))
     }
@@ -63,7 +62,7 @@ class Controller extends React.Component {
 
     componentDidMount() {
         if (this.props.user.isLoggedIn) {
-            this.createGroup(this.state.mode);
+            this.createRoom(this.state.mode);
         }
     }
 
@@ -106,6 +105,17 @@ class Controller extends React.Component {
         )
     }
 
+    SearchResults = () => {
+        return !this.state.searchFetching ? //if not waiting on results
+            <SongTable
+                songs={this.state.searchResults.tracks}
+                handleAction={this.props.controller.currentSong.name ? this.addToQueueHandler : this.playSongHandler}
+                actionName={this.props.controller.currentSong.name ? 'Add' : 'Play'}
+            /> : //else return "loading"
+            <Spinner animation="border" variant="primary"/>
+
+    }
+
     changeOrderHandler = async (songUri, oldPosition, newPosition) => {
 
     }
@@ -135,7 +145,7 @@ class Controller extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
-        if (this.props.controller.group) {
+        if (this.props.controller.room) {
             this.kickoffPoll();
         }
     }
@@ -144,31 +154,61 @@ class Controller extends React.Component {
         clearInterval(this.queuePolling);
     }
 
+    keyPressed = (e) => {
+        if (e.key === "Enter") {
+            this.props.dispatch(setRoomName(this.props.controller.room.id, e.target.value))
+        }
+    }
+
+    RoomCard = () => {
+        let roomName = this.props.controller.room && this.props.controller.room.name;
+        if (roomName && !this.state.editRoom) {
+            return (<Card style={{width: '18rem'}}>
+                <Card.Body>
+                    <Card.Text style={{color: 'black'}}>
+                        Room Name: {this.props.controller.room.name}
+                    </Card.Text>
+                </Card.Body>
+            </Card>)
+        }
+        return (
+            <Card style={{width: '18rem'}}>
+                <Card.Body>
+                    <Card.Text style={{color: 'black'}}>
+                        Room ID: {this.props.controller.room && this.props.controller.room.id}
+                    </Card.Text>
+                    <InputGroup className="mb-2">
+                        <FormControl
+                            type="text"
+                            name="set-room-name"
+                            className="input-left"
+                            placeholder="Set Room Name"
+                            required
+                            onKeyPress={this.keyPressed}
+                            aria-label="Save"
+                            aria-describedby="basic-addon2"
+                        />
+                    </InputGroup>
+                </Card.Body>
+            </Card>
+        );
+    }
+
     render() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force logout
         return (
             <React.Fragment>
-                <Card style={{ width: '18rem' }}>
-                    <Card.Body>
-                        <Card.Text style={{color: 'black'}}>
-                            Group: {this.props.controller.group}
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
                 <main className="main-area">
                     <Container className="col-container">
+                        <Row>
+                            {this.RoomCard()}
+                        </Row>
                         <Row>
                             {'curate' === this.state.mode &&
                             <Col className="search-container">
                                 <h2>Search Results</h2>
                                 {this.SearchBar()}
-                                {!this.state.searchFetching ? <SongTable
-                                        songs={this.state.searchResults.tracks}
-                                        handleAction={this.props.controller.currentSong.name ? this.addToQueueHandler : this.playSongHandler}
-                                        actionName={this.props.controller.currentSong.name ? 'Add' : 'Play'}
-                                    /> :
-                                    <Spinner animation="border" variant="primary"/>
-                                }
+                                {this.SearchResults}
                             </Col>
                             }
                             <Col className="controller-queue-container">
