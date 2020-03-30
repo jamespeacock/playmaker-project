@@ -2,7 +2,7 @@ from django.db import models
 
 
 class SPModel(models.Model):
-    sp_id = models.CharField(max_length=255, unique=True) # If more key collisions occur bc spotify spids are not unique, then change this to not unique
+    sp_id = models.CharField(max_length=255)
     href = models.CharField(max_length=511)
 
     @staticmethod

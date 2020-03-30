@@ -137,10 +137,14 @@ class LogoutView(LogoutView):
     def post(self, request, *args, **kwargs):
         try:
             request.user.listener.delete()
+            request.user.is_listener = False
+            # self.devices.all().delete()
         except Listener.DoesNotExist:
             pass
         try:
             request.user.controller.delete()
+            request.user.is_controller = False
+            # self.devices.all().delete()
         except Controller.DoesNotExist:
             pass
         request.user.save()

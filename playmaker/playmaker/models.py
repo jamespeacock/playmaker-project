@@ -190,6 +190,7 @@ class Device(SPModel):
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=64)
     volume_percent = models.IntegerField(null=True)
+    unique_together = [['user', 'sp_id']]
 
     @staticmethod
     def from_sp(save=False, **kwargs):

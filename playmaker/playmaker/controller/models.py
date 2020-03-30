@@ -32,18 +32,24 @@ class Queue(models.Model):
     controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
 
     def now_playing(self):
-        logging.log(logging.INFO, "Checking currently playing for " + str(self.controller.me.username))
-        sp_client = self.controller.me.sp
+        user = self.controller.me
+        logging.log(logging.INFO, "Checking currently playing for " + str(user.username))
+        sp_client = user.sp
         # TODO need to lock around this to prevent multiple updates
         controller_current_song = sp_client.currently_playing()
         controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
         if not controller_song_uri:
             logging.log(logging.ERROR, "No currently playing song for controller.")
-            if not self.controller.me.active and TURN_OFF_IDLE_CONTROLLERS:
-                self.controller.delete()
+            if not user.active and TURN_OFF_IDLE_CONTROLLERS:
+                user.is_controller = False
+                user.save()
+                logging.log(logging.INFO, "Deleting Idle/Exited Controller for: " + user.username)
+                user.controller.delete()
+
             return None
         if not self.current_song or self.current_song != controller_song_uri:
             self.current_song = controller_song_uri
+            logging.log(logging.INFO, "Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
             self.save()
         # TODO End lock here
             if not controller_current_song or not controller_current_song['item']:
@@ -69,29 +75,3 @@ class SongInQueue(models.Model):
     queue = models.ForeignKey(Queue, null=False, on_delete=models.CASCADE)
     song = models.ForeignKey(Song, related_name='in_q', null=False, on_delete=models.CASCADE)
     position = models.IntegerField(null=False, blank=False)
-
-
-# class Group(models.Model):
-#     name = models.CharField(max_length=255, null=True, blank=False)
-#     controller = models.OneToOneField(Controller, related_name='group', on_delete=models.CASCADE)
-#     # TODO save tracks played
-#
-#     @property
-#     def queue(self):
-#         return self.controller.queue
-#
-#     def current_song(self, detail=False):
-#         if detail:
-#             return self.queue.now_playing()
-#         else:
-#             return self.queue.current_song if self.queue else None
-#
-#     def current_offset(self):
-#         return self.queue.current_offset()
-#
-#     def suggest_next_songs(self):
-#         return
-#
-#     def play_suggested_song(self):
-#         return "spotify:track:7fPuWrlpwDcHm5aHCH5D9t"# uri of next song to play
-
