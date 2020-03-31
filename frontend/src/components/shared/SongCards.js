@@ -37,11 +37,9 @@ class CurrentSongCard extends React.Component {
     } else {
       return (
           <Card.Body>
-            <Card.Text className="text-muted">
               {this.props.isController ?
-                  <p>You're not playing a song! Start playing in <a href="https://www.spotify.com/us/redirect/webplayerlink/" target="_blank">Spotify</a></p> :
-                  <p>This room does not have any songs playing right now.</p>}
-            </Card.Text>
+                  <Card.Text className="text-muted">You're not playing a song! Start playing in <a href="https://www.spotify.com/us/redirect/webplayerlink/" target="_blank">Spotify</a></Card.Text>:
+                  <Card.Text>This room does not have any songs playing right now.</Card.Text>}
           </Card.Body>
       )
     }

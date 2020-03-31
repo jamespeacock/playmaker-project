@@ -16,6 +16,10 @@ export default class RoomInterface {
         )
     }
 
+    getRoom = async ( room ) => {
+        return await this.apiInterface.get('rooms/' + room)
+    }
+
     all = async () => {
         return await this.apiInterface.get('rooms/all')
     }

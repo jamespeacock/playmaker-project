@@ -22,6 +22,7 @@ class QueueActionSerializer(ActionSerializer):
 # Model Serializers
 class ListenerSerializer(serializers.ModelSerializer):
     username = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    room = RoomSerializer(default={}, required=False)
 
     class Meta:
         model = Listener

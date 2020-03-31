@@ -6,7 +6,7 @@ from playmaker.rooms.models import Room
 
 class Listener(models.Model):
     me = models.OneToOneField(User, related_name='listener', on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, related_name='listeners', on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, related_name='listeners', on_delete=models.CASCADE, null=True)
     _v_cached = None
 
     @property
@@ -21,7 +21,7 @@ class Listener(models.Model):
 
     @property
     def queue(self):
-        return self.group.queue
+        return self.room.queue if self.room else []
 
     @property
     def username(self):

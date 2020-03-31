@@ -1,12 +1,9 @@
 
 # Fetch and save songs
 
+
 def nice_images(imgs):
-    images = {}
-    images['lg'] = imgs[0]
-    images['md'] = imgs[1]
-    images['sm'] = imgs[2]
-    return images
+    return {'lg': imgs[0], 'md': imgs[1], 'sm': imgs[2]}
 
 
 def align_sp_song(sp_song):

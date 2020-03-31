@@ -121,9 +121,10 @@ class IsLoggedInView(SecureAPIView):
         if user.token:
             user_data['is_authenticated'] = True
         else:
-            user_data['is_authenticated'] = True
-        redirect = request.GET.get('redirect', 'dashboard')
-        user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect or 'dashboard')
+            user_data['is_authenticated'] = False
+        redirect_path = request.GET.get('redirect', 'dashboard')
+        redirect_path = 'dashboard' if not redirect_path or redirect_path == 'undefined' else redirect_path
+        user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect_path)
 
         # pr.disable()
         # ps = pstats.Stats(pr).sort_stats('tottime')

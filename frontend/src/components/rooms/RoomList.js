@@ -1,11 +1,10 @@
-import {startListener} from "../../actions/actions";
-
 import React from 'react'
-import { withRouter } from 'react-router-dom'
+import {Redirect, withRouter} from 'react-router-dom'
 import {Container} from 'react-bootstrap'
 import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 import RoomTable from "../Listener/RoomTable";
 import {connect} from "react-redux";
+import {fetchRooms} from "../../actions/actions";
 
 class RoomList extends React.Component {
 
@@ -13,31 +12,28 @@ class RoomList extends React.Component {
         super(props)
     }
 
-    handleListen = async () => {
-        this.props.history.push({
-            pathname: '/listen'
-        })
-    }
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
-        if (this.props.user.isInRoom && this.props.user.isListener) {
-            this.props.history.push({
-                pathname: '/listen/' + this.props.user.room
-            });
-        }
+        this.props.dispatch(fetchRooms())
     }
 
     render() {
-
+        if (this.props.user.isInRoom && this.props.user.isListener && this.props.listener.room.id) {
+            return(<Redirect to={'/listen/' + this.props.listener.room.id}/>)
+        }
         return (
             <React.Fragment>
                 <Container fluid>
                     <h2>Rooms</h2>
                     <RoomTable
-                        rooms={this.props.rooms || []}
+                        rooms={this.props.rooms}
                         actionName={"Join"}
-                        actionHandler={(id) => this.props.dispatch(startListener(id))}
+                        actionHandler={(id) => {
+                            this.props.history.push({
+                                pathname: '/listen/' + id
+                            });
+                        }}
                     >
                     </RoomTable>
 

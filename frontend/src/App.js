@@ -7,7 +7,7 @@ import Controller from './components/Controller/Controller'
 import Login from './components/Login/Login'
 import Signup from './components/Login/Signup'
 import Dashboard from './components/Login/Dashboard'
-import Room from './components/Listener/Listener'
+import Room from './components/Listener/Room'
 import Header from './components/Header/Header'
 import {checkLoggedIn} from './actions/actions'
 import './App.css'
@@ -40,8 +40,10 @@ class App extends React.Component {
 
   render() {
     return (
-    <AppContext.Provider value={{user:this.props.user, logout:this.logout}}>
-      <Header auth_url={this.props.user && this.props.user.auth_url}/>
+    <AppContext.Provider value={{logout:this.logout}}>
+      <Header
+          user={this.props.user}
+          session={this.props.session}/>
       <BrowserRouter>
         <Switch>
           <Route exact path='/'
@@ -62,12 +64,14 @@ class App extends React.Component {
               exact path='/listen'
               render={() => <RoomList
                   user={this.props.user}
+                  listener={this.props.listener}
                   rooms={this.props.rooms}
                   />}>
           </Route>
           <Route exact path="/listen/:id" render={() =><Room
               user={this.props.user}
               listener={this.props.listener}
+              session={this.props.session}
               />}>
           </Route>
           <Route
@@ -79,6 +83,7 @@ class App extends React.Component {
               render={() => <Signup user={this.props.user} />}>
           </Route>
         </Switch>
+
       </BrowserRouter>
     </AppContext.Provider>
     )
@@ -90,12 +95,13 @@ App.propTypes = {
   controller: PropTypes.object,
   listener: PropTypes.object,
   rooms: PropTypes.array,
+  session: PropTypes.object,
   dispatch: PropTypes.func.isRequired
 }
 
 function mapStateToProps(state) {
   //what the fuck should i be doing here???
-  const { user, listener, controller, rooms } = state
+  const { user, listener, controller, rooms, session } = state
   // const { isFetching, lastUpdated, items: posts } = postsBySubreddit[
   //   selectedSubreddit
   // ] || {

@@ -37,7 +37,7 @@ class Queue(models.Model):
         sp_client = user.sp
         # TODO need to lock around this to prevent multiple updates
         controller_current_song = sp_client.currently_playing()
-        controller_song_uri = controller_current_song['item']['uri'] if controller_current_song else None
+        controller_song_uri = controller_current_song['item']['uri'] if controller_current_song and controller_current_song['item'] else None
         if not controller_song_uri:
             logging.log(logging.ERROR, "No currently playing song for controller.")
             if not user.active and TURN_OFF_IDLE_CONTROLLERS:

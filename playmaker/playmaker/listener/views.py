@@ -6,11 +6,13 @@ from django.http import JsonResponse
 from rest_framework.generics import RetrieveAPIView
 
 from playmaker.controller.contants import DEVICE
+from playmaker.controller.serializers import ListenerSerializer
+from playmaker.controller.visitors import Action
 from playmaker.listener.models import Listener
 from playmaker.controller.models import Controller
 from playmaker.rooms.models import Room
 from playmaker.serializers import DeviceSerializer, UserSerializer
-from playmaker.controller.services import stop_polling, get_queue
+from playmaker.controller.services import stop_polling, get_queue, perform_action
 from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.views import SecureAPIView
 
@@ -23,7 +25,7 @@ def find_room(room_identifier, return_all=False):
     if SP_USER in room_identifier:
         try:
             Room.objects.get(controller=Controller.objects.filter(me__sp_id=room_identifier))
-        except ObjectDoesNotExist as e:
+        except Room.DoesNotExist as e:
             pass
 
     # if room_indicator is room_id
@@ -43,28 +45,56 @@ class StartListeningView(SecureAPIView):
     def get(self, request, *args, **kwargs):
         super(StartListeningView, self).get(request)
         room_id = request.query_params.get('room')
-        room = find_room(room_id) if room_id else None
-        if not room:
+        try:
+            room = find_room(room_id) if room_id else None
+        except Room.DoesNotExist:
             return JsonResponse("Room with indicator %s does not exist" % str(room_id), status=404, safe=False)
 
         try:
             user = request.user
-            Listener.objects.get_or_create(me=user, room=room)
             if getattr(user, 'controller', None):
                 logging.log(logging.INFO, "Removing controller now that user wants to be a listener.")
                 stop_polling(user)
-                Controller.objects.get(me=user).delete()
+                user.is_controller = False
+                user.controller.delete()
+            l = Listener.objects.filter(me=user).first()
+            if not l:
+                Listener.objects.get_or_create(me=user, room=room)
+            else:
+                l.room = room
+                l.save()
+            user.is_listener = True
+            user.save()
         except IntegrityError as e:
             logging.log(logging.INFO, "Mismatch for user/room/listener")
             return JsonResponse("Mismatch for user/room/listener", safe=False)
 
-        # TODO return room/session info
+        # TODO USE ListenerSerializer
         # Send back current queue, other listeners, etc.
-        return JsonResponse({"room": room_id,
-                             "songs": [],
-                             "currentSong": checkPlaySeek(user),
-                             "queue": get_queue(user.actor)
-                             })
+        if user.actor:
+            current_song = checkPlaySeek(user)
+            response = {"room": {"id": room_id, "name": room.name},
+                             "songs": []}
+            if not current_song:
+                response["error"] = "Device not found."
+            else:
+                response["currentSong"] = current_song
+                response["queue"] = get_queue(user.actor)
+            return JsonResponse(response)
+
+        return JsonResponse({"error": "Listener object was not created."}, safe=False, status=500)
+
+
+class LeaveRoomView(SecureAPIView):
+
+    def get(self, request, *args):
+        listener = request.user.listener
+        listener.room = None
+        listener.save()
+        perform_action(None, Action.PAUSE, listeners=[listener])
+        resp = ListenerSerializer(listener).data
+        resp['room'] = resp['room'] or {}
+        return JsonResponse(resp, safe=False)
 
 
 class DevicesView(SecureAPIView, RetrieveAPIView):
@@ -75,8 +105,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         super(DevicesView, self).get(request)
         user = request.user
-        if not user.devices.first():
-            user.get_devices()
+        devices = user.get_devices()
 
         return JsonResponse(UserSerializer(user).data, safe=False)
 
@@ -85,7 +114,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         user = request.user
         device_id = request.data.get(DEVICE)
         if user.set_device(device_id):
-            current_song = checkPlaySeek(user)
+            current_song = checkPlaySeek(user, forcePlay=True)
             return JsonResponse({"user": UserSerializer(user).data, "current_song": current_song})
         return JsonResponse({"error": "Selected device %s was not found for requesting user." % device_id})
 

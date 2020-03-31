@@ -1,11 +1,11 @@
 import React from 'react'
-import { Redirect, withRouter } from 'react-router-dom'
+import {Redirect, withRouter} from 'react-router-dom'
 import { debounce } from "throttle-debounce";
 import SongTable from '../shared/SongTable'
 import {Card} from "react-bootstrap";
 import {connect} from "react-redux";
 import {updateMode, refreshQueue, startController, editQueue, nextSong, playSong, setRoomName} from "../../actions/actions";
-import {handleRedirectsIfNotLoggedInOrAuthed, showDevicesModal, showPlaying} from "../shared/utils";
+import {handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -13,6 +13,10 @@ import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import SongsInterface from "../../api/SongsInterface";
 import Spinner from "react-bootstrap/Spinner";
+import {openDevices} from "../../actions/sessionActions";
+import {leaveRoom} from "../../actions/listenerActions";
+import Button from "react-bootstrap/Button";
+import {closeRoom} from "../../actions/controllerActions";
 
 
 class Controller extends React.Component {
@@ -27,6 +31,7 @@ class Controller extends React.Component {
             mode: this.props.location.mode,
             searchFetching: false,
             queueFetching: false,
+            roomFetching: true
         }
         this.handleNext = this.handleNext.bind(this);
         this.searchThrottled = debounce(500, this.search);
@@ -36,7 +41,7 @@ class Controller extends React.Component {
 
     createRoom = async ( mode ) => {
         //TODO figure out style for handling constants
-        this.props.dispatch(startController(mode, 'curate' === mode ? this.refreshQueue : null))
+
     }
 
     kickoffPoll () {
@@ -61,8 +66,15 @@ class Controller extends React.Component {
     }
 
     componentDidMount() {
-        if (this.props.user.isLoggedIn) {
-            this.createRoom(this.state.mode);
+        if (this.props.user.isController || this.state.roomFetching) {
+            this.props.dispatch(startController(this.state.mode || 'broadcast',
+                () => {
+                    this.setState({roomFetching: false});
+                    if ('curate' === this.state.mode) {
+                        this.refreshQueue()
+                    }
+                }))
+            this.createRoom(this.state.mode || 'broadcast');
         }
     }
 
@@ -145,6 +157,9 @@ class Controller extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'play');
+        if (this.props.user.isLoggedIn && !this.props.user.active_device ) {
+            this.props.dispatch(openDevices())
+        }
         if (this.props.controller.room) {
             this.kickoffPoll();
         }
@@ -189,6 +204,10 @@ class Controller extends React.Component {
                             aria-describedby="basic-addon2"
                         />
                     </InputGroup>
+                    <Button onClick={() => {
+                        this.props.dispatch(closeRoom())
+                        clearInterval(this.queuePolling)
+                    }}>Close Room</Button>
                 </Card.Body>
             </Card>
         );
@@ -196,6 +215,9 @@ class Controller extends React.Component {
 
     render() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force logout
+        if (!this.props.user.isController && !this.state.roomFetching) {
+            return (<Redirect to={'/dashboard'}/>)
+        }
         return (
             <React.Fragment>
                 <main className="main-area">
@@ -228,7 +250,7 @@ class Controller extends React.Component {
                         Live chat feed coming soon!
                     </Container>
                 </main>
-                {showDevicesModal(this.props.user, 'curate' === this.state.mode && this.props.user.isLoggedIn && !this.props.user.active_device )}
+
             </React.Fragment>
         )
     }

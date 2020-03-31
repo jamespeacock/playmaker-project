@@ -20,7 +20,6 @@ class Dashboard extends React.Component {
     }
 
     handleListen = async () => {
-        this.props.dispatch(fetchRooms())
         this.props.history.push({
           pathname: '/listen'
         })
@@ -30,7 +29,7 @@ class Dashboard extends React.Component {
         //If in a room already, route them there.
         if (this.props.user.isController && this.props.controller.room) {
             this.props.history.push('/play')
-        } else if (this.props.user.isListener && this.props.listener.room) {
+        } else if (this.props.user.isListener) {//} && this.props.listener.isInRoom ) {
             this.props.history.push('/listen/'+ this.props.listener.room.id)
         }
     }
