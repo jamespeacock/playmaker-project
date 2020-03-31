@@ -185,6 +185,18 @@ class User(auth_models.AbstractUser):
         return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), Song)
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, null=False, blank=False, related_name='profile')
+
+    def get_connections(self):
+        connections = Connection.objects.filter(creator=self.user)
+        return connections
+
+    def get_followers(self):
+        followers = Connection.objects.filter(following=self.user)
+        return followers
+
+
 class Device(SPModel):
     user = models.ForeignKey(User, related_name='devices', on_delete=models.CASCADE)
     is_selected = models.BooleanField(null=True)
@@ -215,3 +227,9 @@ class Device(SPModel):
     @staticmethod
     def get_key():
         return "devices"
+
+
+class Connection(models.Model):
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    creator = models.ForeignKey(User, related_name="friendship_creator_set")
+    following = models.ForeignKey(User, related_name="friend_set")

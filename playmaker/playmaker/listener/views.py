@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from rest_framework.generics import RetrieveAPIView
 
-from playmaker.controller.contants import DEVICE
+from playmaker.controller.contants import DEVICE, URIS
 from playmaker.controller.serializers import ListenerSerializer
 from playmaker.controller.visitors import Action
 from playmaker.listener.models import Listener
@@ -114,7 +114,7 @@ class DevicesView(SecureAPIView, RetrieveAPIView):
         user = request.user
         device_id = request.data.get(DEVICE)
         if user.set_device(device_id):
-            current_song = checkPlaySeek(user, forcePlay=True)
+            current_song = checkPlaySeek(user, transfer=True)
             return JsonResponse({"user": UserSerializer(user).data, "current_song": current_song})
         return JsonResponse({"error": "Selected device %s was not found for requesting user." % device_id})
 
@@ -125,6 +125,16 @@ class ListenView(SecureAPIView, RetrieveAPIView):
         currentSongView = request.user.actor.room.current_song(detail=True)
         return JsonResponse({"currentSong": currentSongView})
 
+
+class SaveSongView(SecureAPIView):
+
+    def post(self, request):
+        uris = request.data.get(URIS)
+        request.user.sp.current_user_saved_tracks_add(uris)
+
+    def delete(self, request):
+        uris = request.data.get(URIS)
+        request.user.sp.current_user_saved_tracks_delete(uris)
 
 # class GetQueueView(SecureAPIView, RetrieveAPIView):
 #
