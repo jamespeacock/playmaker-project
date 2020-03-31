@@ -81,7 +81,7 @@ class Room extends React.Component {
                         <Card style={{width: '18rem'}}>
                             <Card.Body>
                                 <Card.Text style={{color: 'black'}}>
-                                    Room: {this.props.listener.room.name || this.props.listener.room.id}
+                                    Room {this.props.listener.room.id}: {this.props.listener.room.name || ''}
                                 </Card.Text>
                                 <Button onClick={() => {
                                     this.props.dispatch(leaveRoom())

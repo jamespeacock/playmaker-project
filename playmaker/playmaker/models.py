@@ -2,7 +2,7 @@ import logging
 
 import spotipy
 import uuid as uuid
-from django.db.models import DateTimeField
+from django.db.models import DateTimeField, CASCADE
 from django.utils import timezone as tz
 
 from django.contrib.auth import models as auth_models
@@ -186,7 +186,7 @@ class User(auth_models.AbstractUser):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, null=False, blank=False, related_name='profile')
+    user = models.OneToOneField(User, null=False, blank=False, related_name='profile', on_delete=CASCADE)
 
     def get_connections(self):
         connections = Connection.objects.filter(creator=self.user)
@@ -231,5 +231,5 @@ class Device(SPModel):
 
 class Connection(models.Model):
     created = models.DateTimeField(auto_now_add=True, editable=False)
-    creator = models.ForeignKey(User, related_name="friendship_creator_set")
-    following = models.ForeignKey(User, related_name="friend_set")
+    creator = models.ForeignKey(User, related_name="friendship_creator_set", on_delete=CASCADE)
+    following = models.ForeignKey(User, related_name="friend_set", on_delete=CASCADE)
