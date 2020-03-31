@@ -98,12 +98,11 @@ class User(auth_models.AbstractUser):
 
         sd = self.devices.filter(is_selected=True).first()
         if sd:
-            print("Returning selected device")
             return sd
 
         ad = self.devices.filter(is_active=True).first()
         if ad:
-            ad.is_selected=True
+            ad.is_selected = True
             ad.save()
             print("Returning active device bc selected was not found.")
             return ad

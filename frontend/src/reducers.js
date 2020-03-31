@@ -96,7 +96,6 @@ function listener(state=defaultListener, action) {
       return Object.assign({}, state, {...state, currentSong: action.current})
     case REFRESH_QUEUE_LISTENER:
       return Object.assign({}, state, action.actor)
-    case CHECK_LOGGED_IN:
     case START_LISTENER:
     case LEAVE_ROOM:
       return Object.assign({}, state, action.listener)

@@ -29,8 +29,10 @@ class Dashboard extends React.Component {
         //If in a room already, route them there.
         if (this.props.user.isController && this.props.controller.room) {
             this.props.history.push('/play')
-        } else if (this.props.user.isListener) {//} && this.props.listener.isInRoom ) {
+        } else if (this.props.user.isListener && this.props.listener.isInRoom ) {
             this.props.history.push('/listen/'+ this.props.listener.room.id)
+        } else if (this.props.user.isListener) {
+            this.props.history.push('/listen')
         }
     }
 

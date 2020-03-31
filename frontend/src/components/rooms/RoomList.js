@@ -15,7 +15,6 @@ class RoomList extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
-        this.props.dispatch(fetchRooms())
     }
 
     render() {

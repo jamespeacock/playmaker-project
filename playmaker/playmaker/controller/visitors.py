@@ -38,9 +38,7 @@ class ActionVisitor(object):
             call = self.action_options[action]
             # This returns a ___ ??
             result = call(*args, **kwargs)
-            if call == Action.PLAY:
-                pass
-                #TODO ensure current_playback matches uri in kwargs
+            return result
             # end here
         except SpotifyException as e:
             print(traceback.format_exc())

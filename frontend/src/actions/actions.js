@@ -43,7 +43,7 @@ function checkLoggedIn(redirect = 'dashboard') {
   }
 }
 
-function fetchRooms( ) {
+function fetchRooms( callback ) {
   return async (dispatch, getState) => {
     const rooms = await new RoomInterface().all()
     if (rooms) {
@@ -52,6 +52,9 @@ function fetchRooms( ) {
         rooms
       }
       dispatch(action)
+    }
+    if (callback) {
+      callback()
     }
   }
 }

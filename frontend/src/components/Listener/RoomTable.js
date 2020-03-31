@@ -2,8 +2,10 @@ import React from "react";
 import {Link} from "react-router-dom";
 import PropTypes from "prop-types";
 import Spinner from "react-bootstrap/Spinner";
+import {fetchRooms} from "../../actions/actions";
+import {connect} from "react-redux";
 
-export default class RoomTable extends React.Component {
+class RoomTable extends React.Component {
     //TODO make this body a SongCard that can be reusable separately from ths polling Card
     constructor (props) {
         super(props)
@@ -53,8 +55,12 @@ export default class RoomTable extends React.Component {
         let header = ['', 'room name', 'now playing', 'listeners', 'curator', ''] //swap these out with icons
         //future: genre / vibes pie chart / viz tooltips
         return header.map((key, index) => {
-            return <th className="text-center" key={index}>{key.toUpperCase()}</th>
+            return <th className="text-center" key={index}>{key.toLowerCase()}</th>
         })
+    }
+
+    componentDidMount() {
+        this.props.dispatch(fetchRooms(() => this.setState({roomsFetching: false})))
     }
 
     render() {
@@ -76,6 +82,8 @@ export default class RoomTable extends React.Component {
         )
     }
 }
+
+export default connect()(RoomTable)
 
 RoomTable.propTypes = {
     actionHandler: PropTypes.func.isRequired,

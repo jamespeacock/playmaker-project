@@ -24,6 +24,7 @@ class Room extends React.Component {
     }
 
     refreshQueue = async () => {
+        this.setState({queuFetching: true})
         this.props.dispatch(refreshQueue('listener', () => this.setState({queueFetching: false})))
     }
 

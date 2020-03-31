@@ -50,6 +50,7 @@ class Queue(models.Model):
         if not self.current_song or self.current_song != controller_song_uri:
             self.current_song = controller_song_uri
             logging.log(logging.INFO, "Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
+            print("Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
             self.save()
         # TODO End lock here
             if not controller_current_song or not controller_current_song['item']:

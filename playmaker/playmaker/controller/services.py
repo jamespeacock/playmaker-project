@@ -44,7 +44,7 @@ def can_perform_action(actor, listener_uuid, action, scope="ALL"):
     #                 (actor.uuid, listener_id, action))
 
 
-# TODO async later
+# TODO make async
 def kickoff_request(v, action, *args, **kwargs):
     return v.execute(action, *args, **kwargs)
 
@@ -69,11 +69,15 @@ def perform_action(actor, action, *args, **kwargs):
 
     return results # loop.run_until_complete(asyncio.gather(*async_actions))
 
+def check_playing_for_all_listeners(listeners, **kwargs):
+    different = [r for r in perform_action(Action.CURRENT, **kwargs) if not r.get('error', None)]
+    listeners = [d for d in different if d and d['item'] and d['item']['uri'] != kwargs[URIS][0]]
 
 def perform_action_for_listeners(*args, **kwargs):
     if URIS in kwargs:
         kwargs[URIS] = make_iterable(kwargs.pop(URIS))
-    failed_results = [r for r in perform_action(*args, **kwargs) if r]
+
+    failed_results = [r for r in perform_action(*args, **kwargs) if r.get('error', None)]
 
     return len(failed_results) == 0
 
@@ -266,7 +270,7 @@ class CurrentSongPoller(object):
             print("Playing next song for controller.")
             user.play_song(next_song)
 
-        success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song])
+        success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song], check_different=Action.CURRENT)
         if current_song_pos > DEFAULT_MS_OFFSET:
             success = success and perform_action_for_listeners(actor, Action.SEEK, position_ms=current_song_pos)
 
