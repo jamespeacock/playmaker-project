@@ -4,7 +4,6 @@ import {Container} from 'react-bootstrap'
 import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 import RoomTable from "../Listener/RoomTable";
 import {connect} from "react-redux";
-import {fetchRooms} from "../../actions/actions";
 
 class RoomList extends React.Component {
 

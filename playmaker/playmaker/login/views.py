@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
 from rest_framework.exceptions import ValidationError
+from django.utils import timezone as tz
 
 from api.settings import FRONTEND
 from playmaker.controller.models import Controller
@@ -19,8 +20,10 @@ from playmaker.serializers import UserSerializer
 from playmaker.shared.views import SecureAPIView
 
 
-def is_logged_in(request):
-    return request.user and hasattr(request.user, 'token') and len(request.user.token)
+def is_logged_in(user):
+    user.last_active = tz.now()
+    user.save()
+    return user and hasattr(user, 'token') and len(user.token)
 
 
 class SpotifyRegisterView(RegisterView):
@@ -57,7 +60,7 @@ class SpotifyLoginView(LoginView):
         # TODO check if request already has user and is logged in.
         data = request.data
         frontend_redirect = data.get('redirect', 'login')
-        if is_logged_in(request):
+        if is_logged_in(request.user):
             # User is already logged in --> send to dashboard.
             user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
             return user_redirect
@@ -116,7 +119,7 @@ class IsLoggedInView(SecureAPIView):
 
         user_data = {**ser(user).data,
          'actor': actor,
-         'is_logged_in': True}
+         'is_logged_in': is_logged_in(user)}
 
         if user.token:
             user_data['is_authenticated'] = True
