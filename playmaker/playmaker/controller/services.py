@@ -69,9 +69,11 @@ def perform_action(actor, action, *args, **kwargs):
 
     return results # loop.run_until_complete(asyncio.gather(*async_actions))
 
+# TODO FIX polling updating when it shouldn't - CHECK CHAnGED is broken
 def check_playing_for_all_listeners(listeners, **kwargs):
     different = [r for r in perform_action(Action.CURRENT, **kwargs) if not r.get('error', None)]
     listeners = [d for d in different if d and d['item'] and d['item']['uri'] != kwargs[URIS][0]]
+
 
 def perform_action_for_listeners(*args, **kwargs):
     if URIS in kwargs:
@@ -270,7 +272,7 @@ class CurrentSongPoller(object):
             print("Playing next song for controller.")
             user.play_song(next_song)
 
-        success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song], check_different=Action.CURRENT)
+        success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song])
         if current_song_pos > DEFAULT_MS_OFFSET:
             success = success and perform_action_for_listeners(actor, Action.SEEK, position_ms=current_song_pos)
 
