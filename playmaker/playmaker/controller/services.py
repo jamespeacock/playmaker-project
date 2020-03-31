@@ -79,7 +79,7 @@ def perform_action_for_listeners(*args, **kwargs):
     if URIS in kwargs:
         kwargs[URIS] = make_iterable(kwargs.pop(URIS))
 
-    failed_results = [r for r in perform_action(*args, **kwargs) if r.get('error', None)]
+    failed_results = [r for r in perform_action(*args, **kwargs) if not r or r.get('error', None)]
 
     return len(failed_results) == 0
 

@@ -2,7 +2,7 @@ import React from 'react'
 import {Redirect, withRouter} from 'react-router-dom'
 import { Form, Button, Container } from 'react-bootstrap'
 import ApiInterface from '../../api/ApiInterface'
-import Header from '../Header/Header'
+import config from '../../config'
 import {checkLoggedIn} from "../../actions/actions";
 import {connect} from "react-redux";
 
@@ -73,6 +73,7 @@ class Login extends React.Component {
                             Login
                         </Button>
                         <Form.Text onClick={() => this.props.history.push('/signup')} >Need an account? Sign Up</Form.Text>
+                        <Form.Text onClick={() => window.location.href = config.API_BASE + '/accounts/password_reset'}>silly you, forgot your password?</Form.Text>
                     </Form>
                 </Container>
             </React.Fragment>
