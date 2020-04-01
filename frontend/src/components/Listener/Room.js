@@ -31,15 +31,15 @@ class Room extends React.Component {
 
     componentWillMount() {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'listen');
-        let roomId = this.props.match && this.props.match.params ? this.props.match.params.id : '';
-        if (roomId && this.state.roomFetching) {
-            this.props.dispatch(startListener(roomId, () => this.setState({roomFetching: false})))
-        }
     }
 
     componentDidMount() {
         if (!this.isDeviceWorking()) {
             if (!this.props.session.showDevices ) { this.props.dispatch(openDevices()) }
+        }
+        let roomId = this.props.match && this.props.match.params ? this.props.match.params.id : '';
+        if (roomId && this.state.roomFetching) {
+            this.props.dispatch(startListener(roomId, () => this.setState({roomFetching: false})))
         }
     }
 
@@ -58,7 +58,7 @@ class Room extends React.Component {
     }
 
     render() {
-        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, '/listen/'+this.props.listener.room.id);
 
         if ((!this.props.user.isListener || this.props.listener.roomClosed) && !this.state.roomFetching) {
             return (<Redirect to={'/listen'}/>)
@@ -75,34 +75,32 @@ class Room extends React.Component {
                 10000);
         }
         return (
-            <AppContext.Consumer>
-                {() =>
-                    <React.Fragment>
-                        <Card style={{width: '18rem'}}>
-                            <Card.Body>
-                                <Card.Text style={{color: 'black'}}>
-                                    Room {this.props.listener.room.id}: {this.props.listener.room.name || ''}
-                                </Card.Text>
-                                <Button onClick={() => {
-                                    this.props.dispatch(leaveRoom())
-                                    clearInterval(this.queuePolling)
-                                }}>Leave</Button>
-                            </Card.Body>
-                        </Card>
-                        <main className="listener-area">
-                            <Container className="listener-queue-container">
-                                {!this.state.queueFetching ?
-                                    showPlaying(this.props.listener.currentSong, this.props.listener.queue) :
-                                    <Spinner animation="border" variant="primary"/>
-                                }
-                            </Container>
-                            <Container>
-                                Chat room coming soon!
-                            </Container>
-                        </main>
-                    </React.Fragment>
-                }
-            </AppContext.Consumer>
+            <React.Fragment>
+                <Container lg={8} md={6}>
+                    <Card className="card-room" fluid>
+                        <Card.Body>
+                            <Card.Text style={{color: 'black'}}>
+                                Room {this.props.listener.room.id}: {this.props.listener.room.name || ''}
+                            </Card.Text>
+                            <Button onClick={() => {
+                                this.props.dispatch(leaveRoom())
+                                clearInterval(this.queuePolling)
+                            }}>Leave</Button>
+                        </Card.Body>
+                    </Card>
+                    <main className="listener-area">
+                        <Container className="listener-queue-container" fluid>
+                            {!this.state.queueFetching ?
+                                showPlaying(this.props.listener.currentSong, this.props.listener.queue) :
+                                <Spinner animation="border" variant="primary"/>
+                            }
+                        </Container>
+                        <Container>
+                            Chat room coming soon!
+                        </Container>
+                    </main>
+                </Container>
+            </React.Fragment>
         )
     }
 }

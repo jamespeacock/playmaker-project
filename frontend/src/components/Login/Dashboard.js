@@ -2,7 +2,6 @@ import React from 'react'
 import { withRouter } from 'react-router-dom'
 import {Button, Container, Row, Col, Jumbotron} from 'react-bootstrap'
 import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
-import {fetchRooms} from "../../actions/actions";
 import {connect} from "react-redux";
 import './dashboard.css';
 
@@ -40,32 +39,31 @@ class Dashboard extends React.Component {
         handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
         return (
           <React.Fragment>
-              <Container fluid>
-                  <Jumbotron>
-                      <Row md={4} sm={6}>
-                          <Col>
-                              <Button
-                                  onClick={this.handleListen}>
-                                  Listen with Friends
-                              </Button>
-                          </Col>
-                      </Row>
+              <Container lg={8} md={6}>
+                  <Jumbotron className="jumbotron-dashboard">
+                      <h1>listen with friends</h1>
+                      <p>sync your spotify stream from any genre of room</p>
+                      <Button
+                          color={"dark"}
+                          onClick={this.handleListen}>
+                          browse rooms
+                      </Button>
                   </Jumbotron>
-                  <Jumbotron>
-                      <Row md={4} sm={6}>
-                          <Col>
-                              <Button
-                                  onClick={() => this.handlePlay('broadcast')}>
-                                  Broadcast your Vibes
-                              </Button>
-                          </Col>
-                          <Col>
-                              <Button
-                                  onClick={() => this.handlePlay('curate')}>
-                                  Curate a Set
-                              </Button>
-                          </Col>
-                      </Row>
+                  <Jumbotron className="jumbotron-dashboard">
+                      <h1>share your music</h1>
+                      <p>broadcast your listening session for others to hear</p>
+                      <Button
+                          onClick={() => this.handlePlay('broadcast')}>
+                          create a room
+                      </Button>
+                  </Jumbotron>
+                  <Jumbotron className="jumbotron-dashboard">
+                      <h1>curate a live set</h1>
+                      <p>create a queue, see suggested songs, see listener's reactions</p>
+                      <Button
+                          onClick={() => this.handlePlay('curate')}>
+                          create a curate room
+                      </Button>
                   </Jumbotron>
               </Container>
           </React.Fragment>

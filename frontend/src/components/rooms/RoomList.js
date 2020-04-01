@@ -13,7 +13,7 @@ class RoomList extends React.Component {
 
 
     componentWillMount() {
-        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
+        handleRedirectsIfNotLoggedInOrAuthed(this.props, '/listen'); //Here to force redirect after logout
     }
 
     render() {
@@ -22,7 +22,7 @@ class RoomList extends React.Component {
         }
         return (
             <React.Fragment>
-                <Container fluid>
+                <Container lg={8} md={6}>
                     <h2>Rooms</h2>
                     <RoomTable
                         rooms={this.props.rooms}
