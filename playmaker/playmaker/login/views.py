@@ -21,8 +21,6 @@ from playmaker.shared.views import SecureAPIView
 
 
 def is_logged_in(user):
-    user.last_active = tz.now()
-    user.save()
     return user and hasattr(user, 'token') and len(user.token)
 
 
@@ -62,6 +60,9 @@ class SpotifyLoginView(LoginView):
         frontend_redirect = data.get('redirect', 'login')
         if is_logged_in(request.user):
             # User is already logged in --> send to dashboard.
+            user = request.usera
+            user.last_active = tz.now()
+            user.save()
             user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
             return user_redirect
         try:
