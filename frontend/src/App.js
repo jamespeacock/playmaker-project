@@ -10,7 +10,7 @@ import Dashboard from './components/Login/Dashboard'
 import Room from './components/Listener/Room'
 import Header from './components/Header/Header'
 import {checkLoggedIn} from './actions/actions'
-import './App.css'
+import './App.scss'
 import ApiInterface from "./api/ApiInterface";
 import RoomList from "./components/rooms/RoomList";
 require('dotenv').config()

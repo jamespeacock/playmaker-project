@@ -4,6 +4,8 @@
 
 #. /etc/dns/config
 
+gcloud compute instances start playmaker-api-1
+
 rm -rf transaction.yaml
 
 #Gather IP

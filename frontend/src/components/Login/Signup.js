@@ -96,7 +96,7 @@ class Signup extends React.Component {
                             </Form.Control.Feedback>
                         </Form.Group>
 
-                        <Button variant="primary" type="submit" onClick={this.signupHandler}>
+                        <Button type="submit" onClick={this.signupHandler}>
                             Create Account
                         </Button>
                         <Form.Text onClick={() => this.props.history.push('/login')} >Have an account? Log In</Form.Text>

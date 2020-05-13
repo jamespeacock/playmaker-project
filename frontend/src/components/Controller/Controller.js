@@ -17,6 +17,7 @@ import {openDevices} from "../../actions/sessionActions";
 import {leaveRoom} from "../../actions/listenerActions";
 import Button from "react-bootstrap/Button";
 import {closeRoom} from "../../actions/controllerActions";
+import styles from "../../App.scss";
 
 
 class Controller extends React.Component {
@@ -178,9 +179,9 @@ class Controller extends React.Component {
     RoomCard = () => {
         let roomName = this.props.controller.room && this.props.controller.room.name;
         if (roomName && !this.state.editRoom) {
-            return (<Card style={{width: '18rem'}}>
+            return (<Card className={styles.card}>
                 <Card.Body>
-                    <Card.Text style={{color: 'black'}}>
+                    <Card.Text className={styles.cardText}>
                         Room Name: {this.props.controller.room.name}
                     </Card.Text>
                 </Card.Body>

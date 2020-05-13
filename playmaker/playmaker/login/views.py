@@ -63,7 +63,7 @@ class SpotifyLoginView(LoginView):
         frontend_redirect = data.get('redirect', 'login')
         if is_authenticated(request.user):
             # User is already logged in --> send to dashboard.
-            user = request.usera
+            user = request.user
             user.last_active = tz.now()
             user.save()
             user_redirect = redirect(FRONTEND + "/" + frontend_redirect)

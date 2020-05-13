@@ -1,3 +1,9 @@
-$body-bg: #000;
-
+// Import Bootstrap and its default variables
 @import '~bootstrap/scss/bootstrap.scss';
+//@import '~_root.scss';
+
+// change the theme
+$theme-colors: (
+  primary: #000000,
+  danger: #ff4136
+);

@@ -30,10 +30,10 @@ class Login extends React.Component {
     loginInterfaceHandler = async ( evt ) => {
         evt.preventDefault();
         const { username, password} = this.state;
-        console.log('will redirect after login to: ' + this.props.location.redirect || 'dashboard');
+        console.log('will redirect after login to: ' + this.props.location.redirect || 'listen');
         const resp = await this.loginInterface.fetchLoginRedirect(
           'login/',
-          { username, password, redirect: this.props.location.redirect || 'dashboard' });
+          { username, password, redirect: this.props.location.redirect || 'listen' });
         if (resp.url) {
           this.props.dispatch(checkLoggedIn())
         } else {
@@ -53,7 +53,7 @@ class Login extends React.Component {
 
     render() {
         if (this.props.user.isLoggedIn) {
-            return (<Redirect to={this.props.location.redirect || '/dashboard'}/>)
+            return (<Redirect to={this.props.location.redirect || '/listen'}/>)
         }
         return (
             <React.Fragment>

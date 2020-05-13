@@ -1,9 +1,10 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
-import {Button, Container, Row, Col, Jumbotron} from 'react-bootstrap'
-import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
+import {Button, Container, Jumbotron} from 'react-bootstrap'
+// import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 import {connect} from "react-redux";
 import './dashboard.css';
+import styles from "../../App.scss";
 
 class Dashboard extends React.Component {
 
@@ -36,7 +37,7 @@ class Dashboard extends React.Component {
     }
 
     render() {
-        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
+        // handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
         return (
           <React.Fragment>
               <Container lg={8} md={6}>
@@ -44,6 +45,7 @@ class Dashboard extends React.Component {
                       <h1>listen with friends</h1>
                       <p>sync your spotify stream from any genre of room</p>
                       <Button
+                          className={styles.button}
                           color={"dark"}
                           onClick={this.handleListen}>
                           browse rooms
@@ -61,6 +63,7 @@ class Dashboard extends React.Component {
                       <h1>curate a live set</h1>
                       <p>create a queue, see suggested songs, see listener's reactions</p>
                       <Button
+                          className={styles.button}
                           onClick={() => this.handlePlay('curate')}>
                           create a curate room
                       </Button>

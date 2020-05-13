@@ -1,7 +1,4 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {getCurrentSong} from "../../actions/actions.js";
-import {withSongPolling} from "./withSongPolling";
 import {Button, Card} from 'react-bootstrap'
 
 //TODO figure out additional display info like track features, popularity, release date, etc.
@@ -22,8 +19,8 @@ class CurrentSongCard extends React.Component {
       this.imageSrc = this.props.song.images["lg"].url
     }
     if (this.doRender) {
-        return (<Card bg="primary" className="text-center" style={{ width: '18rem' }}>
-          <Card.Body>
+        return (<Card bg="light" className="text-center" style={{ width: '18rem' }}>
+          <Card.Body className="card-song">
             <Card.Img variant="top" src={this.imageSrc} />
             <Card.Title>{this.title}</Card.Title>
             <Card.Text>

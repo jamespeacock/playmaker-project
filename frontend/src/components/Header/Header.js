@@ -1,6 +1,6 @@
 import React from 'react'
 import logo from '../../assets/logo.png'
-import { Navbar, NavDropdown, Image, Col } from 'react-bootstrap'
+import { Navbar, NavDropdown, Image, Col, Row } from 'react-bootstrap'
 import AppContext from '../AppContext'
 import {openDevices, openReport, openJoinRoom} from "../../actions/sessionActions";
 import {startListener} from "../../actions/actions";
@@ -8,6 +8,8 @@ import {ShowDevicesModal} from "../shared/Devices";
 import {connect} from "react-redux";
 import FindRoomModal from "../rooms/FindRoomModal";
 import SubmitReport from "../feedback/SubmitReport";
+import styles from '../../App.scss';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 class Header extends React.Component {
 
@@ -15,7 +17,7 @@ class Header extends React.Component {
         super(props)
 
         this.state = {
-            bg : 'green'
+            theme : "#3c763d" // can inject this via styles={{color:this.state.theme}}.
         }
     }
 
@@ -24,19 +26,14 @@ class Header extends React.Component {
         <AppContext.Consumer>
             {({logout}) =>
                 <React.Fragment>
-                    <Navbar bg={this.state.bg} expand="lg">
-                        <Navbar.Brand href="#home">
-                            <Col xs={4} md={3}>
-                                <Image src={logo} fluid/>
-                            </Col>
+                    <Navbar className="navbar-header" expand="lg" sticky={'top'}>
+                        <Navbar.Brand href="/dashboard">
+                            <h2>playmaker</h2>
                         </Navbar.Brand>
-                        <Col xs={4} md={3}>
-                            <Navbar.Text>playmkr</Navbar.Text>
-                        </Col>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         {this.props.user.isLoggedIn &&
                             <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                                <NavDropdown title={this.props.user.username + "'s Account"} id="basic-nav-dropdown" className="dropdown-menu-right">
+                                <NavDropdown class={styles.navbarHeader} title={<FontAwesomeIcon icon="user">{this.props.user.username[0].toUpperCase()}>}</FontAwesomeIcon>} id="basic-nav-dropdown" className="dropdown-menu-right">
                                     {this.props.user.isListener &&
                                     <NavDropdown.Item onClick={() =>
                                         this.props.dispatch(openJoinRoom())

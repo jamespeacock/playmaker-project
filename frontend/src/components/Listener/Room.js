@@ -1,6 +1,5 @@
 import React from 'react'
 import ListenerInterface from '../../api/ListenerInterface'
-import AppContext from "../AppContext";
 import {handleRedirectsIfNotLoggedInOrAuthed, showPlaying} from "../shared/utils";
 import {connect} from "react-redux";
 import {refreshQueue, startListener} from "../../actions/actions";
@@ -11,6 +10,7 @@ import {openDevices} from "../../actions/sessionActions";
 import Button from "react-bootstrap/Button";
 import {leaveRoom} from "../../actions/listenerActions";
 import {Redirect, withRouter} from "react-router-dom";
+import styles from "../../App.scss";
 
 class Room extends React.Component {
 
@@ -77,9 +77,9 @@ class Room extends React.Component {
         return (
             <React.Fragment>
                 <Container lg={8} md={6}>
-                    <Card className="card-room" fluid>
+                    <Card className={styles.cardRoom} fluid>
                         <Card.Body>
-                            <Card.Text style={{color: 'black'}}>
+                            <Card.Text>
                                 Room {this.props.listener.room.id}: {this.props.listener.room.name || ''}
                             </Card.Text>
                             <Button onClick={() => {
