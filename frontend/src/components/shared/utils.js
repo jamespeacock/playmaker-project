@@ -2,7 +2,6 @@ import React from "react";
 import {Button} from "react-bootstrap";
 import CurrentSongCard from "./SongCards";
 import SongTable from "./SongTable";
-var uuid = require('node-uuid');
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
     if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {
@@ -24,7 +23,6 @@ const showPlaying = (currentSong, queue, handleSkip, handleAction=null,  actionN
                 <CurrentSongCard song={currentSong} isController={isController}/>
                 {queue.length > 0 && isController &&
                 <Button
-                    key={uuid()}
                     className="button"
                     onClick={handleSkip}>
                     SKIP
