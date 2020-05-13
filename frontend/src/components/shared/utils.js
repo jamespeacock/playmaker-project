@@ -2,7 +2,7 @@ import React from "react";
 import {Button} from "react-bootstrap";
 import CurrentSongCard from "./SongCards";
 import SongTable from "./SongTable";
-const uuid = require('uuid/v4')
+var uuid = require('node-uuid');
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
     if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {
