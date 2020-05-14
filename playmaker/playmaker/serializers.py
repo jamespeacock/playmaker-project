@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from playmaker.models import User, Device
+from playmaker.rooms.serializers import RoomSerializer
 
 
 class DeviceSerializer(serializers.ModelSerializer):

@@ -53,6 +53,12 @@ export default class ControllerInterface  {
     )
   }
 
+  close = async () => {
+    return await this.apiInterface.get(
+        'controller/close'
+    )
+  }
+
   /* Recommendations Section */
   recs = async ( ) => {
     return await this.apiInterface.get('controller/recs')

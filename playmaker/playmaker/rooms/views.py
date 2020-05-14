@@ -17,7 +17,11 @@ class RoomDetailView(UpdateAPIView, SecureAPIView):
     serializer_class = RoomSerializer
     queryset = Room.objects.all()
 
-    def get(self, request, room, *args):
-        super(RoomDetailView, self).get(request, *args)
-        return super(RoomDetailView, self).get(request, room, *args)
-        # return JsonResponse(RoomSerializer(Room.objects.get(id=room)).data, safe=False)
+    def get(self, request, pk, *args):
+        super(RoomDetailView, self).get(request, pk, *args)
+        # return super(RoomDetailView, self).get(request, room, *args)
+        room_obj = Room.objects.filter(id=pk).first()
+        if room_obj:
+            return JsonResponse(RoomSerializer(room_obj).data, safe=False)
+        else:
+            return JsonResponse({"error": "Room with id %s does not exist." % str(pk)}, status=404)

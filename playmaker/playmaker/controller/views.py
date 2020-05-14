@@ -5,9 +5,10 @@ from playmaker.controller.contants import URIS, ADD, REMOVE, START, STOP
 from playmaker.listener.models import Listener
 from playmaker.controller.serializers import QueueActionSerializer
 from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_room, \
-    perform_action_for_listeners
+    perform_action_for_listeners, perform_action
 from playmaker.controller.visitors import Action
 from playmaker.listener.services import checkPlaySeek
+from playmaker.models import User
 from playmaker.shared.views import SecureAPIView
 
 
@@ -35,7 +36,7 @@ class StartRoomView(SecureAPIView):
 
         if not user.hasActivePoller:
             start_polling(user)
-        current_song = user.actor.queue.now_playing() if mode != 'curate' else {}
+        current_song = User.objects.get(username=user.username).actor.queue.now_playing() if mode != 'curate' else {}
         return JsonResponse({"room": {"id": room_id}, "controller": controller_id, "currentSong": current_song or {}})
 
 
@@ -102,7 +103,9 @@ class QueueActionView(ControllerView):
         current_song = checkPlaySeek(user) # Redundant check to make sure song showing up on UI is actually playing too.
         if current_song:
             return JsonResponse({"currentSong": current_song, "queue": songs}, safe=False)
-        return JsonResponse({"error": "There is a problem with the queue/group. Most likely it has been closed."},
+        if user.is_listener and actor and user.active_device:
+            perform_action(None, Action.PAUSE, listeners=[actor])
+        return JsonResponse({"error": "There is a problem with the queue/group. Most likely it has been closed or user have left it."},
                             status=404, safe=False)
 
     """
@@ -141,6 +144,17 @@ class PollView(ControllerView):
         except Exception as e:
             logging.log(logging.ERROR, e)
             return JsonResponse(str(e), status=500, safe=False)
+
+
+class CloseRoomView(ControllerView):
+
+    def get(self, request, *args):
+        actor = request.user.controller
+        success = perform_action_for_listeners(actor, Action.PAUSE)
+        print("Closed room: " + str(success))
+        print(actor.delete())
+        request.user.save()
+        return JsonResponse({})
 
 
 class ModeDetailView(ControllerView):

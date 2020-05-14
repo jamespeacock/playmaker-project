@@ -15,6 +15,10 @@ export default class ListenerInterface  {
     return await this.apiInterface.get('listener/join?room=' + room)
   }
 
+  leave = async () => {
+    return await this.apiInterface.get('listener/leave')
+  }
+
   devices = async ( ) => {
     const devices = await this.apiInterface.get('listener/devices');
     return devices || [];

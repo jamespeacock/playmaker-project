@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import {Button, Modal} from 'react-bootstrap'
 import BootstrapTable from 'react-bootstrap-table-next';
 import {refreshDevices, setDevice} from "../../actions/actions";
@@ -25,36 +25,50 @@ class DevicesModal extends React.Component {
         id: 'select-button',
         formatter: this.buttonFormatter
       }];
+
+      this.state = {
+          show: true
+      }
     }
 
     buttonFormatter = (cell, row) => {
       return (<Button onClick={ () => {
           this.props.dispatch(setDevice(row));
-          this.props.onHide();
+          this.setState({show: false});
       } }>Select</Button>);
+    }
+
+    currentDevice(device){
+        if (device) {
+            return (<p style={{color:'black'}}>Currently listening on {device.name}</p>)
+        } else {
+            return ''
+        }
+    }
+
+    componentWillMount() {
+        this.props.dispatch(refreshDevices())
     }
 
 
     render() {
       return (
-          <Modal show={this.props.show} onHide={this.props.onHide}>
+          <Modal show={this.state.show} onHide={() => this.setState({show:false})}>
               <Modal.Header>
                   <Modal.Title style={{color:'black'}}>Your Listening Devices</Modal.Title>
               </Modal.Header>
-
-              {this.props.user.current_device && <p>Currently listening on props.user.current_device.name</p>}
-
+              {this.currentDevice(this.props.user.active_device)}
               <Modal.Body>
                   <p style={{color:'black'}}>Please select your listening device.</p>
                   <Button md={3} onClick={() => this.props.dispatch(refreshDevices())}>Refresh Devices</Button>
               </Modal.Body>
-
               <div>
                   <BootstrapTable
                       keyField="sp_id"
                       data={this.props.user.devices}
                       columns={this.columns}/>
               </div>
+              <p style={{color:'black'}}>Oddly, mobile devices do not appear unless they are open.</p>
           </Modal>
       )
     }
@@ -65,19 +79,8 @@ DevicesModal.propTypes = {
     dispatch: PropTypes.func.isRequired
 }
 
-const ConnectedDevicesModal = connect()(DevicesModal)
+const ShowDevicesModal = connect()(DevicesModal)
 
-function ShowDevicesModal(props) {
-    const [modalShow, setModalShow] = React.useState(props.initialShow);
-    useEffect(() => {
-        setModalShow(props.initialShow);
-    }, [props])
-
-    return(<ConnectedDevicesModal
-        user={props.user}
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-    />)
-};
-
-export default ShowDevicesModal
+export {
+    ShowDevicesModal
+}

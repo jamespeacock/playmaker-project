@@ -1,17 +1,24 @@
 import { combineReducers } from 'redux'
 import {
-  REFRESH_QUEUE_CONTROLLER,
-  CHECK_LOGGED_IN,
-  SET_CURRENT_DEVICE,
-  // SEARCH,
-  REFRESH_DEVICES,
-  START_CONTROLLER,
-  UPDATE_CONTROLLER,
-  START_LISTENER,
-  CURRENT_SONG_SUCCESS,
-  REFRESH_QUEUE_LISTENER,
-  FETCH_ROOMS,
+    REFRESH_QUEUE_CONTROLLER,
+    CHECK_LOGGED_IN,
+    SET_CURRENT_DEVICE,
+    REFRESH_DEVICES,
+    START_CONTROLLER,
+    UPDATE_CONTROLLER,
+    START_LISTENER,
+    CURRENT_SONG_SUCCESS,
+    REFRESH_QUEUE_LISTENER,
+    FETCH_ROOMS,
 } from './actions/actions'
+
+import {
+    SHOW_DEVICES,
+    SHOW_JOIN_ROOM,
+    SHOW_REPORT
+} from './actions/sessionActions'
+import {LEAVE_ROOM} from "./actions/listenerActions";
+import {CLOSE_ROOM} from "./actions/controllerActions";
 
 const defaultUser = {
     isLoggedIn: false,
@@ -19,26 +26,29 @@ const defaultUser = {
     isListener: false,
     isInRoom: false,
     mode: '', // Can change this to broadcast, curate or listen...what else? broadcast/curate imply/require isController:true
-    active_device: {}
+    active_device: {},
+    devices: []
 }
 
 //Define reducers here
 function user(state=defaultUser, action) {
   switch (action.type) {
+    case START_LISTENER:
+        return Object.assign({}, state, {...state, isListener: true})
+    case START_CONTROLLER:
+        return Object.assign({}, state, {...state, isController: true})
     case CHECK_LOGGED_IN:
     case SET_CURRENT_DEVICE:
     case REFRESH_DEVICES:
-    case START_LISTENER:
-    case START_CONTROLLER:
-      return Object.assign({}, state, action.user)
-
+    case LEAVE_ROOM:
+    case CLOSE_ROOM:
+        return Object.assign({}, state, action.user)
     default:
-      return state
+        return state
   }
 }
 
 function rooms(state=[], action) {
-  console.log(action.rooms)
   switch (action.type) {
     case CHECK_LOGGED_IN:
     case FETCH_ROOMS:
@@ -67,6 +77,7 @@ function controller(state=defaultController, action) {
     case CHECK_LOGGED_IN:
     case START_CONTROLLER:
     case UPDATE_CONTROLLER:
+    case CLOSE_ROOM:
       return Object.assign({}, state, action.controller)
     default:
       return state
@@ -80,39 +91,46 @@ const defaultListener = {
 }
 
 function listener(state=defaultListener, action) {
-//  console.log('in listener reducer: ' + action.type)
-//  console.log('state', state)
-//  console.log(action.listener)
   switch (action.type) {
     case CURRENT_SONG_SUCCESS:
       return Object.assign({}, state, {...state, currentSong: action.current})
     case REFRESH_QUEUE_LISTENER:
       return Object.assign({}, state, action.actor)
-    case CHECK_LOGGED_IN:
     case START_LISTENER:
+    case LEAVE_ROOM:
       return Object.assign({}, state, action.listener)
     default:
       return state
   }
 }
 
-// Combine reducers to create root reducer below here.
+const defaultSession = {
+    showDevices: false,
+    showReport: false,
+    showJoinRoom: false
+}
 
-function createReducer(initialState, handlers) {
-  return function reducer(state = initialState, action) {
-    if (handlers.hasOwnProperty(action.type)) {
-      return handlers[action.type](state, action)
-    } else {
-      return state
+function session(state=defaultSession, action) {
+    switch (action.type) {
+        case SHOW_DEVICES:
+        case SHOW_REPORT:
+        case SHOW_JOIN_ROOM:
+            return Object.assign({}, state, action.session)
+        case SET_CURRENT_DEVICE:
+            return Object.assign({}, state, {showDevices: false})
+        case START_LISTENER:
+            return Object.assign({}, state, {showJoinRoom: false})
+        default:
+            return state
     }
-  }
 }
 
 const playmakerApp = combineReducers({
-  user,
-  controller,
-  listener,
-  rooms
+    user,
+    controller,
+    listener,
+    rooms,
+    session
 })
 
 export default playmakerApp

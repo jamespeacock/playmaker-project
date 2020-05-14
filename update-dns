@@ -4,6 +4,8 @@
 
 #. /etc/dns/config
 
+gcloud compute instances start playmaker-api-1
+
 rm -rf transaction.yaml
 
 #Gather IP
@@ -12,9 +14,9 @@ IP_ADDRESS=$(gcloud compute instances describe playmaker-api-1 --zone us-central
 #Gather hostname
 IO_HOSTNAME=$(gcloud compute instances describe playmaker-api-1 --zone us-central1-a | grep url: | awk {'print $2'})
 
-OLD_IP_ADDRESS=$(gcloud dns record-sets list --zone=myplaymkrco-zone --name=$IO_HOSTNAME.myplaymkr.co --format=json | jq -r .[0].rrdatas[0])
+OLD_IP_ADDRESS=$(gcloud dns record-sets list --zone=playmaker-social --name=$IO_HOSTNAME.playmaker.social --format=json | jq -r .[0].rrdatas[0])
 
-gcloud dns record-sets transaction start -z=myplaymkrco-zone
-gcloud dns record-sets transaction remove --zone myplaymkrco-zone --name $IO_HOSTNAME.myplaymkr.co. --ttl 120 --type A $OLD_IP_ADDRESS
-gcloud dns record-sets transaction add --zone myplaymkrco-zone --name $IO_HOSTNAME.myplaymkr.co. --ttl 120 --type A $IP_ADDRESS
-gcloud dns record-sets transaction execute -z=myplaymkrco-zone
+gcloud dns record-sets transaction start -z=playmaker-social
+gcloud dns record-sets transaction remove --zone playmaker-social --name $IO_HOSTNAME.playmaker.social. --ttl 120 --type A $OLD_IP_ADDRESS
+gcloud dns record-sets transaction add --zone playmaker-social --name $IO_HOSTNAME.playmaker.social. --ttl 120 --type A $IP_ADDRESS
+gcloud dns record-sets transaction execute -z=playmaker-social

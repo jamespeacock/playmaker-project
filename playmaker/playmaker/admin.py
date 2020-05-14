@@ -20,7 +20,7 @@ class UserAdmin(admin.ModelAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = User
-    list_display = ['email', 'username', 'sp_username', 'name', 'sp_id']
+    list_display = ['email', 'username', 'sp_username', 'name', 'sp_id', 'last_active', 'active']
 
 
 admin.site.register(SPModel, SPModelAdmin)

@@ -1,4 +1,5 @@
 import cProfile
+import logging
 import pstats
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -7,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
 from rest_framework.exceptions import ValidationError
+from django.utils import timezone as tz
 
 from api.settings import FRONTEND
 from playmaker.controller.models import Controller
@@ -19,8 +21,11 @@ from playmaker.serializers import UserSerializer
 from playmaker.shared.views import SecureAPIView
 
 
-def is_logged_in(request):
-    return request.user and hasattr(request.user, 'token') and len(request.user.token)
+def is_authenticated(user):
+    if user and hasattr(user, 'token') and len(user.token):
+        return True
+    else:
+        return False
 
 
 class SpotifyRegisterView(RegisterView):
@@ -54,11 +59,13 @@ class SpotifyLoginView(LoginView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        # TODO check if request already has user and is logged in.
         data = request.data
         frontend_redirect = data.get('redirect', 'login')
-        if is_logged_in(request):
+        if is_authenticated(request.user):
             # User is already logged in --> send to dashboard.
+            user = request.user
+            user.last_active = tz.now()
+            user.save()
             user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
             return user_redirect
         try:
@@ -83,7 +90,7 @@ class SpotifyCallbackView(LoginView):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            print('User does not exist for some reason.')
+            logging.log(logging.ERROR, 'User does not exist for some reason.')
         user_redirect = redirect(FRONTEND + "/" + redirect_path)
         return user_redirect if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
 
@@ -118,12 +125,10 @@ class IsLoggedInView(SecureAPIView):
          'actor': actor,
          'is_logged_in': True}
 
-        if user.token:
-            user_data['is_authenticated'] = True
-        else:
-            user_data['is_authenticated'] = True
-        redirect = request.GET.get('redirect', 'dashboard')
-        user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect or 'dashboard')
+        user_data['is_authenticated'] = is_authenticated(user)
+        redirect_path = request.GET.get('redirect', 'dashboard')
+        redirect_path = 'dashboard' if not redirect_path or redirect_path == 'undefined' else redirect_path
+        user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect_path)
 
         # pr.disable()
         # ps = pstats.Stats(pr).sort_stats('tottime')

@@ -44,40 +44,42 @@ def can_perform_action(actor, listener_uuid, action, scope="ALL"):
     #                 (actor.uuid, listener_id, action))
 
 
-# TODO async later
+# TODO make async
 def kickoff_request(v, action, *args, **kwargs):
     return v.execute(action, *args, **kwargs)
 
 
 def perform_action(actor, action, *args, **kwargs):
     # Is this the right place to do can_perform_action?
-    listeners = [listener for listener in actor.listeners if can_perform_action(actor, listener, str(action))]
+    listeners = [listener for listener in kwargs.pop('listeners', []) or actor.listeners if can_perform_action(actor, listener, str(action))]
 
     # Filter out listeners without active devices
-    # TODO Just verify all listeners have a selected device. Notify those who dont?
-    listeners = [l for l in listeners if l.me.active_device]
-
     # Time how long this takes - are either Spotipy and ActionVisitor being instanced?
-    visitors = [l.v for l in listeners]
-    active_devices = [l.me.active_device.sp_id for l in listeners]
+    listeners = [(l.v, l.me.active_device.sp_id) for l in listeners if l.me.active_device]
 
     # Kickoff loops with visitors,devices + action
     # loop = asyncio.get_event_loop()
-    logging.log(logging.INFO, "Performing %s for %i listeners..." % (str(action), len(visitors)))
+    logging.log(logging.INFO, "Performing %s for %i listeners..." % (str(action), len(listeners)))
     if action == Action.SEEK:
-        results = [kickoff_request(v, action, *args, **kwargs) for v, ad_id in zip(visitors, active_devices)]
+        results = [kickoff_request(v, action, *args, **kwargs) for v, ad_id in listeners]
     else:
-        results = [kickoff_request(v, action, ad_id, *args, **kwargs) for v, ad_id in zip(visitors, active_devices)]
+        results = [kickoff_request(v, action, ad_id, *args, **kwargs) for v, ad_id in listeners]
     # async_actions = [kickoff_request(v, action, ad_id, *args, **kwargs) for v, ad_id in zip(visitors, active_devices)]
     # results = loop.run_until_complete(asyncio.gather(*async_actions))
 
     return results # loop.run_until_complete(asyncio.gather(*async_actions))
 
+# TODO FIX polling updating when it shouldn't - CHECK CHAnGED is broken
+def check_playing_for_all_listeners(listeners, **kwargs):
+    different = [r for r in perform_action(Action.CURRENT, **kwargs) if not r.get('error', None)]
+    listeners = [d for d in different if d and d['item'] and d['item']['uri'] != kwargs[URIS][0]]
+
 
 def perform_action_for_listeners(*args, **kwargs):
     if URIS in kwargs:
         kwargs[URIS] = make_iterable(kwargs.pop(URIS))
-    failed_results = [r for r in perform_action(*args, **kwargs) if r]
+
+    failed_results = [r for r in perform_action(*args, **kwargs) if not r or r.get('error', None)]
 
     return len(failed_results) == 0
 
@@ -86,10 +88,9 @@ def as_views(items, serializer):
     return [serializer(instance=item).data for item in items]
 
 
-## Queue related actions
-
+# Queue related actions
 def get_queue(actor):
-    if actor:
+    if actor and actor.queue:
         songs = as_views(actor.queue.contents(), QueuedSongSerializer)
         seen = defaultdict(int)
         for s in songs:
@@ -98,7 +99,7 @@ def get_queue(actor):
             seen[s[URI]] += 1
         return songs
     else:
-        print("User does not have an associated listener or controller.")
+        print("User does not have both actor & queue currently.")
         return []
 
 
@@ -215,14 +216,12 @@ class CurrentSongPoller(object):
         self.args = args
 
     def check_changed(self, response, current_song_id):
-        print("Checking changed.")
         if response and response['item'] and response['is_playing']:
             changed = response['item']['id'] != current_song_id
         elif response:
             changed = not response['is_playing']
         else:
             changed = response is None and current_song_id is not None
-        print(changed)
         return changed
 
     def start(self):
@@ -230,10 +229,7 @@ class CurrentSongPoller(object):
 
     def run(self, user, current_song_id):
         if user.hasActivePoller:
-            print("did not run bc already active.")
             return False
-        logging.log(logging.INFO, "Start polling")
-        print("In polling thread")
         user.hasActivePoller = True
         user.pollingThread = str(self.thread.ident)
         user.save()
@@ -242,14 +238,11 @@ class CurrentSongPoller(object):
                 # Won't work if user is a listener!
                 lambda: check_song_with_delay(user.actor.mode, user, self.thread),
                 check_success=lambda response: self.check_changed(response, current_song_id),
-                step=2, # Is this every 10s?
-                # ignore_exceptions=(requests.exceptions.ConnectionError,),
+                step=2,
                 poll_forever=True)
         except StoppedException:
             song_changed = user.sp.currently_playing()
-            print("Received exit command.")
             if not self.check_changed(song_changed, current_song_id):
-                print("Song hasn't changed.")
                 user.hasActivePoller = False
                 user.save()
             return
@@ -259,7 +252,7 @@ class CurrentSongPoller(object):
             logging.log(logging.INFO, "Song has changed for group: " + str(room.id))
 
         # Set current song and push out to all listeners. Do I have access to response
-        next_song = song_changed['item'] if song_changed else None
+        next_song = song_changed['item']['uri'] if song_changed and song_changed['item'] else None
         current_song_pos = song_changed['progress_ms'] if song_changed else 0
 
         # Handle curate next song in queue playing (overwrite if anything else was playing next for controller)
@@ -290,7 +283,9 @@ class CurrentSongPoller(object):
             self.callback(*(user, *self.args))  # Kickoff self again with calculated delay.
         elif TURN_OFF_IDLE_CONTROLLERS:
             print("Controller is no longer active. Removing")
-            user.actor.delete()
+            user.is_controller = False
+            user.controller.delete()
+            user.save()
         return success
 
 

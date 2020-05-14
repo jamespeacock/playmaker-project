@@ -1,9 +1,8 @@
 import logging
-import time
 
 import spotipy
 import uuid as uuid
-from django.db.models import DateTimeField
+from django.db.models import DateTimeField, CASCADE
 from django.utils import timezone as tz
 
 from django.contrib.auth import models as auth_models
@@ -32,12 +31,13 @@ class User(auth_models.AbstractUser):
     is_controller = models.BooleanField(default=False)
     hasActivePoller = models.BooleanField(default=False)
     pollingThread = models.CharField(null=True, max_length=128)
-    last_action = models.FloatField(null=True)
+    last_active = models.DateTimeField(null=True)
+
     _sp_cached = None
 
     @property
     def active(self):
-        return (time.time() - self.last_action < DEFAULT_INACTIVE_LEN)
+        return (self.last_active + tz.timedelta(seconds=DEFAULT_INACTIVE_LEN) - tz.now()).days >= 0
 
     # make @memoized maybe
     @property
@@ -96,19 +96,22 @@ class User(auth_models.AbstractUser):
             logging.log(logging.INFO, "Lost token for " + self.username)
             return None
 
-        ad = self.devices.filter(is_active=True).first()
-        if ad:
-            # Should there be a check if this is still the active device?
-            return ad
-
         sd = self.devices.filter(is_selected=True).first()
         if sd:
             return sd
+
+        ad = self.devices.filter(is_active=True).first()
+        if ad:
+            ad.is_selected = True
+            ad.save()
+            print("Returning active device bc selected was not found.")
+            return ad
 
         current_playback = self.sp.current_playback()
         if current_playback:
             current_device = current_playback[DEVICE]
             current_device[USER] = self
+            print("Returning device from current playback.")
             return Device.from_sp(save=True, **current_device)
 
         logging.log(logging.INFO, "Listener: " + self.username + " does not have any active or selected devices.")
@@ -116,9 +119,10 @@ class User(auth_models.AbstractUser):
 
     def get_devices(self):
         all_ds = []
+        self.devices.all().delete()
         for d in self.sp.devices()[Device.get_key()]:
             d[USER] = self
-            all_ds.append(Device.from_sp(save=False, **d))
+            all_ds.append(Device.from_sp(save=True, **d))
         return all_ds
 
     def set_device(self, device_id):
@@ -128,7 +132,7 @@ class User(auth_models.AbstractUser):
             for d in self.devices.filter(is_selected=True).all():
                 d.is_selected = False
                 d.save()
-            device.listener = self
+            device.user = self
             device.is_selected = True
             device.save()
             return True
@@ -136,7 +140,7 @@ class User(auth_models.AbstractUser):
             # Fetch current playback and set is_selected device
             logging.log(logging.ERROR, "Selected device for %s was not in database. Fetching now." % self.username)
             for d in self.sp.devices()[Device.get_key()]:
-                if d['id'] == device_id:  # d['is_selected'] or d['is_active'] # should these ever take precedent to auto select a device?
+                if d['id'] == device_id:
                     d[USER] = self
                     Device.from_sp(save=True, **d)
                     return True
@@ -157,7 +161,7 @@ class User(auth_models.AbstractUser):
 
     @property
     def is_in_room(self):
-        return self.is_listener and self.listener.room
+        return True if self.is_listener and self.listener.room else False
 
     @property
     def room(self):
@@ -179,6 +183,18 @@ class User(auth_models.AbstractUser):
     @property
     def saved_tracks(self, limit=20, offset=0):
         return utils.from_response(self.sp.current_user_saved_tracks(limit, offset), Song)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, null=False, blank=False, related_name='profile', on_delete=CASCADE)
+
+    def get_connections(self):
+        connections = Connection.objects.filter(creator=self.user)
+        return connections
+
+    def get_followers(self):
+        followers = Connection.objects.filter(following=self.user)
+        return followers
 
 
 class Device(SPModel):
@@ -211,3 +227,9 @@ class Device(SPModel):
     @staticmethod
     def get_key():
         return "devices"
+
+
+class Connection(models.Model):
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    creator = models.ForeignKey(User, related_name="friendship_creator_set", on_delete=CASCADE)
+    following = models.ForeignKey(User, related_name="friend_set", on_delete=CASCADE)

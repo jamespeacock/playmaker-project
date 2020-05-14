@@ -2,7 +2,6 @@ import ApiInterface from '../api/ApiInterface'
 import ControllerInterface from "../api/ControllerInterface";
 import ListenerInterface from "../api/ListenerInterface";
 import RoomInterface from '../api/RoomInterface'
-// import {toastr} from "react-redux-toastr";
 
 export const CURRENT_SONG_SUCCESS = "CURRENT_SONG_SUCCESS";
 export const CHECK_LOGGED_IN = 'CHECK_LOGGED_IN'
@@ -11,8 +10,6 @@ export const REFRESH_DEVICES = 'REFRESH_DEVICES'
 export const REFRESH_QUEUE_CONTROLLER = 'REFRESH_QUEUE_CONTROLLER'
 export const REFRESH_QUEUE_LISTENER = 'REFRESH_QUEUE_LISTENER'
 export const FETCH_ROOMS = 'FETCH_ROOMS'
-// export const SEARCH = 'SEARCH'
-
 export const START_CONTROLLER = 'START_CONTROLLER'
 export const UPDATE_CONTROLLER = 'UPDATE_CONTROLLER'
 export const START_LISTENER = 'START_LISTENER'
@@ -26,6 +23,7 @@ function checkLoggedIn(redirect = 'dashboard') {
         isLoggedIn: user.is_logged_in,
         isController: user.is_controller,
         isListener: user.is_listener,
+        isInRoom: user.is_in_room,
         username: user.username,
         sp_username: user.sp_username,
         devices: user.devices,
@@ -36,6 +34,7 @@ function checkLoggedIn(redirect = 'dashboard') {
     }
     if (user.is_listener) {
         action.listener = user.actor
+        action.listener.room = action.listener.room || {}
     }
     if (user.is_controller) {
         action.controller = user.actor
@@ -44,7 +43,7 @@ function checkLoggedIn(redirect = 'dashboard') {
   }
 }
 
-function fetchRooms( ) {
+function fetchRooms( callback ) {
   return async (dispatch, getState) => {
     const rooms = await new RoomInterface().all()
     if (rooms) {
@@ -53,6 +52,9 @@ function fetchRooms( ) {
         rooms
       }
       dispatch(action)
+    }
+    if (callback) {
+      callback()
     }
   }
 }
@@ -64,18 +66,19 @@ function setDevice( deviceRow ) {
       const action = {
         type: SET_CURRENT_DEVICE,
         user: resp.user,
+        listener: {room: {error: ''}},
         currentSong: resp.current_song
       }
       dispatch(action)
     }
   }
-  //replace with dispatch action here that calls listener.setDevice & set user selectedDevice (on user) name here with reducer
 }
 
 function updateMode( mode ) {
-  //Is it ok to have this action that does not need to flow to a reducer
   return async (dispatch, getState) => {
+    //TODO let this be used to switch btwn listenr & controller too
     await new ControllerInterface().updateMode(mode)
+    // action = {type: SWITCH_MODE}
   }
 }
 
@@ -178,39 +181,33 @@ function startController( mode, callback ) {
   }
 }
 
-function startListener(room) {
+function startListener(room, callback) {
   return async (dispatch, getState) => {
-    const resp = await new ListenerInterface({}).joinRoom(room)
-    let action = {type: START_LISTENER}
-    if (resp && resp.room) {
-      action.listener = resp
-      action.listener.roomClosed = false;
-    } else if (resp.error) {
-      action.listener.room = ''
+    const foundRoom = await new RoomInterface().getRoom(room);
+    let action = {type: START_LISTENER,
+      listener : { room: {} }
     }
-    action.user = {
-        isLoggedIn: true,
-        isListener: true,
-        isController: false
+    if (!foundRoom.id) {
+      action.listener.room.error = "Room " + room + " does not exist."
+      action.listener.isInRoom = false
+      action.listener = {roomClosed: true};
+    } else {
+      const resp = await new ListenerInterface({}).joinRoom(foundRoom.id)
+      if (resp && resp.room) {
+        action.listener = resp;
+        action.listener.roomClosed = false;
+        action.listener.isInRoom = true;
+        if (resp.error) {
+          action.listener.room.error = resp.error;
+        }
       }
-    dispatch(action)
+      dispatch(action)
+    }
+    if (callback) {
+      callback()
+    }
   }
 }
-
-// function search ( q ) {
-//   return async (dispatch, getState) => {
-    // let action = {type: SEARCH}
-    // action.controller = { searchFetching: true}
-    // dispatch(action)
-    // //dispatch update search results
-    // const searchResults = await this.songsInterface.search(q)
-    // action.controller = {
-    //   searchResults,
-    //   searchFetching: false
-    // }
-    // dispatch(action)
-//   }
-// }
 
 function getCurrentSong () {
     return async (dispatch, getState) => {
@@ -233,6 +230,17 @@ function setRoomName (id, name) {
   }
 
 }
+
+function submitReport (report) {
+  return async (dispatch, getState) => {
+    const type = report.isFeature ? "Feature Request" : "Bug/Problem"
+    const description = report.text
+    const resp = await new ApiInterface().post('feedback',
+        {type, description}
+    )
+  }
+}
+
 export {
     checkLoggedIn,
     setDevice,
@@ -246,5 +254,6 @@ export {
     playSong,
     updateMode,
     fetchRooms,
-    setRoomName
+    setRoomName,
+    submitReport
 }

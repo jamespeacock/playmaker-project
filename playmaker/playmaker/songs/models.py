@@ -120,25 +120,25 @@ class Song(SPModel):
         if song_obj:
             return song_obj
         else:
-            song_obj = Song.objects.create(**song)
+            song_obj = Song(**song)
 
         if save:
             song_obj.save()
         for artist in artists:
             artist[SP_ID] = artist.pop(ID)
-            a, a_created = Artist.objects.get_or_create(name=artist[NAME], uri=artist[URI], sp_id=artist[SP_ID])
+            a = Artist(name=artist[NAME], uri=artist[URI], sp_id=artist[SP_ID])
             song_obj.artists.add(a)
 
         album['sp_id'] = album.pop('id')
-        alb, _ = Album.objects.get_or_create(name=album[NAME], uri=album[URI], sp_id=album[SP_ID])
+        alb = Album(name=album[NAME], uri=album[URI], sp_id=album[SP_ID])
         if save:
             alb.save()
         for img in album['images']:
-            img_obj, _ = Image.objects.get_or_create(**img)
-            alb.images.add(img_obj.id)
+            img_obj = Image(**img)
+            alb.images.add(img_obj)
         if save:
             alb.save()
-        song_obj.on_album = alb
+        song_obj.albums.add(alb)
 
         if details:
             pass

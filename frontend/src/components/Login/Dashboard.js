@@ -1,10 +1,10 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
-import {Button, Container, Row, Col, Jumbotron} from 'react-bootstrap'
-import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
-import {fetchRooms} from "../../actions/actions";
+import {Button, Container, Jumbotron} from 'react-bootstrap'
+// import {handleRedirectsIfNotLoggedInOrAuthed} from "../shared/utils";
 import {connect} from "react-redux";
 import './dashboard.css';
+import styles from "../../App.scss";
 
 class Dashboard extends React.Component {
 
@@ -20,7 +20,6 @@ class Dashboard extends React.Component {
     }
 
     handleListen = async () => {
-        this.props.dispatch(fetchRooms())
         this.props.history.push({
           pathname: '/listen'
         })
@@ -30,41 +29,44 @@ class Dashboard extends React.Component {
         //If in a room already, route them there.
         if (this.props.user.isController && this.props.controller.room) {
             this.props.history.push('/play')
-        } else if (this.props.user.isListener && this.props.listener.room) {
+        } else if (this.props.user.isListener && this.props.listener.isInRoom ) {
             this.props.history.push('/listen/'+ this.props.listener.room.id)
+        } else if (this.props.user.isListener) {
+            this.props.history.push('/listen')
         }
     }
 
     render() {
-        handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
+        // handleRedirectsIfNotLoggedInOrAuthed(this.props, 'login'); //Here to force redirect after logout
         return (
           <React.Fragment>
-              <Container fluid>
-                  <Jumbotron>
-                      <Row md={4} sm={6}>
-                          <Col>
-                              <Button
-                                  onClick={this.handleListen}>
-                                  Listen with Friends
-                              </Button>
-                          </Col>
-                      </Row>
+              <Container lg={8} md={6}>
+                  <Jumbotron className="jumbotron-dashboard">
+                      <h1>listen with friends</h1>
+                      <p>sync your spotify stream from any genre of room</p>
+                      <Button
+                          className={styles.button}
+                          color={"dark"}
+                          onClick={this.handleListen}>
+                          browse rooms
+                      </Button>
                   </Jumbotron>
-                  <Jumbotron>
-                      <Row md={4} sm={6}>
-                          <Col>
-                              <Button
-                                  onClick={() => this.handlePlay('broadcast')}>
-                                  Broadcast your Vibes
-                              </Button>
-                          </Col>
-                          <Col>
-                              <Button
-                                  onClick={() => this.handlePlay('curate')}>
-                                  Curate a Set
-                              </Button>
-                          </Col>
-                      </Row>
+                  <Jumbotron className="jumbotron-dashboard">
+                      <h1>share your music</h1>
+                      <p>broadcast your listening session for others to hear</p>
+                      <Button
+                          onClick={() => this.handlePlay('broadcast')}>
+                          create a room
+                      </Button>
+                  </Jumbotron>
+                  <Jumbotron className="jumbotron-dashboard">
+                      <h1>curate a live set</h1>
+                      <p>create a queue, see suggested songs, see listener's reactions</p>
+                      <Button
+                          className={styles.button}
+                          onClick={() => this.handlePlay('curate')}>
+                          create a curate room
+                      </Button>
                   </Jumbotron>
               </Container>
           </React.Fragment>

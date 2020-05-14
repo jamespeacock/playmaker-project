@@ -10,6 +10,7 @@ class CreateFeedback(SecureAPIView):
 
     def post(self, request, *args, **kwargs):
         data = self.get_params(request.data, FeedbackSerializer)
+        data['user']= request.user.username
         created = Feedback.objects.create(data)
         if created:
             return JsonResponse("Feedback submitted successfully.", safe=False)

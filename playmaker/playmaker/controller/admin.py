@@ -15,7 +15,7 @@ class ListenerAdmin(admin.ModelAdmin):
 
 class RoomAdmin(admin.ModelAdmin):
     model = Room
-    # fields = ('get_group', 'get_listeners')
+    fields = ('get_group', 'get_listeners')
 
     def get_group(self, obj):
         return 'Group {} hosted by {}'.format(obj.id, obj.controller.me.username)
