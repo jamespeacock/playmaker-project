@@ -1,8 +1,6 @@
 version: '2'
 services:
   interface:
-    environment:
-      - MY_HOST=https://test.myplaymkr.co
     env_file:
       - production.env
     volumes:
@@ -15,24 +13,13 @@ services:
       args:
         - TAG=${TAG}
     volumes:
-      - /root/certs/test.myplaymkr.co:/etc/nginx/ssl/letsencrypt/test.myplaymkr.co/:rw
+      - /root/certs/playmaker.social:/etc/nginx/ssl/letsencrypt/playmaker.social/:rw
       - $HOME/docker/volumes/static:/static
     ports:
           - "80:80"
           - "443:443"
     depends_on:
       - interface
-    environment:
-      - REACT_APP_API_BASE=https://test.myplaymkr.co
+    env_file:
+      - production.env
     restart: always
-#  nginx:
-#    container_name: nginx
-#    build:
-#      context: ./nginx
-#      args:
-#        - TAG=${TAG}
-#    volumes:
-#      - /root/certs/myplaymkr.co:/etc/nginx/ssl/myplaymkr.co:rw
-#    ports:
-#      - "80:80"
-#      - "443:443"
