@@ -17,17 +17,10 @@ RUN rm /etc/nginx/conf.d/default.conf
 RUN apk update && apk add vim
 RUN apk add netcat-openbsd bc curl wget git bash
 RUN apk add libressl
-RUN cd /tmp/ && git clone https://github.com/Neilpang/acme.sh.git
-RUN cd /tmp/acme.sh/ && ./acme.sh --install
 ENV D=/usr/share/nginx/html
 #Inject this in the future as a build arg.
-ENV DOMAIN=test.myplaymkr.co
-RUN mkdir -vp ${D}/.well-known/acme-challenge/
-RUN mkdir -p /etc/nginx/ssl/letsencrypt/${DOMAIN}/
-RUN cd /etc/nginx/ssl/letsencrypt/${DOMAIN} && touch ${DOMAIN}.key && touch ${DOMAIN}.crt
 
 ADD nginx.conf /etc/nginx/conf.d/default.conf
-COPY install_certs.sh /root/install_certs.sh
 
 EXPOSE 80
 EXPOSE 443
