@@ -178,13 +178,21 @@ class Controller extends React.Component {
 
     RoomCard = () => {
         let roomName = this.props.controller.room && this.props.controller.room.name;
-        if (roomName && !this.state.editRoom) {
+        if (roomName) {
             return (<Card className={styles.card}>
                 <Card.Body>
                     <Card.Text className={styles.cardText}>
                         Room Name: {this.props.controller.room.name}
                     </Card.Text>
                 </Card.Body>
+                <Button onClick={() => {
+                    this.props.dispatch(closeRoom())
+                    clearInterval(this.queuePolling)
+                }}>Close Room</Button>
+                <Button onClick={() => {
+                    this.props.dispatch(closeRoom())
+                    clearInterval(this.queuePolling)
+                }}>Share Room</Button>
             </Card>)
         }
         return (
@@ -205,10 +213,6 @@ class Controller extends React.Component {
                             aria-describedby="basic-addon2"
                         />
                     </InputGroup>
-                    <Button onClick={() => {
-                        this.props.dispatch(closeRoom())
-                        clearInterval(this.queuePolling)
-                    }}>Close Room</Button>
                 </Card.Body>
             </Card>
         );

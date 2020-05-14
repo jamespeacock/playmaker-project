@@ -3,7 +3,7 @@ echo $1
 if [ "$1" = "dev" ]; then
     echo "Refreshing local"
     if [ "$2" = "build" ]; then
-        docker-compose down && docker -compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+        docker-compose down && docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
     else
         docker-compose down && docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
     fi
