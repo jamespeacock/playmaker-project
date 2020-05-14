@@ -1,5 +1,5 @@
 # base image
-FROM node:14.2.0-slim
+FROM node:12.2.0-alpine
 
 # set working directory
 WORKDIR /app
@@ -10,10 +10,10 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 # install and cache app dependencies
 COPY package.json /app/package.json
+RUN npm install
+RUN npm install react-scripts@3.4.0 -g
+RUN npm install -g --unsafe-perm node-sass@4.14.1
 RUN npm update
-RUN npm install react-scripts@3.4.1 -g
-RUN npm install node-sass@4.14.1
-#RUN yarn add react-scripts
 
 # start app
-CMD npm start
+CMD npm start --debug
