@@ -9,7 +9,7 @@ import {connect} from "react-redux";
 import FindRoomModal from "../rooms/FindRoomModal";
 import SubmitReport from "../feedback/SubmitReport";
 import styles from '../../App.scss';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 
 class Header extends React.Component {
 
@@ -33,7 +33,7 @@ class Header extends React.Component {
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         {this.props.user.isLoggedIn &&
                             <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                                <NavDropdown class={styles.navbarHeader} title={<FontAwesomeIcon icon="user">{this.props.user.username[0].toUpperCase()}>}</FontAwesomeIcon>} id="basic-nav-dropdown" className="dropdown-menu-right">
+                                <NavDropdown class={styles.navbarHeader} title={<AccountCircleIcon> {this.props.user.username[0].toUpperCase()}>}</AccountCircleIcon>} id="basic-nav-dropdown" className="dropdown-menu-right">
                                     {this.props.user.isListener &&
                                     <NavDropdown.Item onClick={() =>
                                         this.props.dispatch(openJoinRoom())
