@@ -40,11 +40,9 @@ class RoomTable extends React.Component {
                     <td className="text-center">{numListeners}</td>
                     <td className="text-center">{curator}</td>
                     {this.props.actionName && <td className="text-center">
-                        <button type="button"
-                                className="btn btn-primary"
-                                onClick={() => this.props.actionHandler(id)}>
+                        <Button onClick={() => this.props.actionHandler(id)}>
                             {this.props.actionName}
-                        </button>
+                        </Button>
                     </td>}
                 </tr>
             )
