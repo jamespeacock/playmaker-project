@@ -5,6 +5,7 @@ services:
       - dev.env
     volumes:
       - './playmaker:/app:rw'
+      - '/var/www/static:/var/www/static'
   frontend:
     build:
       context: ./frontend

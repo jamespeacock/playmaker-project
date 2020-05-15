@@ -1,4 +1,5 @@
 import React from "react";
+import {Button} from "react-bootstrap";
 
 export default class SongTable extends React.Component {
     //TODO make this body a SongCard that can be reusable separately from ths polling Card
@@ -23,11 +24,9 @@ export default class SongTable extends React.Component {
                     <td className="text-center">{artists}</td>
                     <td className="text-center">{album}</td>
                     {this.props.actionName && <td className="text-center">
-                        <button type="button"
-                                className="btn btn-primary"
-                                onClick={() => this.props.handleAction(uri, song.position)}>
+                        <Button onClick={() => this.props.handleAction(uri, song.position)}>
                             {this.props.actionName}
-                        </button>
+                        </Button>
                     </td>}
                 </tr>
             )

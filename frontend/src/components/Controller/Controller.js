@@ -179,7 +179,7 @@ class Controller extends React.Component {
     RoomCard = () => {
         let roomName = this.props.controller.room && this.props.controller.room.name;
         if (roomName) {
-            return (<Card className={styles.card}>
+            return (<Card className={styles.cardRoom}>
                 <Card.Body>
                     <Card.Text className={styles.cardText}>
                         Room Name: {this.props.controller.room.name}
@@ -196,7 +196,7 @@ class Controller extends React.Component {
             </Card>)
         }
         return (
-            <Card style={{width: '18rem'}}>
+            <Card className={styles.cardRoom}>
                 <Card.Body>
                     <Card.Text style={{color: 'black'}}>
                         Room ID: {this.props.controller.room && this.props.controller.room.id}

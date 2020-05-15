@@ -19,7 +19,7 @@ class CurrentSongCard extends React.Component {
       this.imageSrc = this.props.song.images["lg"].url
     }
     if (this.doRender) {
-        return (<Card bg="light" className="text-center" style={{ width: '18rem' }}>
+        return (<Card className="text-center" style={{ width: '18rem' }}>
           <Card.Body className="card-song">
             <Card.Img variant="top" src={this.imageSrc} />
             <Card.Title>{this.title}</Card.Title>
