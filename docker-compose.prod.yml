@@ -5,7 +5,7 @@ services:
       - production.env
     volumes:
       - './playmaker:/app:rw'
-      - $HOME/docker/volumes/static:/static
+      - $HOME/docker/volumes/static:/var/www/static
   frontend:
     build:
       context: ./frontend
@@ -14,7 +14,7 @@ services:
         - TAG=${TAG}
     volumes:
       - /root/certs/playmaker.social:/etc/nginx/ssl/letsencrypt/playmaker.social/:rw
-      - $HOME/docker/volumes/static:/static
+      - $HOME/docker/volumes/static:/var/www/static
     ports:
           - "80:80"
           - "443:443"
