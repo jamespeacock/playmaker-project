@@ -1,8 +1,18 @@
 $primary-theme: #ff5f58;
+$dark: #11111;
+$light: #EEEEE;
+
+@font-face {
+  font-family: myFirstFont;
+  src: url(MR ROBOT.ttf);
+}
+
+
 
 .App {
   text-align: left;
 }
+
 
 .nav-link {
   color: #2e2d2d;
