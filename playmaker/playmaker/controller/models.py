@@ -24,15 +24,8 @@ class Controller(models.Model):
     def username(self):
         return self.me.username
 
-
-class Queue(models.Model):
-    songs = models.ManyToManyField(Song, through='SongInQueue')
-    current_song = models.CharField(max_length=256, null=True)
-    next_pos = models.IntegerField(default=0, blank=False, null=False)
-    controller = models.OneToOneField(Controller, related_name='queue', on_delete=models.CASCADE, blank=True, null=True)
-
     def now_playing(self):
-        user = self.controller.me
+        user = self.me
         logging.log(logging.INFO, "Checking currently playing for " + str(user.username))
         sp_client = user.sp
         # TODO need to lock around this to prevent multiple updates
@@ -60,19 +53,7 @@ class Queue(models.Model):
         return SongSerializer(response_song).data
 
     def current_offset(self):
-        song = self.controller.me.sp.currently_playing()
+        song = self.me.sp.currently_playing()
         if song and song['item']:
             return song['progress_ms'] + DEFAULT_MS_ADDITION
         return 0
-
-    def contents(self):
-        return self.songs.order_by('in_q__position').all()
-
-    def clear(self):
-        self.songs.clear()
-
-
-class SongInQueue(models.Model):
-    queue = models.ForeignKey(Queue, null=False, on_delete=models.CASCADE)
-    song = models.ForeignKey(Song, related_name='in_q', null=False, on_delete=models.CASCADE)
-    position = models.IntegerField(null=False, blank=False)

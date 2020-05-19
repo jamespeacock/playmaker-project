@@ -1,21 +1,18 @@
 import logging
 import threading
 import time
-from collections import defaultdict
 
 import polling
 from django.core.exceptions import ObjectDoesNotExist
 
 from api.settings import DEFAULT_MS_OFFSET, TURN_OFF_IDLE_CONTROLLERS
-from playmaker.controller.contants import URI, URIS
-from playmaker.controller.models import SongInQueue, Controller, Queue
-from playmaker.rooms.models import Room
+from playmaker.controller.contants import URIS
+from playmaker.controller.models import Controller
+from playmaker.rooms.models import Room, Queue
 from playmaker.controller.visitors import Action
 from playmaker.models import User
-from playmaker.shared.models import SPModel
+from playmaker.rooms.services import next_in_queue
 from playmaker.shared.utils import make_iterable
-from playmaker.songs.models import Song
-from playmaker.songs.serializers import QueuedSongSerializer, SongSerializer
 
 TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []
@@ -82,71 +79,6 @@ def perform_action_for_listeners(*args, **kwargs):
     failed_results = [r for r in perform_action(*args, **kwargs) if not r or r.get('error', None)]
 
     return len(failed_results) == 0
-
-
-def as_views(items, serializer):
-    return [serializer(instance=item).data for item in items]
-
-
-# Queue related actions
-def get_queue(actor):
-    if actor and actor.queue:
-        songs = as_views(actor.queue.contents(), QueuedSongSerializer)
-        seen = defaultdict(int)
-        for s in songs:
-            s['position'] = s.pop('in_q')[seen[s[URI]]]
-            s['album'] = s.pop('on_album')
-            seen[s[URI]] += 1
-        return songs
-    else:
-        print("User does not have both actor & queue currently.")
-        return []
-
-
-def update_queue_order(queue, uris):
-    for i, uri in enumerate(uris):
-        queue.songs.get(uri=uri).in_q.position = i
-    queue.songs.all().save()
-    queue.save()
-
-
-def next_in_queue(queue):
-    ns = queue.songs.order_by('in_q').first()
-    if not ns:
-        print("Queue did not have a next song.")
-        queue.current_song = None
-        queue.save()
-        return None
-    queue.current_song = ns.uri
-    SongInQueue.objects.get(song=ns, queue=queue).delete()
-    queue.save()
-    return queue.current_song
-
-
-def add_to_queue(uuid, uris):
-    actor = User.objects.get(uuid=uuid).actor
-    if uris:
-        sp = actor.me.sp
-        songs = SPModel.from_response(sp.tracks(uris), Song, serializer=SongSerializer, save=True)
-        next_pos = actor.queue.next_pos
-        for s in songs:
-            SongInQueue.objects.create(song=s, queue=actor.queue, position=actor.queue.next_pos)
-            next_pos += 1
-        actor.queue.next_pos = next_pos
-        actor.queue.save()
-        return True
-    else:
-        return False
-
-
-def remove_from_queue(uuid, uris, positions):
-    actor = User.objects.get(uuid=uuid).actor
-    songs = Song.objects.filter(uri__in=uris).all()
-    if songs:
-        [SongInQueue.objects.get(song=s, queue=actor.queue, position=positions[i]).delete() for i, s in enumerate(songs)]
-        return True
-    else:
-        return False
 
 
 """
@@ -329,8 +261,8 @@ def create_controller_and_room(user, mode):
     if mode:
         controller.mode = mode
     user.save()
-    Queue.objects.get_or_create(controller=controller)
-    room, created = Room.objects.get_or_create(controller=controller)
+    queue, created = Queue.objects.get_or_create(controller=controller)
+    room, created = Room.objects.get_or_create(controller=controller, queue=queue)
     controller.save()
     if not created:
         logging.log(logging.INFO, "Room was not created for some reason! It already existed.")

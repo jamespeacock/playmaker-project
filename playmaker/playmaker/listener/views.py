@@ -11,8 +11,10 @@ from playmaker.controller.visitors import Action
 from playmaker.listener.models import Listener
 from playmaker.controller.models import Controller
 from playmaker.rooms.models import Room
+from playmaker.rooms.services import get_queue
 from playmaker.serializers import DeviceSerializer, UserSerializer
-from playmaker.controller.services import stop_polling, get_queue, perform_action
+from playmaker.controller.services import stop_polling, perform_action
+
 from playmaker.listener.services import checkPlaySeek
 from playmaker.shared.views import SecureAPIView
 

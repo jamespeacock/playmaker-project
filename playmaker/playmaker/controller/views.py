@@ -4,11 +4,12 @@ from playmaker.controller import services
 from playmaker.controller.contants import URIS, ADD, REMOVE, START, STOP
 from playmaker.listener.models import Listener
 from playmaker.controller.serializers import QueueActionSerializer
-from playmaker.controller.services import next_in_queue, start_polling, stop_polling, create_controller_and_room, \
+from playmaker.controller.services import start_polling, stop_polling, create_controller_and_room, \
     perform_action_for_listeners, perform_action
 from playmaker.controller.visitors import Action
 from playmaker.listener.services import checkPlaySeek
 from playmaker.models import User
+from playmaker.rooms.services import next_in_queue, add_to_queue, remove_from_queue, get_queue
 from playmaker.shared.views import SecureAPIView
 
 
@@ -99,7 +100,7 @@ class QueueActionView(ControllerView):
         super(QueueActionView, self).get(request)
         user = request.user
         actor = user.actor
-        songs = services.get_queue(actor)
+        songs = get_queue(actor)
         current_song = checkPlaySeek(user) # Redundant check to make sure song showing up on UI is actually playing too.
         if current_song:
             return JsonResponse({"currentSong": current_song, "queue": songs}, safe=False)
@@ -119,11 +120,11 @@ class QueueActionView(ControllerView):
         user = request.user
         actor = user.actor
         if action == ADD:
-            success = services.add_to_queue(user.uuid, body.get(URIS))
+            success = add_to_queue(user.uuid, body.get(URIS))
         elif action == REMOVE:
-            success = services.remove_from_queue(user.uuid, body.get(URIS), body.get('positions'))
+            success = remove_from_queue(user.uuid, body.get(URIS), body.get('positions'))
 
-        songs = services.get_queue(actor)
+        songs = get_queue(actor)
         current_song = actor.queue.now_playing()
         return JsonResponse({"success": success, "currentSong": current_song, "queue": songs}, safe=False)
 

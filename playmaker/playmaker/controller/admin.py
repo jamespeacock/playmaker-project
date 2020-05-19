@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from playmaker.controller.models import Controller, Queue, SongInQueue
+from playmaker.controller.models import Controller
+from playmaker.rooms.models import Queue, SongInQueue
 from playmaker.listener.models import Listener
 from playmaker.rooms.models import Room
 
@@ -15,7 +16,7 @@ class ListenerAdmin(admin.ModelAdmin):
 
 class RoomAdmin(admin.ModelAdmin):
     model = Room
-    fields = ('get_group', 'get_listeners')
+    # fields = ('get_group', 'get_listeners')
 
     def get_group(self, obj):
         return 'Group {} hosted by {}'.format(obj.id, obj.controller.me.username)

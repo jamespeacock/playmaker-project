@@ -27,3 +27,7 @@ def exception_handler(exc, context):
         response.data['status_code'] = response.status_code
 
     return response
+
+
+def as_views(items, serializer):
+    return [serializer(instance=item).data for item in items]
