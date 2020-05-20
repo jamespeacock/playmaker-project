@@ -19,9 +19,8 @@ $light: #EEEEE;
 }
 
 .navbar-header {
-  background-color: $primary-theme;
-  color: #2e2d2d; /* accent color */
-  border-radius: 0px 0px 20px 20px;
+  background-color: $dark;
+  color: $primary-theme; /* accent color */
 }
 
 .dropdown-menu-right {

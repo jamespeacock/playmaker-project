@@ -1,6 +1,5 @@
 import React from 'react'
-import logo from '../../assets/logo.png'
-import { Navbar, NavDropdown, Image, Col, Row } from 'react-bootstrap'
+import { Navbar, NavDropdown } from 'react-bootstrap'
 import AppContext from '../AppContext'
 import {openDevices, openReport, openJoinRoom} from "../../actions/sessionActions";
 import {startListener} from "../../actions/actions";
@@ -17,7 +16,7 @@ class Header extends React.Component {
         super(props)
 
         this.state = {
-            theme : "#3c763d" // can inject this via styles={{color:this.state.theme}}.
+            theme : "#D12025" // can inject this via styles={{color:this.state.theme}}.
         }
     }
 
