@@ -11,8 +11,8 @@ function dispatchWrap(action) {
 
 
 function openDevices() {
-    dispatch(refreshDevices())
     return async (dispatch, getState) => {
+        dispatch(refreshDevices())
         let action = {
             type: SHOW_DEVICES,
             session: {
