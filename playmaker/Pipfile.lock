@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ef2f2d58c4e9e6f37ec4e2b9727128e68e7e8021f8b4956b91d41e123ff25d29"
+            "sha256": "b38a382fc259132900495d2157efcc9e96780a8712104d68535a45f1ec9746c5"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -290,11 +290,8 @@
             "version": "==1.14.0"
         },
         "spotipy": {
-            "hashes": [
-                "sha256:4b05da481b5c5dd4d1da8c0f0d13ca805dde037db648d12be866244b19501ed1"
-            ],
-            "index": "pypi",
-            "version": "==2.4.4"
+            "git": "https://github.com/jamespeacock/spotipy.git",
+            "ref": "38136ea0fab2cc21ca7a0d232f6f558779cbe914"
         },
         "sqlparse": {
             "hashes": [
