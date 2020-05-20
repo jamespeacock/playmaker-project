@@ -5,6 +5,7 @@ import ApiInterface from '../../api/ApiInterface'
 import config from '../../config'
 import {checkLoggedIn} from "../../actions/actions";
 import {connect} from "react-redux";
+import styles from "../../App.scss";
 
 
 class Login extends React.Component {
@@ -58,7 +59,7 @@ class Login extends React.Component {
         return (
             <React.Fragment>
                 <Container>
-                    <h1>l o g i n</h1>
+                    <h1 className={styles.body}>Login</h1>
                     <Form>
                         <Form.Group controlId="formBasicEmail">
                             <Form.Label className="font-weight-bold">email</Form.Label>

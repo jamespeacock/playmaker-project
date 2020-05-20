@@ -9,6 +9,7 @@ import FindRoomModal from "../rooms/FindRoomModal";
 import SubmitReport from "../feedback/SubmitReport";
 import styles from '../../App.scss';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import DropdownMenu from "react-bootstrap/DropdownMenu";
 
 class Header extends React.Component {
 
@@ -25,14 +26,15 @@ class Header extends React.Component {
         <AppContext.Consumer>
             {({logout}) =>
                 <React.Fragment>
-                    <Navbar className="navbar-header" expand="lg" sticky={'top'}>
+                    <Navbar expand="lg" sticky={'top'}>
                         <Navbar.Brand href="/dashboard">
                             <h2>playmaker</h2>
                         </Navbar.Brand>
                         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                         {this.props.user.isLoggedIn &&
                             <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-                                <NavDropdown class={styles.navbarHeader} title={<AccountCircleIcon> {this.props.user.username[0].toUpperCase()}>}</AccountCircleIcon>} id="basic-nav-dropdown" className="dropdown-menu-right">
+                                <DropdownMenu title={<AccountCircleIcon> {this.props.user.username[0].toUpperCase()}>}</AccountCircleIcon>}
+                                             id="basic-nav-dropdown" right>
                                     {this.props.user.isListener &&
                                     <NavDropdown.Item onClick={() =>
                                         this.props.dispatch(openJoinRoom())
@@ -47,7 +49,7 @@ class Header extends React.Component {
                                     }>Report a Problem</NavDropdown.Item>
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>
-                                </NavDropdown>
+                                </DropdownMenu>
                             </Navbar.Collapse>
                         }
                     </Navbar>

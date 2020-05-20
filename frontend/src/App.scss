@@ -1,5 +1,9 @@
-$primary-theme: #ff5f58;
+@import "./theme.scss";
+@import "~bootstrap/dist/css/bootstrap.min.css";
+
+$primary-theme: $color-primary-0;
 $dark: #111111;
+$gray: #1d1d1d;
 $light: #EEEEEE;
 
 //@font-face {
@@ -15,47 +19,65 @@ $light: #EEEEEE;
 
 
 .nav-link {
-  color: #2e2d2d;
+  color: $gray;
+}
+
+.navbar {
+  composes: navbar;
+  background-color: $dark;
+  border-color: $primary-theme;
+  color: $primary-theme;
 }
 
 .navbar-header {
-  background-color: $dark;
-  color: $primary-theme; /* accent color */
+  composes: navbar;
 }
 
-.dropdown-menu-right {
-  color: #2e2d2d; /* accent color */
+.navbar-brand {
+  composes: navbar;
+}
+
+.dropdown-menu {
+  background-color: $gray;
+  color: $light;
+}
+
+.dropdown-item {
+  composes: dropdown-menu;
 }
 
 .jumbotron-dashboard {
   border-radius: 30px;
-  color: #A9B6C7;
-  background-color: darkslategrey;
+  color: $light;
+  background-color: $gray;
 }
 
 .card-room {
   border-radius: 20px;
-  background-color: #ff5f58;
+  background-color: $color-primary-0;
 }
 
 .card-song {
   border-radius: 20px;
-  background-color: #13391c;
+  background-color: $color-secondary-1-0;
 }
 
 .btn-primary {
-  background-color: $primary-theme;
-  border-color: $primary-theme;
-  color: #2e2d2d;
+  background-color: $color-primary-0;
+  border-color: $color-primary-0;
+  color: $dark;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: $color-primary-2;
+  border-color: $color-primary-2;
+  color: $dark;
 }
 
 body {
-  background-color: #2c2c2c;
-  opacity: .9;
-  color: #A9B6C7;
+  background-color: $dark;
+  color: $light;
 }
-
-
 
 ul {
   list-style-type: none;
