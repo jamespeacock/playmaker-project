@@ -56,7 +56,7 @@ class DevicesModal extends React.Component {
                   <div>
                       <BootstrapTable
                           keyField="sp_id"
-                          data={this.props.user.devices}
+                          data={this.props.user.devices || []}
                           columns={this.columns}/>
                   </div>
                   <p>Oddly, mobile devices do not appear unless they are open.</p>

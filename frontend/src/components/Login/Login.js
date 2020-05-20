@@ -62,8 +62,8 @@ class Login extends React.Component {
                     <h1 className={styles.body}>Login</h1>
                     <Form>
                         <Form.Group controlId="formBasicEmail">
-                            <Form.Label className="font-weight-bold">email</Form.Label>
-                            <Form.Control type="email" placeholder="email" onChange={this.updateUsername}/>
+                            <Form.Label className="font-weight-bold">username</Form.Label>
+                            <Form.Control type="email" placeholder="username" onChange={this.updateUsername}/>
                         </Form.Group>
                         <Form.Group controlId="formBasicPassword">
                             <Form.Label className="font-weight-bold" >password</Form.Label>

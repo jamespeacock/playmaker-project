@@ -81,11 +81,13 @@ $hover-color: $color-primary-2;
 }
 
 .modal {
-  background-color: $gray !important;
-  color: $light !important;
+  background-color: $gray;
+  color: $light;
 }
 
-.mo
+.modal-open {
+  overflow: visible !important;
+}
 
 .modal-body {
   composes: modal;
@@ -116,7 +118,7 @@ $hover-color: $color-primary-2;
 
 .card-song {
   composes: card;
-  background-color: $color-secondary-2-4;
+  background-color: $color-secondary-1-4;
 }
 
 .btn-primary {
