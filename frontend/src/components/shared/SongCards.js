@@ -1,5 +1,6 @@
 import React from 'react';
-import {Button, Card} from 'react-bootstrap'
+import {Card} from 'react-bootstrap'
+import AppContext from '../AppContext'
 
 //TODO figure out additional display info like track features, popularity, release date, etc.
 //key energy danceability valence
@@ -19,7 +20,7 @@ class CurrentSongCard extends React.Component {
       this.imageSrc = this.props.song.images["lg"].url
     }
     if (this.doRender) {
-        return (<Card className="text-center" style={{ width: '18rem' }}>
+        return (<Card>
           <Card.Body className="card-song">
             <Card.Img variant="top" src={this.imageSrc} />
             <Card.Title>{this.title}</Card.Title>
@@ -33,11 +34,16 @@ class CurrentSongCard extends React.Component {
         </Card>)
     } else {
       return (
-          <Card.Body>
-              {this.props.isController ?
-                  <Card.Text className="text-muted">You're not playing a song! Start playing in <a href="https://www.spotify.com/us/redirect/webplayerlink/" target="_blank">Spotify</a></Card.Text>:
-                  <Card.Text>This room does not have any songs playing right now.</Card.Text>}
-          </Card.Body>
+          <AppContext.Consumer>
+            {
+              ({user}) =>
+              <Card.Body>
+                  {this.props.isController ?
+                      <Card.Text className="text-muted">You're not playing a song! Start playing in <a href="https://www.spotify.com/us/redirect/webplayerlink/" target="_blank">Spotify</a>. If you are playing a song, try <a href={user.auth_url}>refreshing.</a></Card.Text>:
+                      <Card.Text className="text-muted">This room does not have any songs playing right now.</Card.Text>}
+              </Card.Body>
+            }
+          </AppContext.Consumer>
       )
     }
   }

@@ -54,7 +54,7 @@ class Login extends React.Component {
 
     render() {
         if (this.props.user.isLoggedIn) {
-            return (<Redirect to={this.props.location.redirect || '/listen'}/>)
+            return (<Redirect to={this.props.location.redirect || this.props.user.isController ? '/play' : '/listen'}/>)
         }
         return (
             <React.Fragment>

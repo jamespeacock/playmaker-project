@@ -33,7 +33,7 @@ class RoomTable extends React.Component {
             const id = room.id
 
             return (
-                <tr key={index} style={{width: '20rem'}}>
+                <tr key={index} style={{width: '30rem'}}>
                     <td className="text-center"><img className="img-responsive"
                                                      src={imgUrl}/></td>
                     <td className="text-center">{name}</td>

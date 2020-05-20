@@ -40,7 +40,7 @@ class App extends React.Component {
 
   render() {
     return (
-    <AppContext.Provider value={{logout:this.logout}}>
+    <AppContext.Provider value={{logout:this.logout, user:this.props.user}}>
       <Header
           user={this.props.user}
           session={this.props.session}/>

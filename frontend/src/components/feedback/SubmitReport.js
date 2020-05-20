@@ -22,11 +22,11 @@ class SubmitReport extends React.Component {
         return (
             <Modal show={this.state.show} onHide={() => this.setState({show: false})}>
                 <Modal.Header>
-                    <Modal.Title style={{color: 'black'}}>Report an Issue</Modal.Title>
+                    <Modal.Title>Report an Issue</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <p style={{color: 'black'}}>Please select the type of issue you encountered.</p>
+                        <p>Please select the type of issue you encountered.</p>
                         <Form.Group>
                             <Form.Group check>
                                 <FormLabel check>

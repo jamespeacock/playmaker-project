@@ -40,7 +40,7 @@ class DevicesModal extends React.Component {
 
     currentDevice(device){
         if (device) {
-            return (<p style={{color:'black'}}>Currently listening on {device.name}</p>)
+            return (<p>Currently listening on {device.name}</p>)
         } else {
             return ''
         }
@@ -55,11 +55,11 @@ class DevicesModal extends React.Component {
       return (
           <Modal show={this.state.show} onHide={() => this.setState({show:false})}>
               <Modal.Header>
-                  <Modal.Title style={{color:'black'}}>Your Listening Devices</Modal.Title>
+                  <Modal.Title>Your Listening Devices</Modal.Title>
               </Modal.Header>
               {this.currentDevice(this.props.user.active_device)}
               <Modal.Body>
-                  <p style={{color:'black'}}>Please select your listening device.</p>
+                  <p>Please select your listening device.</p>
                   <Button md={3} onClick={() => this.props.dispatch(refreshDevices())}>Refresh Devices</Button>
               </Modal.Body>
               <div>
@@ -68,7 +68,7 @@ class DevicesModal extends React.Component {
                       data={this.props.user.devices}
                       columns={this.columns}/>
               </div>
-              <p style={{color:'black'}}>Oddly, mobile devices do not appear unless they are open.</p>
+              <p>Oddly, mobile devices do not appear unless they are open.</p>
           </Modal>
       )
     }

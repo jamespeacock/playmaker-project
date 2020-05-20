@@ -27,7 +27,7 @@ class FindRoomModal extends React.Component {
             <Modal show={this.state.show} onHide={() => this.setState({show: false})}>
                 <Form>
                     <Modal.Header>
-                        <Modal.Title style={{color:'black'}}>Join a Room</Modal.Title>
+                        <Modal.Title>Join a Room</Modal.Title>
                     </Modal.Header>
                     <Form.Group>
                         <Form.Control

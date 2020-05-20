@@ -4,7 +4,9 @@ import CurrentSongCard from "./SongCards";
 import SongTable from "./SongTable";
 
 function handleRedirectsIfNotLoggedInOrAuthed(props, redirect, pathname='/login') {
+
     if (null === props.user.isLoggedIn || !props.user.isLoggedIn) {
+        console.log('redirecting to ' + pathname)
         props.history.push({
             pathname,
             redirect

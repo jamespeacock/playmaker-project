@@ -5,18 +5,21 @@ $primary-theme: $color-primary-0;
 $dark: #111111;
 $gray: #1d1d1d;
 $light: #EEEEEE;
+$hover-color: $color-primary-2;
 
-//@font-face {
-//  font-family: myFirstFont;
-//  src: url(MR ROBOT.ttf);
-//}
+@font-face {
+  font-family: MrRobot;
+  src: url("./assets/fonts/MR ROBOT.ttf");
+}
 
-
+@font-face {
+  font-family: FiraSans-Regular;
+  src: url("./assets/fonts/Fira_Sans/FiraSans-Regular.ttf");
+}
 
 .App {
   text-align: left;
 }
-
 
 .nav-link {
   color: $gray;
@@ -27,6 +30,9 @@ $light: #EEEEEE;
   background-color: $dark;
   border-color: $primary-theme;
   color: $primary-theme;
+  :hover, :focus, :active {
+    color: $hover-color;
+  }
 }
 
 .navbar-header {
@@ -35,15 +41,37 @@ $light: #EEEEEE;
 
 .navbar-brand {
   composes: navbar;
+  color: $primary-theme;
+  font-family: MrRobot;
+}
+
+.navbar-dark .navbar-brand:hover {
+  color: $hover-color;
+}
+
+.navbar-dark .navbar-brand {
+  composes: navbar;
+  color: $primary-theme;
+  font-family: MrRobot;
+}
+
+.dropdown-toggle {
+  color: $primary-theme;
+  :hover, :focus, :active {
+    color: $hover-color;
+  }
 }
 
 .dropdown-menu {
   background-color: $gray;
   color: $light;
+  right: 0;
+  left: auto;
 }
 
 .dropdown-item {
   composes: dropdown-menu;
+  color: $light;
 }
 
 .jumbotron-dashboard {
@@ -52,14 +80,24 @@ $light: #EEEEEE;
   background-color: $gray;
 }
 
-.card-room {
+.card {
   border-radius: 20px;
-  background-color: $color-primary-0;
+  background-color: $gray;
+  color: $light;
+}
+
+.card-body {
+  composes: card;
+}
+
+.card-room {
+  composes: card;
+  background-color: $color-secondary-1-4;
 }
 
 .card-song {
-  border-radius: 20px;
-  background-color: $color-secondary-1-0;
+  composes: card;
+  background-color: $color-secondary-2-4;
 }
 
 .btn-primary {
@@ -69,14 +107,15 @@ $light: #EEEEEE;
 }
 
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
-  background-color: $color-primary-2;
-  border-color: $color-primary-2;
+  background-color: $hover-color;
+  border-color: $hover-color;
   color: $dark;
 }
 
 body {
   background-color: $dark;
   color: $light;
+  font-family: FiraSans-Regular;
 }
 
 ul {

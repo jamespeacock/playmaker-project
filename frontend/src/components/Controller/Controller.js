@@ -14,7 +14,6 @@ import FormControl from "react-bootstrap/FormControl";
 import SongsInterface from "../../api/SongsInterface";
 import Spinner from "react-bootstrap/Spinner";
 import {openDevices} from "../../actions/sessionActions";
-import {leaveRoom} from "../../actions/listenerActions";
 import Button from "react-bootstrap/Button";
 import {closeRoom} from "../../actions/controllerActions";
 import styles from "../../App.scss";
@@ -67,7 +66,7 @@ class Controller extends React.Component {
     }
 
     componentDidMount() {
-        if (this.props.user.isController || this.state.roomFetching) {
+        if ((this.props.user.isController || this.state.roomFetching) && !this.props.user.room) {
             this.props.dispatch(startController(this.state.mode || 'broadcast',
                 () => {
                     this.setState({roomFetching: false});
@@ -180,25 +179,25 @@ class Controller extends React.Component {
         let roomName = this.props.controller.room && this.props.controller.room.name;
         if (roomName) {
             return (<Card className={styles.cardRoom}>
-                <Card.Body>
-                    <Card.Text className={styles.cardText}>
+                <Card.Body className={styles.cardRoom}>
+                    <Card.Text>
                         Room Name: {this.props.controller.room.name}
                     </Card.Text>
                 </Card.Body>
-                <Button onClick={() => {
+                <Button size={'sm'} onClick={() => {
                     this.props.dispatch(closeRoom())
                     clearInterval(this.queuePolling)
                 }}>Close Room</Button>
-                <Button onClick={() => {
-                    this.props.dispatch(closeRoom())
-                    clearInterval(this.queuePolling)
-                }}>Share Room</Button>
+                {/*<Button onClick={() => {*/}
+                {/*    // this.props.dispatch(closeRoom())*/}
+                {/*    // clearInterval(this.queuePolling)*/}
+                {/*}}>Share Room</Button>*/}
             </Card>)
         }
         return (
             <Card className={styles.cardRoom}>
-                <Card.Body>
-                    <Card.Text style={{color: 'black'}}>
+                <Card.Body  className={styles.cardRoom}>
+                    <Card.Text>
                         Room ID: {this.props.controller.room && this.props.controller.room.id}
                     </Card.Text>
                     <InputGroup className="mb-2">
@@ -227,7 +226,7 @@ class Controller extends React.Component {
             <React.Fragment>
                 <main className="main-area">
                     <Container className="col-container">
-                        <Row>
+                        <Row className={styles.cardRoom}>
                             {this.RoomCard()}
                         </Row>
                         <Row>
