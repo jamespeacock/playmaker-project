@@ -41,10 +41,10 @@ class Controller(models.Model):
 
             return None
         if not self.current_song or self.current_song != controller_song_uri:
-            self.current_song = controller_song_uri
+            self.queue.current_song = controller_song_uri
             logging.log(logging.INFO, "Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
             print("Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
-            self.save()
+            self.queue.save()
         # TODO End lock here
             if not controller_current_song or not controller_current_song['item']:
                 return None
@@ -57,3 +57,7 @@ class Controller(models.Model):
         if song and song['item']:
             return song['progress_ms'] + DEFAULT_MS_ADDITION
         return 0
+
+    @property
+    def current_song(self):
+        return self.queue.current_song
