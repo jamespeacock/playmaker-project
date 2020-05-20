@@ -46,11 +46,6 @@ class DevicesModal extends React.Component {
         }
     }
 
-    componentWillMount() {
-        this.props.dispatch(refreshDevices())
-    }
-
-
     render() {
       return (
           <Modal show={this.state.show} onHide={() => this.setState({show:false})}>

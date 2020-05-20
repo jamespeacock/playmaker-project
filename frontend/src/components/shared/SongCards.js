@@ -1,6 +1,7 @@
 import React from 'react';
 import {Card} from 'react-bootstrap'
 import AppContext from '../AppContext'
+import {openDevices} from "../../actions/sessionActions";
 
 //TODO figure out additional display info like track features, popularity, release date, etc.
 //key energy danceability valence
@@ -40,7 +41,13 @@ class CurrentSongCard extends React.Component {
               <Card.Body>
                   {this.props.isController ?
                       <Card.Text className="text-muted">You're not playing a song! Start playing in <a href="https://www.spotify.com/us/redirect/webplayerlink/" target="_blank">Spotify</a>. If you are playing a song, try <a href={user.auth_url}>refreshing.</a></Card.Text>:
-                      <Card.Text className="text-muted">This room does not have any songs playing right now.</Card.Text>}
+                      <Card.Text className="text-muted">
+                        This room does not have any songs playing right now. Try <a href={user.auth_url}>refreshing.</a> or selecting a
+                        <a onClick={() =>
+                            this.props.dispatch(openDevices())
+                        }
+                        >device</a>
+                      </Card.Text>}
               </Card.Body>
             }
           </AppContext.Consumer>

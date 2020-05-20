@@ -1,3 +1,4 @@
+import {refreshDevices} from "./actions";
 
 
 export const SHOW_DEVICES = 'SHOW_DEVICES'
@@ -10,6 +11,7 @@ function dispatchWrap(action) {
 
 
 function openDevices() {
+    dispatch(refreshDevices())
     return async (dispatch, getState) => {
         let action = {
             type: SHOW_DEVICES,
