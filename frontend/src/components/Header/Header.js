@@ -42,9 +42,9 @@ class Header extends React.Component {
                                     }>Devices</NavDropdown.Item>
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item href={this.props.user.auth_url}>Reauthenticate</NavDropdown.Item>
-                                    <NavDropdown.Item onClick={ () =>
-                                        this.props.dispatch(openReport())
-                                    }>Report a Problem</NavDropdown.Item>
+                                    {/*<NavDropdown.Item onClick={ () =>*/}
+                                    {/*    this.props.dispatch(openReport())*/}
+                                    {/*}>Report a Problem</NavDropdown.Item>*/}
                                     <NavDropdown.Divider/>
                                     <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>
                                 </NavDropdown>
@@ -52,8 +52,9 @@ class Header extends React.Component {
                         }
                     </Navbar>
                 {/*modals here*/}
-                {this.props.session.showDevices && <ShowDevicesModal
-                                                    user={this.props.user}/>}
+                {<ShowDevicesModal
+                                show={this.props.session.showDevices}
+                                user={this.props.user}/>}
                 {this.props.session.showReport && <SubmitReport/>}
                 {this.props.session.showJoinRoom && <FindRoomModal
                     joinRoom={(room) => this.props.dispatch(startListener(room))}

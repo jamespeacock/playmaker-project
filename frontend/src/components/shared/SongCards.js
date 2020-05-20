@@ -1,7 +1,8 @@
 import React from 'react';
-import {Card} from 'react-bootstrap'
+import {Button, Card} from 'react-bootstrap'
 import AppContext from '../AppContext'
 import {openDevices} from "../../actions/sessionActions";
+import {connect} from "react-redux";
 
 //TODO figure out additional display info like track features, popularity, release date, etc.
 //key energy danceability valence
@@ -43,10 +44,10 @@ class CurrentSongCard extends React.Component {
                       <Card.Text className="text-muted">You're not playing a song! Start playing in <a href="https://www.spotify.com/us/redirect/webplayerlink/" target="_blank">Spotify</a>. If you are playing a song, try <a href={user.auth_url}>refreshing.</a></Card.Text>:
                       <Card.Text className="text-muted">
                         This room does not have any songs playing right now. Try <a href={user.auth_url}>refreshing.</a> or selecting a
-                        <a onClick={() =>
+                        <Button onClick={() =>
                             this.props.dispatch(openDevices())
                         }
-                        >device</a>
+                        > device </Button>
                       </Card.Text>}
               </Card.Body>
             }
@@ -60,7 +61,7 @@ const mapStateToProps = state => ({
     // currentSong: state.listener.currentSong
 });
 const mapDispatchToProps = {};
-export default CurrentSongCard
+export default connect()(CurrentSongCard);
 //Was used for song to poll for itself.
 // export default withSongPolling(getCurrentSong)(
 //     connect(mapStateToProps, mapDispatchToProps)(CurrentSongCard)

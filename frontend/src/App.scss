@@ -26,7 +26,7 @@ $hover-color: $color-primary-2;
 }
 
 .navbar {
-  composes: navbar;
+  //composes: navbar;
   background-color: $dark;
   border-color: $primary-theme;
   color: $primary-theme;
@@ -78,6 +78,25 @@ $hover-color: $color-primary-2;
   border-radius: 30px;
   color: $light;
   background-color: $gray;
+}
+
+.modal {
+  background-color: $gray !important;
+  color: $light !important;
+}
+
+.mo
+
+.modal-body {
+  composes: modal;
+}
+
+.modal-header {
+  composes: modal;
+}
+
+.modal-content {
+  composes: modal;
 }
 
 .card {

@@ -245,7 +245,7 @@ def find_thread_match(threadId):
 
 def stop_polling(user):
     t = find_thread_match(user.pollingThread)
-    if t:
+    if t and isinstance(t, StoppableThread):
         t.stop()
         print('joining %s', t.getName())
         t.join()

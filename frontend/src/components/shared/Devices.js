@@ -4,6 +4,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import {refreshDevices, setDevice} from "../../actions/actions";
 import {connect} from "react-redux";
 import PropTypes from "prop-types";
+import {hideDevices} from "../../actions/sessionActions";
 
 class DevicesModal extends React.Component {
   
@@ -25,10 +26,6 @@ class DevicesModal extends React.Component {
         id: 'select-button',
         formatter: this.buttonFormatter
       }];
-
-      this.state = {
-          show: true
-      }
     }
 
     buttonFormatter = (cell, row) => {
@@ -48,7 +45,7 @@ class DevicesModal extends React.Component {
 
     render() {
       return (
-          <Modal show={this.state.show} onHide={() => this.setState({show:false})}>
+          <Modal show={this.props.show} onHide={() => this.props.dispatch(hideDevices())}>
               <Modal.Header>
                   <Modal.Title>Your Listening Devices</Modal.Title>
               </Modal.Header>
@@ -56,14 +53,14 @@ class DevicesModal extends React.Component {
               <Modal.Body>
                   <p>Please select your listening device.</p>
                   <Button md={3} onClick={() => this.props.dispatch(refreshDevices())}>Refresh Devices</Button>
+                  <div>
+                      <BootstrapTable
+                          keyField="sp_id"
+                          data={this.props.user.devices}
+                          columns={this.columns}/>
+                  </div>
+                  <p>Oddly, mobile devices do not appear unless they are open.</p>
               </Modal.Body>
-              <div>
-                  <BootstrapTable
-                      keyField="sp_id"
-                      data={this.props.user.devices}
-                      columns={this.columns}/>
-              </div>
-              <p>Oddly, mobile devices do not appear unless they are open.</p>
           </Modal>
       )
     }
