@@ -10,15 +10,15 @@ import {
     CURRENT_SONG_SUCCESS,
     REFRESH_QUEUE_LISTENER,
     FETCH_ROOMS,
-} from './actions/actions'
+} from '../actions/actions'
 
 import {
     SHOW_DEVICES,
     SHOW_JOIN_ROOM,
     SHOW_REPORT
-} from './actions/sessionActions'
-import {LEAVE_ROOM} from "./actions/listenerActions";
-import {CLOSE_ROOM} from "./actions/controllerActions";
+} from '../actions/sessionActions'
+import {LEAVE_ROOM} from "../actions/listenerActions";
+import {CLOSE_ROOM} from "../actions/controllerActions";
 
 const defaultUser = {
     isLoggedIn: false,
