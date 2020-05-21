@@ -63,7 +63,7 @@ class User(auth_models.AbstractUser):
     @property
     def sp(self):
         if self.token and self._sp_cached is None:
-            self._sp_cached = spotipy.Spotify(self.token)
+            self._sp_cached = spotipy.Spotify(self.token, requests_timeout=60)
         return self._sp_cached
 
     @property

@@ -71,7 +71,6 @@ class SpotifyLoginView(LoginView):
         try:
             login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
         except Exception as e:
-            #Todo return more specific exception
             return JsonResponse({"error": "Invalid credentials."}, status=401)
         assert login.status_code == 200
         username = data.get('username')
@@ -97,13 +96,8 @@ class SpotifyCallbackView(LoginView):
 
 class IsLoggedInView(SecureAPIView):
 
-    def get_serializer_class(self):
-        return UserSerializer
-
     @csrf_exempt
     def get(self, request, *args, **kwargs):
-        # pr = cProfile.Profile()
-        # pr.enable()
         super(IsLoggedInView, self).get(request)
         actor = {}
         user = request.user
@@ -119,20 +113,12 @@ class IsLoggedInView(SecureAPIView):
         except (Listener.DoesNotExist, Controller.DoesNotExist):
             pass
 
-        ser = self.get_serializer_class()
+        user_data = {'actor': actor, 'is_logged_in': True, 'is_authenticated': is_authenticated(user)}
 
-        user_data = {**ser(user).data,
-         'actor': actor,
-         'is_logged_in': True}
-
-        user_data['is_authenticated'] = is_authenticated(user)
         redirect_path = request.GET.get('redirect', 'dashboard')
         redirect_path = 'dashboard' if not redirect_path or redirect_path == 'undefined' else redirect_path
         user_data['auth_url'] = get_redirect(user.username, frontend_redirect=redirect_path)
 
-        # pr.disable()
-        # ps = pstats.Stats(pr).sort_stats('tottime')
-        # ps.print_stats(20)
         return JsonResponse({'user': user_data})
 
 

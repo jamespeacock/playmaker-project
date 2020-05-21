@@ -45,7 +45,7 @@ class DevicesModal extends React.Component {
 
     render() {
       return (
-          <Modal show={this.props.show} onHide={() => this.props.dispatch(hideDevices())}>
+          <Modal show={this.props.show} onHide={() => this.props.dispatch(hideDevices())} centered style={{overflow: "visible"}}>
               <Modal.Header>
                   <Modal.Title>Your Listening Devices</Modal.Title>
               </Modal.Header>
