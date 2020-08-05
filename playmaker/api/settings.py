@@ -79,7 +79,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'Playmaker Team <noreply@test.myplaymkr.co>'
+DEFAULT_FROM_EMAIL = 'Playmaker Team <noreply@playmaker.social>'
 
 SITE_ID = int(os.environ.get("SITE_ID", 1))
 

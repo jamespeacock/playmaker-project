@@ -273,4 +273,4 @@ def create_controller_and_room(user, mode):
         user.save()
         start_polling(user)
 
-    return room.id, controller.id
+    return room, controller.id

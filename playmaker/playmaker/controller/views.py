@@ -9,6 +9,7 @@ from playmaker.controller.services import start_polling, stop_polling, create_co
 from playmaker.controller.visitors import Action
 from playmaker.listener.services import checkPlaySeek
 from playmaker.models import User
+from playmaker.rooms.serializers import RoomSerializer
 from playmaker.rooms.services import next_in_queue, add_to_queue, remove_from_queue, get_queue
 from playmaker.shared.views import SecureAPIView
 
@@ -33,12 +34,12 @@ class StartRoomView(SecureAPIView):
             logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
             Listener.objects.get(me=user).delete()
         mode = request.GET.get('mode', '')
-        room_id, controller_id = create_controller_and_room(user, mode)
+        room, controller_id = create_controller_and_room(user, mode)
 
         if not user.hasActivePoller:
             start_polling(user)
         current_song = User.objects.get(username=user.username).actor.queue.now_playing() if mode != 'curate' else {}
-        return JsonResponse({"room": {"id": room_id}, "controller": controller_id, "currentSong": current_song or {}})
+        return JsonResponse({"room": RoomSerializer(room).data, "controller": controller_id, "currentSong": current_song or {}})
 
 
 # Play song for current listeners
