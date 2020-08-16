@@ -37,6 +37,8 @@ class User(auth_models.AbstractUser):
 
     @property
     def active(self):
+        if not self.last_active:
+            return "never"
         return (self.last_active + tz.timedelta(seconds=DEFAULT_INACTIVE_LEN) - tz.now()).days >= 0
 
     # make @memoized maybe
