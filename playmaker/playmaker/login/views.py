@@ -117,7 +117,7 @@ class IsLoggedInView(SecureAPIView):
             pass
 
         ser = self.get_serializer_class()
-        user_data = {**ser(user).data}, 'actor': actor, 'is_logged_in': True, 'is_authenticated': is_authenticated(user)}
+        user_data = {**ser(user).data, 'actor': actor, 'is_logged_in': True, 'is_authenticated': is_authenticated(user)}
 
         redirect_path = request.GET.get('redirect', 'dashboard')
         redirect_path = 'dashboard' if not redirect_path or redirect_path == 'undefined' else redirect_path
