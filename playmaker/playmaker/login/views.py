@@ -96,6 +96,9 @@ class SpotifyCallbackView(LoginView):
 
 class IsLoggedInView(SecureAPIView):
 
+    def get_serializer_class(self):
+        return UserSerializer
+
     @csrf_exempt
     def get(self, request, *args, **kwargs):
         super(IsLoggedInView, self).get(request)
@@ -113,7 +116,8 @@ class IsLoggedInView(SecureAPIView):
         except (Listener.DoesNotExist, Controller.DoesNotExist):
             pass
 
-        user_data = {'actor': actor, 'is_logged_in': True, 'is_authenticated': is_authenticated(user)}
+        ser = self.get_serializer_class()
+        user_data = {**ser(user).data}, 'actor': actor, 'is_logged_in': True, 'is_authenticated': is_authenticated(user)}
 
         redirect_path = request.GET.get('redirect', 'dashboard')
         redirect_path = 'dashboard' if not redirect_path or redirect_path == 'undefined' else redirect_path
