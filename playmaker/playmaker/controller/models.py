@@ -4,7 +4,6 @@ from django.db import models
 
 from api.settings import DEFAULT_MS_ADDITION, TURN_OFF_IDLE_CONTROLLERS
 from playmaker.models import User
-from playmaker.songs.models import Song
 from playmaker.songs.serializers import SongSerializer
 from playmaker.songs.services import align_sp_song
 

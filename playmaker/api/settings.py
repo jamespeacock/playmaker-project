@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'feedback',
     'playmaker',
     'playmaker.controller',
+    'playmaker.listener',
     'playmaker.login',
     'playmaker.playlists',
     'playmaker.rooms',
@@ -126,7 +127,7 @@ WSGI_APPLICATION = 'api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'playmaker',
         'USER': os.environ.get('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'test'),
         'HOST': os.environ.get('POSTGRES_HOST', 'postgres'),
