@@ -25,23 +25,23 @@ class Controller(models.Model):
 
     def now_playing(self):
         user = self.me
-        logging.log(logging.INFO, "Checking currently playing for " + str(user.username))
+        logging.info("Checking currently playing for " + str(user.username))
         sp_client = user.sp
         # TODO need to lock around this to prevent multiple updates
         controller_current_song = sp_client.currently_playing()
         controller_song_uri = controller_current_song['item']['uri'] if controller_current_song and controller_current_song['item'] else None
         if not controller_song_uri:
-            logging.log(logging.ERROR, "No currently playing song for controller.")
+            logging.error("No currently playing song for controller.")
             if not user.active and TURN_OFF_IDLE_CONTROLLERS:
                 user.is_controller = False
                 user.save()
-                logging.log(logging.INFO, "Deleting Idle/Exited Controller for: " + user.username)
+                logging.info("Deleting Idle/Exited Controller for: " + user.username)
                 user.controller.delete()
 
             return None
         if not self.current_song or self.current_song != controller_song_uri:
             self.queue.current_song = controller_song_uri
-            logging.log(logging.INFO, "Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
+            logging.info("Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
             print("Updating song for: " + user.username + " | is_controller: " + str(user.is_controller))
             self.queue.save()
         # TODO End lock here

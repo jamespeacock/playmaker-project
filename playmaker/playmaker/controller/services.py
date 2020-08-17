@@ -17,7 +17,8 @@ from playmaker.shared.utils import make_iterable
 TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []
 
-logging.basicConfig(level=logging.DEBUG, format='%(relativeCreated)6d %(threadName)s %(message)s')
+logger = logging.getLogger('ControllerServices')
+thread_logger = logging.getLogger('CurrentSongPoller')
 
 
 # TODO change this method to ensure user actor matches Listener vs. Controller so that listeners can only do listener actions, etc.
@@ -58,7 +59,7 @@ def perform_action(actor, action, *args, **kwargs):
 
     # Kickoff loops with visitors,devices + action
     # loop = asyncio.get_event_loop()
-    logging.info("Performing %s for %i listeners..." % (str(action), len(listeners)))
+    logger.info("Performing %s for %i listeners..." % (str(action), len(listeners)))
     if action == Action.SEEK:
         results = [kickoff_request(v, action, *args, **kwargs) for v, ad_id in listeners]
     else:
@@ -109,19 +110,17 @@ def check_song_with_delay(mode, user, thread):
 
         if intro_left > 0:
             delay = intro_left
-        # elif remaining < 3000 and mode == 'curate': # Turn this on to try and end songs a few seconds early
-        #     return None
         else:
             remaining = song['item']['duration_ms'] - song['progress_ms']
             delay = min(120000, round(remaining * 0.8))
 
         if song['progress_ms'] > 10: # Most likely means song is not playing if progress_ms < 10.
             delay = round(delay/1000.0)
-            print("About to wait for " + str(delay))
+            thread_logger.debug("About to wait for " + str(delay))
             st = time.time()
             while time.time() - st < delay:
                 if thread.stopped():
-                    print("Got signal to stop. Exiting.")
+                    thread_logger.debug("Got signal to stop. Exiting.")
                     raise StoppedException()
                 time.sleep(1)
         song = user.sp.currently_playing()
@@ -183,7 +182,7 @@ class CurrentSongPoller(object):
         actor = user.actor
         room = actor.room
         if song_changed:
-            logging.log(logging.INFO, "Song has changed for group: " + str(room.id))
+            thread_logger.info("Song has changed for group: " + str(room.id))
 
         # Set current song and push out to all listeners. Do I have access to response
         next_song = song_changed['item']['uri'] if song_changed and song_changed['item'] else None
@@ -191,19 +190,19 @@ class CurrentSongPoller(object):
 
         # Handle curate next song in queue playing (overwrite if anything else was playing next for controller)
         if actor.mode == 'curate':
-            print("Actor in curate. Going to next song in queue.")
+            logger.debug("Actor in curate. Going to next song in queue.")
             next_song = next_in_queue(room.queue)
             current_song_pos = 0
 
         # In all cases, if there is no next song, make sure there is one
         if not next_song:
-            print("Playing next suggested song bc no songs were in queue or currently playing.")
+            thread_logger.debug("Playing next suggested song bc no songs were in queue or currently playing.")
             next_song = room.play_suggested_song()
             current_song_pos = 0
 
         if actor.mode == 'curate':
             # In curate mode, the next song from the queue needs to be played for the controller as well.
-            print("Playing next song for controller.")
+            thread_logger.debug("Playing next song for controller.")
             user.play_song(next_song)
 
         success = perform_action_for_listeners(actor, Action.PLAY, uris=[next_song])
@@ -213,10 +212,10 @@ class CurrentSongPoller(object):
         user.hasActivePoller = False
         user.save()
         if user.active:
-            logging.info("Restarting polling.")
+            thread_logger.info("Restarting polling.")
             self.callback(*(user, *self.args))  # Kickoff self again with calculated delay.
         elif TURN_OFF_IDLE_CONTROLLERS:
-            logging.info("Controller is no longer active. Removing")
+            thread_logger.info("Controller is no longer active. Removing")
             user.is_controller = False
             user.controller.delete()
             user.save()
@@ -227,11 +226,11 @@ def start_polling(user):
     curr_song = user.sp.currently_playing()
     # TODO check in future if "currently_playing_type" is different from track. If so grab tracks not direct ID
     current_song_id = curr_song['item']['id'] if (curr_song and curr_song['item'] and curr_song['is_playing']) else None
-    logging.log(logging.INFO, "Current song before polling: " + str(current_song_id))
+    logger.info("Current song before polling: " + str(current_song_id))
     song_poller = CurrentSongPoller(user, start_polling, current_song_id)
     song_poller.start()
     if not user.hasActivePoller:
-        print("New thread did not start.")
+        logger.error("New thread did not start.")
         return False
 
     return True
@@ -240,7 +239,7 @@ def start_polling(user):
 def find_thread_match(threadId):
     for t in threading.enumerate():
         if str(t.ident) == threadId:
-            # Meants t is a stoppable thread.
+            # Means t is a stoppable thread.
             return t
     return None
 
@@ -249,12 +248,11 @@ def stop_polling(user):
     t = find_thread_match(user.pollingThread)
     if t and isinstance(t, StoppableThread):
         t.stop()
-        print('joining %s', t.getName())
         t.join()
     user.pollingThread = None
     user.hasActivePoller = False
     user.save()
-    logging.log(logging.INFO, "Stop polling")
+    logger.info("Stop polling")
     return True
 
 
@@ -267,7 +265,7 @@ def create_controller_and_room(user, mode):
     room, created = Room.objects.get_or_create(controller=controller, queue=queue)
     controller.save()
     if not created:
-        logging.log(logging.INFO, "Room was not created for some reason! It already existed.")
+        logger.debug("Room was not created bc it already existed.")
 
     if not find_thread_match(user.pollingThread):
         user.pollingThread = None
