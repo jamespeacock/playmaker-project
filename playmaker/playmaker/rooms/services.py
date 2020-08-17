@@ -1,5 +1,6 @@
 
 # Queue related actions
+import logging
 from collections import defaultdict
 
 from playmaker.controller.contants import URI
@@ -21,7 +22,7 @@ def get_queue(actor):
             seen[s[URI]] += 1
         return songs
     else:
-        print("User does not have both actor & queue currently.")
+        logging.info("User does not have both actor & queue currently.")
         return []
 
 

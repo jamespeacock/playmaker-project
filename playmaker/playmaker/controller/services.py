@@ -211,10 +211,10 @@ class CurrentSongPoller(object):
         user.hasActivePoller = False
         user.save()
         if user.active:
-            print("Restarting polling.")
+            logging.info("Restarting polling.")
             self.callback(*(user, *self.args))  # Kickoff self again with calculated delay.
         elif TURN_OFF_IDLE_CONTROLLERS:
-            print("Controller is no longer active. Removing")
+            logging.info("Controller is no longer active. Removing")
             user.is_controller = False
             user.controller.delete()
             user.save()
