@@ -46,7 +46,7 @@ TURN_OFF_IDLE_CONTROLLERS = True  # TODO fix last_active or active check before 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = strtobool(os.environ.get("DEBUG", "True"))
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", "playmaker.social"]
 
 # Application definition
 
@@ -168,6 +168,9 @@ SOCIAL_AUTH_SPOTIFY_SECRET = SPOTIFY_CLIENT_SECRET
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_SLUGIFY_USERNAMES = True
+
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'login'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler',

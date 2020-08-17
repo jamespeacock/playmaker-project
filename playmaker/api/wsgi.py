@@ -14,6 +14,6 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 from django.conf import settings
 
-logging.basicConfig(level=logging.DEBUG if settings.DEBUG else logging.INFO, format='[%(asctime)s] [%(name)] %(levelname) - %(message)s')
+logging.basicConfig(level=logging.DEBUG if settings.DEBUG else logging.INFO, format='[%(asctime)s] [%(name)s] %(levelname)s - %(message)s')
 
 application = get_wsgi_application()
