@@ -1,9 +1,12 @@
 import cProfile
 import logging
 import pstats
+
+import requests
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
@@ -15,6 +18,7 @@ from playmaker.controller.models import Controller
 from playmaker.listener.models import Listener
 from playmaker.controller.serializers import ControllerSerializer, ListenerSerializer
 from playmaker.login import services
+from playmaker.login.decorators import spotify_view
 from playmaker.login.services import get_redirect
 from playmaker.models import User
 from playmaker.serializers import UserSerializer
@@ -28,6 +32,25 @@ def is_authenticated(user):
         return True
     else:
         return False
+
+
+class TestView(View):
+
+    @spotify_view
+    def get(self, request, token):
+        resp = requests.get(
+            'https://api.spotify.com/v1/me/top/tracks',
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {token}'
+            }
+        )
+        resp.raise_for_status()
+
+        return JsonResponse({
+            'data': resp.json()
+        })
 
 
 class SpotifyRegisterView(RegisterView):
