@@ -170,6 +170,8 @@ SOCIAL_AUTH_URL_NAMESPACE = 'social'
 SOCIAL_AUTH_SLUGIFY_USERNAMES = False
 
 SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/dashboard'
+SOCIAL_AUTH_SANITIZE_REDIRECTS = False
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'https://playmaker.social/api/social/complete/spotify/'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler'
