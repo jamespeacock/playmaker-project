@@ -167,14 +167,13 @@ SOCIAL_AUTH_SPOTIFY_KEY = SPOTIFY_CLIENT_ID
 SOCIAL_AUTH_SPOTIFY_SECRET = SPOTIFY_CLIENT_SECRET
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
-SOCIAL_AUTH_SLUGIFY_USERNAMES = False
-
-SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/dashboard'
-SOCIAL_AUTH_SANITIZE_REDIRECTS = False
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'https://playmaker.social/api/social/complete/spotify/'
+SOCIAL_AUTH_SLUGIFY_USERNAMES = True
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler'
+    'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+    )
 }
 
 # LOGIN_REDIRECT_URL = '/'
@@ -205,12 +204,3 @@ STATICFILES_FINDERS = [
 STATICFILES_DIRS = [
     '/static/',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    ),
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-    )
-}
