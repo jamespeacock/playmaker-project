@@ -31,6 +31,8 @@ SECRET_KEY = 'tvlz#$1m-b4mdr=g%o!*bv7*t=+jr#q-m1$$)l(uezk^_$7508'
 # SPOTIFY
 SPOTIFY_CLIENT_ID = '06fdc33f688440e6bff40f6eb930f21c'
 SPOTIFY_CLIENT_SECRET = 'f83c328423054a73a3daa9ae9045e538'
+SOCIAL_AUTH_SPOTIFY_KEY = SPOTIFY_CLIENT_ID
+SOCIAL_AUTH_SPOTIFY_SECRET = SPOTIFY_CLIENT_SECRET
 SPOTIFY_REDIRECT_URI = HOSTNAME + '/api/login/get_auth'
 READ_LIBRARY = 'user-library-read playlist-modify-public user-read-recently-played user-top-read '
 CONTROL_PLAYBACK = 'streaming user-modify-playback-state app-remote-control user-read-playback-state user-read-currently-playing '
@@ -73,6 +75,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'rest_framework',
     'rest_framework.authtoken',
+    'social_django',
 ]
 
 EMAIL_HOST = 'smtp.sendgrid.net'
@@ -152,6 +155,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
 SOCIAL_AUTH_AUTHENTICATION_BACKENDS = (
     'social_core.backends.spotify.SpotifyOAuth2',
 )

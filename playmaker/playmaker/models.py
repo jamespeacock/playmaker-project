@@ -46,7 +46,7 @@ class User(auth_models.AbstractUser):
     def actor(self):
         if hasattr(self, 'controller') and self.controller:
             if hasattr(self, 'listener') and self.listener:
-                logging.log(logging.WARN, "User has both controller and listener.")
+                logger.warning("User has both controller and listener.")
                 # self.listener.delete()
                 # self.save()
                 return None
@@ -72,7 +72,7 @@ class User(auth_models.AbstractUser):
     def token(self):
         if self.token_expires is None or (self.token_expires - tz.now()).days < 0:
             self._sp_cached = None
-            logging.log(logging.INFO, "Refreshing token for: " + str(self.username))
+            logger.debug("Refreshing token for: " + str(self.username))
             return logins.do_refresh_token(self)
 
         return self.access_token or ""
@@ -95,7 +95,7 @@ class User(auth_models.AbstractUser):
     @property
     def active_device(self):
         if self.token is None:
-            logging.log(logging.INFO, "Lost token for " + self.username)
+            logger.warning("Lost token for " + self.username)
             return None
 
         sd = self.devices.filter(is_selected=True).first()
@@ -106,17 +106,17 @@ class User(auth_models.AbstractUser):
         if ad:
             ad.is_selected = True
             ad.save()
-            print("Returning active device bc selected was not found.")
+            logger.debug("Returning active device bc selected was not found.")
             return ad
 
         current_playback = self.sp.current_playback()
         if current_playback:
             current_device = current_playback[DEVICE]
             current_device[USER] = self
-            print("Returning device from current playback.")
+            logger.debug("Returning device from current playback.")
             return Device.from_sp(save=True, **current_device)
 
-        logging.log(logging.INFO, "Listener: " + self.username + " does not have any active or selected devices.")
+        logger.warning("Listener: " + self.username + " does not have any active or selected devices.")
         return None
 
     def get_devices(self):

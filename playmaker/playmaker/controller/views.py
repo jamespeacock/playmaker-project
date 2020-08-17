@@ -13,6 +13,8 @@ from playmaker.rooms.serializers import RoomSerializer
 from playmaker.rooms.services import next_in_queue, add_to_queue, remove_from_queue, get_queue
 from playmaker.shared.views import SecureAPIView
 
+logger = logging.getLogger(__package__)
+
 
 class ControllerView(SecureAPIView):
 
@@ -31,7 +33,7 @@ class StartRoomView(SecureAPIView):
         super(StartRoomView, self).get(request)
         user = request.user
         if getattr(user, 'listener', None):
-            logging.log(logging.INFO, "Removing listener now that user wants to be controller.")
+            logger.debug("Removing listener now that user wants to be controller.")
             Listener.objects.get(me=user).delete()
         mode = request.GET.get('mode', '')
         room, controller_id = create_controller_and_room(user, mode)
@@ -144,7 +146,7 @@ class PollView(ControllerView):
                 stopped = stop_polling(user)
                 return JsonResponse({"stopped": stopped})
         except Exception as e:
-            logging.log(logging.ERROR, e)
+            logger.error(e)
             return JsonResponse(str(e), status=500, safe=False)
 
 
@@ -153,8 +155,7 @@ class CloseRoomView(ControllerView):
     def get(self, request, *args):
         actor = request.user.controller
         success = perform_action_for_listeners(actor, Action.PAUSE)
-        print("Closed room: " + str(success))
-        print(actor.delete())
+        logger.info("Closed room: " + str(success))
         request.user.save()
         return JsonResponse({})
 

@@ -20,6 +20,8 @@ from playmaker.models import User
 from playmaker.serializers import UserSerializer
 from playmaker.shared.views import SecureAPIView
 
+logger = logging.getLogger(__package__)
+
 
 def is_authenticated(user):
     if user and hasattr(user, 'token') and len(user.token):
@@ -89,7 +91,7 @@ class SpotifyCallbackView(LoginView):
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
-            logging.log(logging.ERROR, 'User does not exist for some reason.')
+            logger.error('User does not exist for some reason.')
         user_redirect = redirect(FRONTEND + "/" + redirect_path)
         return user_redirect if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
 

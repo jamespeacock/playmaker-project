@@ -32,6 +32,7 @@ urlpatterns = [
     path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('search/<str:_type>/', SearchView.as_view(), name="search-view"),
     path('signup/', SpotifyRegisterView.as_view(), name="signup-view"),
+    path('social/', include('social_django.urls')),
     path('songs/', include('playmaker.songs.urls')),
     path('rooms/', include('playmaker.rooms.urls'), name="rooms-view"),
 
