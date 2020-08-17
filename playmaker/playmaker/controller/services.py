@@ -17,6 +17,8 @@ from playmaker.shared.utils import make_iterable
 TOP_ARTISTS = "current_user_top_artists"
 ACTIONS = []
 
+logging.basicConfig(level=logging.DEBUG, format='%(relativeCreated)6d %(threadName)s %(message)s')
+
 
 # TODO change this method to ensure user actor matches Listener vs. Controller so that listeners can only do listener actions, etc.
 def user_matches_actor(user, actor_uuid, cls):
@@ -56,7 +58,7 @@ def perform_action(actor, action, *args, **kwargs):
 
     # Kickoff loops with visitors,devices + action
     # loop = asyncio.get_event_loop()
-    logging.log(logging.INFO, "Performing %s for %i listeners..." % (str(action), len(listeners)))
+    logging.info("Performing %s for %i listeners..." % (str(action), len(listeners)))
     if action == Action.SEEK:
         results = [kickoff_request(v, action, *args, **kwargs) for v, ad_id in listeners]
     else:
