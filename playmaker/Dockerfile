@@ -24,8 +24,6 @@ RUN pip3 install pipenv
 
 RUN set -ex && mkdir /app
 
-ADD . /app
-
 WORKDIR /app
 
 ADD Pipfile.lock Pipfile.lock
@@ -38,6 +36,7 @@ RUN pip3 freeze
 
 # COPY startup script into known file location in container
 ADD start.sh /start.sh
+ADD . /app
 
 RUN mkdir -p /var/www/static
 RUN mkdir -p /static
