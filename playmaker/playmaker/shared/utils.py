@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from rest_framework.exceptions import APIException
-from rest_framework.views import exception_handler
+from rest_framework.views import exception_handler as django_handler
 
 
 class NotLoggedInException(APIException):
@@ -17,7 +17,7 @@ def make_iterable(data):
 
 # TODO not utilized yet
 def exception_handler(exc, context):
-    response = exception_handler(exc, context)
+    response = django_handler(exc, context)
 
     if isinstance(exc, NotLoggedInException):
         return HttpResponse("Not logged in.", status=401)

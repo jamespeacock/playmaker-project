@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from playmaker.login.views import SpotifyRegisterView, IsLoggedInView
+from playmaker.login.views import IsLoggedInView
 from playmaker.songs.views import SearchView
 
 urlpatterns = [
@@ -27,11 +27,10 @@ urlpatterns = [
     path('has_user', IsLoggedInView.as_view(), name="is-logged-in-view"),
     path('feedback', include('feedback.urls')),
     path('listener/', include('playmaker.listener.urls')),
-    path('login/', include('playmaker.login.urls')),
-    path('rest-auth/', include('rest_auth.urls')),
-    path('rest-auth/registration/', include('rest_auth.registration.urls')),
+    # path('login/', include('playmaker.login.urls')),
+    # path('rest-auth/', include('rest_auth.urls')),
+    # path('rest-auth/registration/', include('rest_auth.registration.urls')),
     path('search/<str:_type>/', SearchView.as_view(), name="search-view"),
-    path('signup/', SpotifyRegisterView.as_view(), name="signup-view"),
     path('social/', include('social_django.urls')),
     path('songs/', include('playmaker.songs.urls')),
     path('rooms/', include('playmaker.rooms.urls'), name="rooms-view"),

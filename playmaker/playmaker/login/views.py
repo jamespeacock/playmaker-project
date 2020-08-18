@@ -12,15 +12,13 @@ from rest_auth.views import LoginView, LogoutView
 from rest_auth.registration.views import RegisterView
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone as tz
+from social_django.utils import load_strategy
 
 from api.settings import FRONTEND
 from playmaker.controller.models import Controller
 from playmaker.listener.models import Listener
 from playmaker.controller.serializers import ControllerSerializer, ListenerSerializer
-from playmaker.login import services
-from playmaker.login.decorators import spotify_view
 from playmaker.login.services import get_redirect
-from playmaker.models import User
 from playmaker.serializers import UserSerializer
 from playmaker.shared.views import SecureAPIView
 
@@ -34,90 +32,73 @@ def is_authenticated(user):
         return False
 
 
-class TestView(View):
-
-    @spotify_view
-    def get(self, request, token):
-        resp = requests.get(
-            'https://api.spotify.com/v1/me/top/tracks',
-            headers={
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': f'Bearer {token}'
-            }
-        )
-        resp.raise_for_status()
-
-        return JsonResponse({
-            'data': resp.json()
-        })
-
-
-class SpotifyRegisterView(RegisterView):
-
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
-        body = request.data
-        username = body.get('username')
-        frontend_redirect = body.get('redirect', 'login')
-        try:
-            signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
-            if signup.status_code != 201:
-                return JsonResponse(signup, safe=False, status=signup.status_code)
-            return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
-        except Exception as e:
-            return JsonResponse({"error": self.format_exc(e)}, status=403)
-
-    def format_exc(self, e):
-        exc_str = ""
-        if isinstance(e, ValidationError):
-            for field, detail in e.detail.items():
-                exc_str += "%s: " % field
-                exc_str += "\n".join([str(err) for err in detail])
-                exc_str += "\n"
-        else:
-            exc_str += str(e)
-        return exc_str
+# class SpotifyRegisterView(RegisterView):
+#
+#     @csrf_exempt
+#     def post(self, request, *args, **kwargs):
+#         body = request.data
+#         username = body.get('username')
+#         frontend_redirect = body.get('redirect', 'login')
+#         try:
+#             signup = super(SpotifyRegisterView, self).post(request, *args, **kwargs)
+#             if signup.status_code != 201:
+#                 return JsonResponse(signup, safe=False, status=signup.status_code)
+#             return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
+#         except Exception as e:
+#             return JsonResponse({"error": self.format_exc(e)}, status=403)
+#
+#     def format_exc(self, e):
+#         exc_str = ""
+#         if isinstance(e, ValidationError):
+#             for field, detail in e.detail.items():
+#                 exc_str += "%s: " % field
+#                 exc_str += "\n".join([str(err) for err in detail])
+#                 exc_str += "\n"
+#         else:
+#             exc_str += str(e)
+#         return exc_str
 
 
-class SpotifyLoginView(LoginView):
+# class SpotifyLoginView(LoginView):
+#
+#     @csrf_exempt
+#     def post(self, request, *args, **kwargs):
+#         data = request.data
+#         frontend_next = data.get('next', 'dashboard')
+#         if is_authenticated(request.user):
+#             # User is already logged in --> send to dashboard.
+#             user = request.user
+#             user.last_active = tz.now()
+#             user.save()
+#             user_redirect = redirect(FRONTEND + "/" + frontend_next)
+#             return user_redirect
+#         try:
+#             login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
+#         except Exception as e:
+#             return JsonResponse({"error": "Invalid credentials."}, status=401)
+#         assert login.status_code == 200
+#         username = data.get('username')
+#         return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_next)})
 
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
-        data = request.data
-        frontend_redirect = data.get('redirect', 'login')
-        if is_authenticated(request.user):
-            # User is already logged in --> send to dashboard.
-            user = request.user
-            user.last_active = tz.now()
-            user.save()
-            user_redirect = redirect(FRONTEND + "/" + frontend_redirect)
-            return user_redirect
-        try:
-            login = super(SpotifyLoginView, self).post(request, *args, **kwargs)
-        except Exception as e:
-            return JsonResponse({"error": "Invalid credentials."}, status=401)
-        assert login.status_code == 200
-        username = data.get('username')
-        return JsonResponse({'url': get_redirect(username, frontend_redirect=frontend_redirect)})
 
-
-# This endpoint/url is called after a user follows redirect to login into spotify.
-class SpotifyCallbackView(LoginView):
-
-    @csrf_exempt
-    def get(self, request, *args, **kwargs):
-        auth_code = request.GET.get('code')
-        args = request.GET.get('state').split('|')
-        username = args[0].split('username=')[1]
-        redirect_path = args[1].split('frontend_redirect=')[1]
-        try:
-            user = User.objects.get(username=username)
-        except ObjectDoesNotExist:
-            logger.error('User does not exist for some reason.')
-        user_redirect = redirect(FRONTEND + "/" + redirect_path)
-        return user_redirect if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
-
+# # This endpoint/url is called after a user follows redirect to login into spotify.
+# class SpotifyCallbackView(LoginView):
+#
+#     @csrf_exempt
+#     def get(self, request, *args, **kwargs):
+#
+#         # social.get_re
+#         auth_code = request.GET.get('code')
+#         args = request.GET.get('state').split('|')
+#         username = args[0].split('username=')[1]
+#         redirect_path = args[1].split('frontend_redirect=')[1]
+#         try:
+#             user = User.objects.get(username=username)
+#         except ObjectDoesNotExist:
+#             logger.error('User does not exist for some reason.')
+#         user_redirect = redirect(FRONTEND + "/" + redirect_path)
+#         return user_redirect if services.authenticate(user, auth_code) else JsonResponse({"status": "Login Failed."})
+#
 
 class IsLoggedInView(SecureAPIView):
 
@@ -129,6 +110,8 @@ class IsLoggedInView(SecureAPIView):
         super(IsLoggedInView, self).get(request)
         actor = {}
         user = request.user
+        user.last_active = tz.now()
+        user.save()
         u_actor = user.actor
         try:
             ser = None
@@ -151,23 +134,23 @@ class IsLoggedInView(SecureAPIView):
         return JsonResponse({'user': user_data})
 
 
-class LogoutView(LogoutView):
-
-    @csrf_exempt
-    def post(self, request, *args, **kwargs):
-        try:
-            request.user.listener.delete()
-            request.user.is_listener = False
-            # self.devices.all().delete()
-        except Listener.DoesNotExist:
-            pass
-        try:
-            request.user.controller.delete()
-            request.user.is_controller = False
-            # self.devices.all().delete()
-        except Controller.DoesNotExist:
-            pass
-        request.user.save()
-        super(LogoutView, self).post(request, *args, **kwargs)
-
-        return JsonResponse({"success": True})
+# class LogoutView(LogoutView):
+#
+#     @csrf_exempt
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             request.user.listener.delete()
+#             request.user.is_listener = False
+#             # self.devices.all().delete()
+#         except Listener.DoesNotExist:
+#             pass
+#         try:
+#             request.user.controller.delete()
+#             request.user.is_controller = False
+#             # self.devices.all().delete()
+#         except Controller.DoesNotExist:
+#             pass
+#         request.user.save()
+#         super(LogoutView, self).post(request, *args, **kwargs)
+#
+#         return JsonResponse({"success": True})
