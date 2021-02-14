@@ -3,16 +3,17 @@
 # Make sure only root can run our script
 
 #. /etc/dns/config
+export INSTANCE_NAME=$1
 
-gcloud compute instances start playmaker-api-1
+gcloud compute instances start --zone us-central1-a $INSTANCE_NAME
 
 rm -rf transaction.yaml
 
 #Gather IP
-IP_ADDRESS=$(gcloud compute instances describe playmaker-api-1 --zone us-central1-a | grep natIP | awk {'print $2'})
+IP_ADDRESS=$(gcloud compute instances describe $INSTANCE_NAME --zone us-central1-a | grep natIP | awk {'print $2'})
 
 #Gather hostname
-#IO_HOSTNAME=$(gcloud compute instances describe playmaker-api-1 --zone us-central1-a | grep url: | awk {'print $2'})
+#IO_HOSTNAME=$(gcloud compute instances describe $INSTANCE_NAME --zone us-central1-a | grep url: | awk {'print $2'})
 
 OLD_IP_ADDRESS=$(gcloud dns record-sets list --zone=playmaker-social --name=playmaker.social --format=json | jq -r .[0].rrdatas[0])
 
