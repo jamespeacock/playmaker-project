@@ -1,23 +1,14 @@
-FROM centos:7
+FROM ubuntu:20.04
 
-ENV LC_ALL en_US.utf8
-ENV LANG en_US.utf8
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
+
+# Install ubuntu deps
+RUN apt-get update
+RUN apt-get -yqq install libpq-dev build-essential python3-dev python3-setuptools python3-wheel curl git 
 
 # -- Install Pipenv:
-# gcc because we need regex and pyldap
-# openldap-devel because we need pyldap
-RUN yum update -y \
-    && yum install -y https://centos7.iuscommunity.org/ius-release.rpm \
-    && yum install -y python36u python36u-libs python36u-devel python36u-pip \
-    && yum install -y which gcc \
-    && yum install -y openldap-devel \
-    && yum install -y git \
-    && yum install -y postgresql-devel
-
-RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3.6
-
-# Backwards compatility.
-RUN rm -fr /usr/bin/python3 && ln /usr/bin/python3.6 /usr/bin/python3
+RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3.8
 
 RUN pip3 install --upgrade pip
 RUN pip3 install pipenv
@@ -40,7 +31,7 @@ ADD . /app
 
 RUN mkdir -p /var/www/static
 RUN mkdir -p /static
-RUN python3.6 /app/manage.py collectstatic --noinput
+RUN python3.8 /app/manage.py collectstatic --noinput
 
 EXPOSE 5000
 
