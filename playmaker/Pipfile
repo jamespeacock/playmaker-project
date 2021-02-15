@@ -24,7 +24,7 @@ numpy = "*"
 polling = "*"
 prompt-toolkit = "==2.0.10"
 psycopg2 = "*"
-#jupyter = "*"
-#matplotlib = "*"
-#seaborn = "*"
 social-auth-app-django = "*"
+
+[requires]
+python_version = "3.8"
