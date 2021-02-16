@@ -46,7 +46,11 @@ TURN_OFF_IDLE_CONTROLLERS = True  # TODO fix last_active or active check before 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = strtobool(os.environ.get("DEBUG", "True"))
 
-ALLOWED_HOSTS = ["localhost", "playmaker.social"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "playmaker.social",
+    "www.playmaker.social"
+]
 
 # Application definition
 
@@ -142,20 +146,6 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 AUTH_USER_MODEL = "playmaker.User"
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.spotify.SpotifyOAuth2',
@@ -167,13 +157,12 @@ SOCIAL_AUTH_SPOTIFY_KEY = SPOTIFY_CLIENT_ID
 SOCIAL_AUTH_SPOTIFY_SECRET = SPOTIFY_CLIENT_SECRET
 SOCIAL_AUTH_SPOTIFY_SCOPE = SPOTIFY_SCOPE.split()
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
-# SESSION_COOKIE_SAMESITE = None
 
-LOGIN_REDIRECT_URL = FRONTEND + '/dashboard'
-LOGOUT_REDIRECT_URL = FRONTEND + '/login'
+LOGIN_REDIRECT_URL = '/dashboard'
+LOGOUT_REDIRECT_URL = '/'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler',
@@ -181,8 +170,6 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     )
 }
-
-# LOGIN_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

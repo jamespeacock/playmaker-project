@@ -5,7 +5,7 @@ ENV LANG C.UTF-8
 
 # Install ubuntu deps
 RUN apt-get update
-RUN apt-get -yqq install libpq-dev build-essential python3-dev python3-setuptools python3-wheel curl git 
+RUN apt-get -yqq install libpq-dev build-essential python3-dev python3-setuptools python3-wheel curl git vim 
 
 # -- Install Pipenv:
 RUN curl --silent https://bootstrap.pypa.io/get-pip.py | python3.8
