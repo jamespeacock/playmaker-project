@@ -1,5 +1,6 @@
 
 # Queue related actions
+import logging
 from collections import defaultdict
 
 from playmaker.controller.contants import URI
@@ -10,6 +11,7 @@ from playmaker.shared.utils import as_views
 from playmaker.songs.models import Song
 from playmaker.songs.serializers import QueuedSongSerializer, SongSerializer
 
+logger = logging.getLogger(__package__)
 
 def get_queue(actor):
     if actor and actor.queue:
@@ -21,7 +23,7 @@ def get_queue(actor):
             seen[s[URI]] += 1
         return songs
     else:
-        print("User does not have both actor & queue currently.")
+        logger.warning("User does not have both actor & queue currently.")
         return []
 
 
@@ -35,7 +37,7 @@ def update_queue_order(queue, uris):
 def next_in_queue(queue):
     ns = queue.songs.order_by('in_q').first()
     if not ns:
-        print("Queue did not have a next song.")
+        logger.error("Queue did not have a next song.")
         queue.current_song = None
         queue.save()
         return None

@@ -30,7 +30,8 @@ SECRET_KEY = 'tvlz#$1m-b4mdr=g%o!*bv7*t=+jr#q-m1$$)l(uezk^_$7508'
 
 # SPOTIFY
 SPOTIFY_CLIENT_ID = '06fdc33f688440e6bff40f6eb930f21c'
-SPOTIFY_CLIENT_SECRET = 'f83c328423054a73a3daa9ae9045e538'
+SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET', '')
+
 SPOTIFY_REDIRECT_URI = HOSTNAME + '/api/login/get_auth'
 READ_LIBRARY = 'user-library-read playlist-modify-public user-read-recently-played user-top-read '
 CONTROL_PLAYBACK = 'streaming user-modify-playback-state app-remote-control user-read-playback-state user-read-currently-playing '
@@ -45,7 +46,11 @@ TURN_OFF_IDLE_CONTROLLERS = True  # TODO fix last_active or active check before 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = strtobool(os.environ.get("DEBUG", "True"))
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "playmaker.social",
+    "www.playmaker.social"
+]
 
 # Application definition
 
@@ -64,6 +69,7 @@ INSTALLED_APPS = [
     'feedback',
     'playmaker',
     'playmaker.controller',
+    'playmaker.listener',
     'playmaker.login',
     'playmaker.playlists',
     'playmaker.rooms',
@@ -72,6 +78,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'rest_framework',
     'rest_framework.authtoken',
+    'social_django',
 ]
 
 EMAIL_HOST = 'smtp.sendgrid.net'
@@ -79,7 +86,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'Playmaker Team <noreply@test.myplaymkr.co>'
+DEFAULT_FROM_EMAIL = 'Playmaker Team <noreply@playmaker.social>'
 
 SITE_ID = int(os.environ.get("SITE_ID", 1))
 
@@ -112,6 +119,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -126,7 +135,7 @@ WSGI_APPLICATION = 'api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'playmaker',
         'USER': os.environ.get('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'test'),
         'HOST': os.environ.get('POSTGRES_HOST', 'postgres'),
@@ -137,29 +146,30 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 AUTH_USER_MODEL = "playmaker.User"
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-SOCIAL_AUTH_AUTHENTICATION_BACKENDS = (
+
+AUTHENTICATION_BACKENDS = (
     'social_core.backends.spotify.SpotifyOAuth2',
 )
 
-REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler'
-}
+SOCIAL_AUTH_USER_MODEL = 'playmaker.User'
 
-# LOGIN_REDIRECT_URL = '/'
+SOCIAL_AUTH_SPOTIFY_KEY = SPOTIFY_CLIENT_ID
+SOCIAL_AUTH_SPOTIFY_SECRET = SPOTIFY_CLIENT_SECRET
+SOCIAL_AUTH_SPOTIFY_SCOPE = SPOTIFY_SCOPE.split()
+
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+
+LOGIN_REDIRECT_URL = '/dashboard'
+LOGOUT_REDIRECT_URL = '/'
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'playmaker.shared.utils.exception_handler',
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
+    )
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
@@ -187,12 +197,3 @@ STATICFILES_FINDERS = [
 STATICFILES_DIRS = [
     '/static/',
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    ),
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-    )
-}

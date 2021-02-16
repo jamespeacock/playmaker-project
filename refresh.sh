@@ -11,7 +11,7 @@ else
     echo "Refreshing production"
     if [ "$1" = "build" ]; then
         docker-compose down && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
-        docker exec -it interface python3.6 manage.py migrate
+        docker exec -it interface python3.8 manage.py migrate
     else
         docker-compose down && docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
     fi

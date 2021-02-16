@@ -7,13 +7,16 @@ from django.utils import timezone as tz
 
 from django.contrib.auth import models as auth_models
 from django.db import models
+from social_django.utils import load_strategy
 
 from api.settings import DEFAULT_INACTIVE_LEN
 from playmaker.controller.contants import ID, DEVICE, USER
 from playmaker.songs import utils
-from playmaker.login import services as logins
 from playmaker.songs.models import Artist, Song
 from playmaker.shared.models import SPModel
+
+logger = logging.getLogger(__package__)
+credential_loader = load_strategy()
 
 
 class User(auth_models.AbstractUser):
@@ -21,9 +24,9 @@ class User(auth_models.AbstractUser):
     username = models.CharField(max_length=255, null=True, blank=True, unique=True)
     name = models.CharField(max_length=255, null=True, blank=True, unique=False)
     # TODO figure out how to store this more securely - encryptedField
-    access_token = models.CharField(max_length=511, null=True, blank=True)
-    refresh_token = models.CharField(max_length=511, null=True, blank=True)
-    token_expires = DateTimeField(null=True)
+    # access_token = models.CharField(max_length=511, null=True, blank=True)
+    # refresh_token = models.CharField(max_length=511, null=True, blank=True)
+    # token_expires = DateTimeField(null=True)
     scope = models.CharField(max_length=511, null=True, blank=True)
     sp_id = models.CharField(max_length=256, null=True, blank=True)
     sp_username = models.CharField(max_length=256, null=True, blank=True)
@@ -37,6 +40,8 @@ class User(auth_models.AbstractUser):
 
     @property
     def active(self):
+        if not self.last_active:
+            return False
         return (self.last_active + tz.timedelta(seconds=DEFAULT_INACTIVE_LEN) - tz.now()).days >= 0
 
     # make @memoized maybe
@@ -44,7 +49,7 @@ class User(auth_models.AbstractUser):
     def actor(self):
         if hasattr(self, 'controller') and self.controller:
             if hasattr(self, 'listener') and self.listener:
-                logging.log(logging.WARN, "User has both controller and listener.")
+                logger.warning("User has both controller and listener.")
                 # self.listener.delete()
                 # self.save()
                 return None
@@ -62,26 +67,15 @@ class User(auth_models.AbstractUser):
 
     @property
     def sp(self):
-        if self.token and self._sp_cached is None:
-            self._sp_cached = spotipy.Spotify(self.token, requests_timeout=60)
-        return self._sp_cached
+        return spotipy.Spotify(self.token, requests_timeout=60)
+        # if self.token and self._sp_cached is None:
+        #     self._sp_cached = spotipy.Spotify(self.token, requests_timeout=60)
+        # return self._sp_cached
 
     @property
     def token(self):
-        if self.token_expires is None or (self.token_expires - tz.now()).days < 0:
-            self._sp_cached = None
-            logging.log(logging.INFO, "Refreshing token for: " + str(self.username))
-            return logins.do_refresh_token(self)
-
-        return self.access_token or ""
-
-    def save_token(self, token_info):
-        self.access_token = token_info['access_token']
-        self.refresh_token = token_info['refresh_token']
-        self.scope = token_info['scope']
-        self.token_expires = tz.now() + tz.timedelta(seconds=token_info['expires_in'] - 5)
-        self.save()
-        return self.info
+        spotify_backend = self.social_auth.get(provider='spotify')
+        return spotify_backend.get_access_token(credential_loader)
 
     def current_song(self):
         cp = self.sp.currently_playing()
@@ -93,7 +87,7 @@ class User(auth_models.AbstractUser):
     @property
     def active_device(self):
         if self.token is None:
-            logging.log(logging.INFO, "Lost token for " + self.username)
+            logger.warning("Lost token for " + self.username)
             return None
 
         sd = self.devices.filter(is_selected=True).first()
@@ -104,17 +98,17 @@ class User(auth_models.AbstractUser):
         if ad:
             ad.is_selected = True
             ad.save()
-            print("Returning active device bc selected was not found.")
+            logger.debug("Returning active device bc selected was not found.")
             return ad
 
         current_playback = self.sp.current_playback()
         if current_playback:
             current_device = current_playback[DEVICE]
             current_device[USER] = self
-            print("Returning device from current playback.")
+            logger.debug("Returning device from current playback.")
             return Device.from_sp(save=True, **current_device)
 
-        logging.log(logging.INFO, "Listener: " + self.username + " does not have any active or selected devices.")
+        logger.warning("Listener: " + self.username + " does not have any active or selected devices.")
         return None
 
     def get_devices(self):

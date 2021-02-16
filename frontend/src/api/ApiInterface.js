@@ -104,7 +104,7 @@ export default class ApiInterface  {
   }
 
   logout = async () => {
-    await this.axios.post('login/logout').catch(e => {
+    await this.axios.post('accounts/logout').catch(e => {
         return {error: e.response.data}
     })
   }
